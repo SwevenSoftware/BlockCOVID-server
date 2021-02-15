@@ -1,5 +1,5 @@
 package it.sweven.blockcovid.entities;
 
-enum Autorization {
+enum Authorization {
     USER, ADMIN, CLEANER
 }

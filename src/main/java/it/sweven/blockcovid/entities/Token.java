@@ -1,7 +1,7 @@
 package it.sweven.blockcovid.entities;
 
 /* Java utilities */
-import java.util.Timestamp;
+import java.sql.Timestamp;
 import java.security.MessageDigest;
 import java.nio.charset.StandardCharsets;
 
@@ -17,8 +17,12 @@ public class Token{
      * sono problemi dato che la JVM non consegna ad altri thread
      * degli oggetti non costruiti completamente */
     public Token(String entropy){
-	MessageDigest digester = MessageDigest.getInstance("SHA-256");
-	token = digester.digest(entropy.getBytes(StandardCharsets.UTF_8));
+	try{
+	    MessageDigest digester = MessageDigest.getInstance("SHA-256");
+	    token = digester.digest(entropy.getBytes(StandardCharsets.UTF_8));
+	} catch (Exception NoAlgorithm) {
+	    System.err.println("Rip");
+	}
     }
 
     @Override

@@ -31,8 +31,8 @@ class UserRouter {
 
     @PostMapping("/login")
     @ResponseBody
-    String login(@RequestBody LoginFrom loginForm) {
-	
+    Mono<User> login(@RequestBody LoginForm loginForm) {
+	return repository.findByLogin(loginForm);
     }
 
     @GetMapping("/user/{name}")

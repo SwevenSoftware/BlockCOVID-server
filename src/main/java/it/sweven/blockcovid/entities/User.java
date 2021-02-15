@@ -23,19 +23,19 @@ public class User {
     }
 
     public boolean isUser() {
-	return autorizations.contains(Authorization.USER);
+	return authorizations.contains(Authorization.USER);
     }
     
     public boolean isAdmin() {
-	return autorizations.contains(Authorization.ADMIN);
+	return authorizations.contains(Authorization.ADMIN);
     }
 
     public boolean isCleaner() {
-	return autorizations.contains(Authorization.CLEANER);
+	return authorizations.contains(Authorization.CLEANER);
     }
     
     public String getName() {
-	return name;
+	return login.getName();
     }
 
     public Set<Authorization> getAuthorizations() {

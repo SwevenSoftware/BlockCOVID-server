@@ -2,3 +2,5 @@ build
 log*
 db
 .gradle
+*.pem
+*.p12

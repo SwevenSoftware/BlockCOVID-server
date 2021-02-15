@@ -13,6 +13,7 @@ import it.sweven.blockcovid.entities.Token;
 import it.sweven.blockcovid.entities.LoginForm;
     
 public interface UserRepository extends ReactiveMongoRepository<User, String> {
-    public Mono<User> findByToken(Mono<Token> token);
-    public Mono<User> findByLogin(Mono<LoginForm> login);
+    public Mono<User> findByToken(Token token);
+    public Mono<User> findByLogin(LoginForm login);
+    public Flux<User> findAll();
 }
