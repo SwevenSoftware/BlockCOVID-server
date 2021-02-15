@@ -1,4 +1,4 @@
-package it.sweven.blockcovid;
+package it.sweven.blockcovid.routers;
 
 /* Spring Annotations */
 import org.springframework.web.bind.annotation.RestController;
@@ -16,32 +16,23 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /* Our own imports */
-import it.sweven.blockcovid.entities.User;
-import it.sweven.blockcovid.repositories.UserRepository;
+import it.sweven.blockcovid.entities.*;
+import it.sweven.blockcovid.repositories.*;
 
 @RestController
-class Router {
+class UserRouter {
     
     @Autowired
     private final UserRepository repository;
 
-    Router(UserRepository repo) {
+    UserRouter(UserRepository repo) {
 	this.repository = repo;
     }
 
-    @GetMapping("/")
-    String hello() {
-	return "Pagina iniziale!!\n";
-    }
-
-    @GetMapping("/init")
-    String init() {
-	repository.save(new User("Gianni", "password"));
-	repository.save(new User("Annaclara", "password"));
-	repository.save(new User("Mario", "password"));
-	repository.save(new User("Genni", "password"));
-
-	return "Init avvenuto";
+    @PostMapping("/login")
+    @ResponseBody
+    String login(@RequestBody LoginFrom loginForm) {
+	
     }
 
     @GetMapping("/user/{name}")

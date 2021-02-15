@@ -2,6 +2,7 @@ package it.sweven.blockcovid.entities;
 
 /* Java utilities */
 import java.util.Set;
+import java.util.Date;
 
 /* Spring utilities */
 import org.springframework.data.annotation.Id;
@@ -12,14 +13,13 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document
 public class User {
 
-    private @Id String name;
-    private String password;
-    private Token token;
+    private LoginForm login;
+    private @Id Token token;
     private Set<Authorization> authorizations;
 
     public User(String name, String password) {
-	this.name = name;
-	this.password = password;
+	this.login = new LoginForm(name, password);
+	this.token = new Token(name + password);
     }
 
     public boolean isUser() {
@@ -28,6 +28,10 @@ public class User {
     
     public boolean isAdmin() {
 	return autorizations.contains(Authorization.ADMIN);
+    }
+
+    public boolean isCleaner() {
+	return autorizations.contains(Authorization.CLEANER);
     }
     
     public String getName() {
@@ -41,18 +45,24 @@ public class User {
     public String getToken() {
 	return token.toString();
     }
-    
-    @Override
-    public String toString() {
-	return String.format("{'name': '%s', 'password': '%s'}",
-			     name, password);
+
+    public void setAdmin() {
+	authorizations.add(Authorization.ADMIN);
     }
 
+    public void setUser() {
+	authorizations.add(Authorization.USER);
+    }
+
+    public void setCleaner() {
+	authorizations.add(Authorization.CLEANER);
+    }
+    
     @Override
     public boolean equals(Object o) {
-	if(instanceof User){
+	if(o instanceof User){
 	    User other = (User)o;
-	    return name.equals(other.name) && password.equals(other.password);
+	    return login.equals(other.login);
 	} else return false;
     }
 }
