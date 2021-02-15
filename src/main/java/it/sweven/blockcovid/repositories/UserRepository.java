@@ -7,6 +7,5 @@ import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import it.sweven.blockcovid.entities.User;
 
 public interface UserRepository extends ReactiveMongoRepository<User, String> {
-    /* l'implementazione può rimanere vuota, La classe di base si
-     * occupa di fare tutto */
+    public Mono<User> findByToken(Mono<Token> token);
 }

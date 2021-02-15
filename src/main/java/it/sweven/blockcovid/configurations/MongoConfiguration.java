@@ -1,4 +1,4 @@
-package it.sweven.blockcovid;
+package it.sweven.blockcovid.configurations;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.config.AbstractReactiveMongoConfiguration;
@@ -9,7 +9,7 @@ import com.mongodb.reactivestreams.client.MongoClients;
 
 @Configuration
 @EnableReactiveMongoRepositories(basePackages = "it.sweven.blockcovid.repositories")
-public class ServerConfig extends AbstractReactiveMongoConfiguration {
+public class MongoConfiguration extends AbstractReactiveMongoConfiguration {
 
     @Override
     public MongoClient reactiveMongoClient() {
