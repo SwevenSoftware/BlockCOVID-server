@@ -113,10 +113,10 @@ public class Reservation {
                 '}';
     }
 
-    boolean conflicts(Reservation other) {
+    public boolean conflicts(Reservation other) {
         if(this.nameRoom.equals(other.nameRoom) && this.idDesk.equals(other.idDesk)) {
-            return (this.from.isBefore(other.from) && this.to.isAfter(other.from)) ||
-                    (other.from.isBefore(this.from) && other.to.isAfter(this.from));
+            return (!this.from.isAfter(other.from) && this.to.isAfter(other.from)) ||
+                    (!other.from.isAfter(this.from) && other.to.isAfter(this.from));
         }
         return false;
     }

@@ -35,9 +35,22 @@ public class ReservationRouter {
                                      @RequestParam String tokenAuth) {
         String user = tokenAuth;  // TODO: placeholder until User.checkToken() is implemented
         if(user.isEmpty()) {
-            throw new HttpClientErrorException(HttpStatus.UNAUTHORIZED);
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
-        return repository.save(new Reservation(nameRoom, idDesk, from, to, user));
+        Reservation toSave = new Reservation(nameRoom, idDesk, from, to, user);
+        Optional<Boolean> conflict = repository.findAllByUser(user)
+                                .filter(r -> r.conflicts(toSave))
+                                .hasElements().blockOptional();
+        conflict.ifPresentOrElse(
+                b -> {
+                    if(b)
+                        throw new ResponseStatusException(HttpStatus.CONFLICT);
+                },
+                () -> {
+                    throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
+                }
+        );
+        return repository.save(toSave);
     }
 
     @PostMapping(value="/user/reservations", params="tokenAuth")
