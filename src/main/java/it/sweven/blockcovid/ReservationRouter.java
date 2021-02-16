@@ -2,20 +2,23 @@ package it.sweven.blockcovid;
 
 /* Spring Annotations */
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
 
 /* Bean factory annotations */
 import org.springframework.beans.factory.annotation.Autowired;
 
 /* Reactor core imports */
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.server.ResponseStatusException;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /* Our own imports */
 import it.sweven.blockcovid.entities.*;
-import it.sweven.blockcovid.repositories.*;
+import it.sweven.blockcovid.repositories.ReservationRepository;
 
 import java.util.Map;
 import java.util.Optional;
@@ -38,19 +41,15 @@ public class ReservationRouter {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
         Reservation toSave = new Reservation(nameRoom, idDesk, from, to, user);
-        Optional<Boolean> conflict = repository.findAllByUser(user)
+        boolean conflict = repository.findAll()
                                 .filter(r -> r.conflicts(toSave))
-                                .hasElements().blockOptional();
-        conflict.ifPresentOrElse(
-                b -> {
-                    if(b)
-                        throw new ResponseStatusException(HttpStatus.CONFLICT);
-                },
-                () -> {
-                    throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
-                }
-        );
-        return repository.save(toSave);
+                                .hasElements().blockOptional()
+                                .orElseThrow(() ->
+                                        new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE));
+        if(conflict)
+            throw new ResponseStatusException(HttpStatus.CONFLICT);
+        else
+            return repository.save(toSave);
     }
 
     @PostMapping(value="/user/reservations", params="tokenAuth")
