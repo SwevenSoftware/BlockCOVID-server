@@ -14,14 +14,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /* Reactor core imports */
 import org.springframework.web.server.ResponseStatusException;
-import reactor.core.publisher.Mono;
 
 /* Our own imports */
-import it.sweven.blockcovid.entities.*;
+import it.sweven.blockcovid.entities.Reservation;
 import it.sweven.blockcovid.repositories.ReservationRepository;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RestController
 public class ReservationRouter {
@@ -33,19 +34,16 @@ public class ReservationRouter {
     }
 
     @PostMapping(value="/user/reservations", params={"nameRoom", "idDesk", "from", "to", "tokenAuth"})
-    Mono<Reservation> newReservation(@RequestParam String nameRoom, @RequestParam Integer idDesk,
-                                     @RequestParam String from, @RequestParam String to,
-                                     @RequestParam String tokenAuth) {
+    Reservation newReservation(@RequestParam String nameRoom, @RequestParam Integer idDesk,
+                               @RequestParam String from, @RequestParam String to,
+                               @RequestParam String tokenAuth) {
         String user = tokenAuth;  // TODO: placeholder until User.checkToken() is implemented
         if(user.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
         Reservation toSave = new Reservation(nameRoom, idDesk, from, to, user);
-        boolean conflict = repository.findAll()
-                                .filter(r -> r.conflicts(toSave))
-                                .hasElements().blockOptional()
-                                .orElseThrow(() ->
-                                        new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE));
+        boolean conflict = repository.findAll().stream().parallel()
+                                     .anyMatch(r -> r.conflicts(toSave));
         if(conflict)
             throw new ResponseStatusException(HttpStatus.CONFLICT);
         else
@@ -53,12 +51,14 @@ public class ReservationRouter {
     }
 
     @PostMapping(value="/user/reservations", params="tokenAuth")
-    Mono<Map<String, Reservation>> getPersonalReservations(@RequestParam String tokenAuth) {
-        return repository.findAllByUser(tokenAuth).collectMap(Reservation::getId);
+    Map<String, Reservation> getPersonalReservations(@RequestParam String tokenAuth) {
+        return repository.findAllByUser(tokenAuth)
+                .stream().parallel()
+                .collect(Collectors.toMap(Reservation::getId, Function.identity()));
     }
 
     @PostMapping("/user/reservations/{id}")
-    Mono<Reservation> getSingleReservation(@PathVariable String id, @RequestParam String tokenAuth) {
+    Reservation getSingleReservation(@PathVariable String id, @RequestParam String tokenAuth) {
         String user = tokenAuth;  // TODO: placeholder until User.checkToken() is implemented
         if(user.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
@@ -67,31 +67,27 @@ public class ReservationRouter {
     }
 
     @DeleteMapping("/user/reservations/{id}")
-    Mono<String> cancelReservation(@PathVariable String id, @RequestParam String tokenAuth) {
+    String cancelReservation(@PathVariable String id, @RequestParam String tokenAuth) {
         String user = tokenAuth;  // TODO: placeholder until User.checkToken() is implemented
         if(user.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
-        return repository.deleteByIdAndUser(id, user).map(Reservation::getId);
+        return repository.deleteByIdAndUser(id, user).getId();
     }
 
     @PutMapping("/user/reservations/{id}")
-    Mono<Reservation> updateReservation(@PathVariable String id, @RequestParam String tokenAuth,
-                            @RequestParam Optional<String> nameRoom, @RequestParam Optional<Integer> idDesk,
-                            @RequestParam Optional<String> from, @RequestParam Optional<String> to) {
+    Reservation updateReservation(@PathVariable String id, @RequestParam String tokenAuth,
+                                  @RequestParam Optional<String> nameRoom, @RequestParam Optional<Integer> idDesk,
+                                  @RequestParam Optional<String> from, @RequestParam Optional<String> to) {
         String user = tokenAuth;  // TODO: placeholder until User.checkToken() is implemented
         if(user.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
-        Mono<Reservation> reservation = repository.findByIdAndUser(id, user);
-        if(nameRoom.isPresent())
-            reservation = reservation.map(r -> { r.setNameRoom(nameRoom.get()); return r; });
-        if(idDesk.isPresent())
-            reservation = reservation.map(r -> { r.setIdDesk(idDesk.get()); return r; });
-        if(from.isPresent())
-            reservation = reservation.map(r -> { r.setFrom(from.get()); return r; });
-        if(to.isPresent())
-            reservation = reservation.map(r -> { r.setTo(to.get()); return r; });
-        return reservation.flatMap(repository::save);
+        Reservation reservation = repository.findByIdAndUser(id, user);
+        nameRoom.ifPresent(reservation::setNameRoom);
+        idDesk.ifPresent(reservation::setIdDesk);
+        from.ifPresent(reservation::setFrom);
+        to.ifPresent(reservation::setTo);
+        return repository.save(reservation);
     }
 }

@@ -17,7 +17,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     // MongoDB Drivers
-    implementation 'org.mongodb:mongodb-driver-reactivestreams'
+    implementation 'org.mongodb:mongodb-driver-sync'
     // reactivex reactive streams
     implementation 'io.reactivex.rxjava2:rxjava'
     implementation 'io.reactivex:rxjava-reactive-streams'

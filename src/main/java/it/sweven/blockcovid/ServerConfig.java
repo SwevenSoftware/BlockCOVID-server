@@ -1,23 +1,23 @@
 package it.sweven.blockcovid;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.mongodb.config.AbstractReactiveMongoConfiguration;
-import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories;
+import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
-import com.mongodb.reactivestreams.client.MongoClient;
-import com.mongodb.reactivestreams.client.MongoClients;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 
 @Configuration
-@EnableReactiveMongoRepositories(basePackages = "it.sweven.blockcovid.repositories")
-public class ServerConfig extends AbstractReactiveMongoConfiguration {
+@EnableMongoRepositories(basePackages = "it.sweven.blockcovid.repositories")
+public class ServerConfig extends AbstractMongoClientConfiguration {
 
     @Override
-    public MongoClient reactiveMongoClient() {
+    public MongoClient mongoClient() {
         return MongoClients.create();
     }
 
     @Override
     protected String getDatabaseName() {
-        return "blockcovid-reactive";
+        return "blockcovid-sync";
     }
 }
