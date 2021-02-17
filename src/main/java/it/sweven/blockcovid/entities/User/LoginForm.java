@@ -1,4 +1,4 @@
-package it.sweven.blockcovid.entities;
+package it.sweven.blockcovid.entities.User;
 
 public class LoginForm {
     private String name;
