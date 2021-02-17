@@ -13,6 +13,7 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 15
+        fetch-depth: 0
         
     - name: Start MongoDB
       uses: supercharge/mongodb-github-action@1.3.0
