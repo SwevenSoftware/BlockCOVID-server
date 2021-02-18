@@ -44,6 +44,8 @@ public class Reservation {
         this.nameRoom = nameRoom;
         this.idDesk = idDesk;
         this.date = date;
+        if(from.isAfter(to))
+            throw new IllegalArgumentException("'from' should come before 'to'");
         this.from = from.truncatedTo(granularity);
         this.to = to.truncatedTo(granularity);
         this.user = user;
@@ -82,6 +84,8 @@ public class Reservation {
     }
 
     public void setFrom(LocalTime from) {
+        if(from.isAfter(to))
+            throw new IllegalArgumentException("'from' should come before 'to'");
         this.from = from.truncatedTo(ChronoUnit.MINUTES);
     }
 
@@ -90,7 +94,16 @@ public class Reservation {
     }
 
     public void setTo(LocalTime to) {
+        if(from.isAfter(to))
+            throw new IllegalArgumentException("'to' should come after 'from'");
         this.to = to.truncatedTo(granularity);
+    }
+
+    public void setTime(LocalTime from, LocalTime to) throws IllegalArgumentException {
+        if(from.isAfter(to))
+            throw new IllegalArgumentException("'from' should come before 'to'");
+        this.from = from;
+        this.to = to;
     }
 
     public String getUser() {

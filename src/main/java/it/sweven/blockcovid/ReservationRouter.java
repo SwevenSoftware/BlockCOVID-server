@@ -80,8 +80,16 @@ public class ReservationRouter {
         nameRoom.ifPresent(reservation::setNameRoom);
         idDesk.ifPresent(reservation::setIdDesk);
         date.ifPresent(reservation::setDate);
-        from.ifPresent(reservation::setFrom);
-        to.ifPresent(reservation::setTo);
+        try {
+            if (from.isPresent() && to.isPresent())
+                reservation.setTime(from.get(), to.get());
+            else {
+                from.ifPresent(reservation::setFrom);
+                to.ifPresent(reservation::setTo);
+            }
+        } catch( IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
         return repository.save(reservation);
     }
 
@@ -107,8 +115,12 @@ public class ReservationRouter {
         if(user.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
-        System.out.println(nameRoom + idDesk + date.toString());
-        Reservation toSave = new Reservation(nameRoom, idDesk, date, from, to, user);
+        Reservation toSave;
+        try {
+            toSave = new Reservation(nameRoom, idDesk, date, from, to, user);
+        } catch( IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
         boolean conflict = repository.findAll().stream().parallel()
                 .anyMatch(r -> r.conflicts(toSave));
         if(conflict)
