@@ -1,6 +1,7 @@
 package it.sweven.blockcovid;
 
 /* Spring Annotations */
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +20,9 @@ import org.springframework.web.server.ResponseStatusException;
 import it.sweven.blockcovid.entities.Reservation;
 import it.sweven.blockcovid.repositories.ReservationRepository;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -33,24 +37,7 @@ public class ReservationRouter {
         this.repository = repository;
     }
 
-    @PostMapping(value="/user/reservations", params={"nameRoom", "idDesk", "from", "to", "tokenAuth"})
-    Reservation newReservation(@RequestParam String nameRoom, @RequestParam Integer idDesk,
-                               @RequestParam String from, @RequestParam String to,
-                               @RequestParam String tokenAuth) {
-        String user = tokenAuth;  // TODO: placeholder until User.checkToken() is implemented
-        if(user.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-        }
-        Reservation toSave = new Reservation(nameRoom, idDesk, from, to, user);
-        boolean conflict = repository.findAll().stream().parallel()
-                                     .anyMatch(r -> r.conflicts(toSave));
-        if(conflict)
-            throw new ResponseStatusException(HttpStatus.CONFLICT);
-        else
-            return repository.save(toSave);
-    }
-
-    @PostMapping(value="/user/reservations", params="tokenAuth")
+    @PostMapping(value="/user/reservations")
     Map<String, Reservation> getPersonalReservations(@RequestParam String tokenAuth) {
         return repository.findAllByUser(tokenAuth)
                 .stream().parallel()
@@ -77,8 +64,14 @@ public class ReservationRouter {
 
     @PutMapping("/user/reservations/{id}")
     Reservation updateReservation(@PathVariable String id, @RequestParam String tokenAuth,
-                                  @RequestParam Optional<String> nameRoom, @RequestParam Optional<Integer> idDesk,
-                                  @RequestParam Optional<String> from, @RequestParam Optional<String> to) {
+                                  @RequestParam Optional<String> nameRoom,
+                                  @RequestParam Optional<Integer> idDesk,
+                                  @RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.DATE)
+                                          Optional<LocalDate> date,
+                                  @RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.TIME)
+                                          Optional<LocalTime> from,
+                                  @RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.TIME)
+                                          Optional<LocalTime> to) {
         String user = tokenAuth;  // TODO: placeholder until User.checkToken() is implemented
         if(user.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
@@ -86,8 +79,42 @@ public class ReservationRouter {
         Reservation reservation = repository.findByIdAndUser(id, user);
         nameRoom.ifPresent(reservation::setNameRoom);
         idDesk.ifPresent(reservation::setIdDesk);
+        date.ifPresent(reservation::setDate);
         from.ifPresent(reservation::setFrom);
         to.ifPresent(reservation::setTo);
         return repository.save(reservation);
     }
+
+    @PostMapping("/rooms/{nameRoom}/reservations")
+    List<Reservation> roomReservations(@PathVariable String nameRoom,
+                                       @RequestParam String tokenAuth,
+                                       @RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.DATE)
+                                               Optional<LocalDate> date) {
+        String user = tokenAuth;  // TODO: placeholder until User.checkToken() is implemented
+        if(user.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+        return repository.findByNameRoomAndDate(nameRoom, date.orElse(LocalDate.now()));
+    }
+
+    @PostMapping("/rooms/{nameRoom}/reserve")
+    Reservation reserveRoom(@PathVariable String nameRoom, @RequestParam Integer idDesk,
+                            @RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate date,
+                            @RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.TIME) LocalTime from,
+                            @RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.TIME) LocalTime to,
+                            @RequestParam String tokenAuth) {
+        String user = tokenAuth;  // TODO: placeholder until User.checkToken() is implemented
+        if(user.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+        System.out.println(nameRoom + idDesk + date.toString());
+        Reservation toSave = new Reservation(nameRoom, idDesk, date, from, to, user);
+        boolean conflict = repository.findAll().stream().parallel()
+                .anyMatch(r -> r.conflicts(toSave));
+        if(conflict)
+            throw new ResponseStatusException(HttpStatus.CONFLICT);
+        else
+            return repository.save(toSave);
+    }
+
 }
