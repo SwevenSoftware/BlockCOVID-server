@@ -43,6 +43,8 @@ public class Reservation {
                        LocalTime to, String user) {
         this.nameRoom = nameRoom;
         this.idDesk = idDesk;
+        if(date.isBefore(LocalDate.now()))
+            throw new IllegalArgumentException("'date' already passed");
         this.date = date;
         if(from.isAfter(to))
             throw new IllegalArgumentException("'from' should come before 'to'");
@@ -76,6 +78,8 @@ public class Reservation {
     }
 
     public void setDate(LocalDate date) {
+        if(date.isBefore(LocalDate.now()))
+            throw new IllegalArgumentException("'date' already passed");
         this.date = date;
     }
 

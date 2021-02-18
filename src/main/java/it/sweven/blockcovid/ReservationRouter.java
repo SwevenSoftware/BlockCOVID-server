@@ -79,8 +79,8 @@ public class ReservationRouter {
         Reservation reservation = repository.findByIdAndUser(id, user);
         nameRoom.ifPresent(reservation::setNameRoom);
         idDesk.ifPresent(reservation::setIdDesk);
-        date.ifPresent(reservation::setDate);
         try {
+            date.ifPresent(reservation::setDate);
             if (from.isPresent() && to.isPresent())
                 reservation.setTime(from.get(), to.get());
             else {
