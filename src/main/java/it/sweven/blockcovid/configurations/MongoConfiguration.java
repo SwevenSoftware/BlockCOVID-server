@@ -1,7 +1,10 @@
 package it.sweven.blockcovid.configurations;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.mongodb.config.AbstractMongoConfiguration;
+import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 import com.mongodb.MongoClientSettings;
@@ -10,7 +13,7 @@ import com.mongodb.client.MongoClients;
 
 @Configuration
 @EnableMongoRepositories(basePackages="it.sweven.blockcovid.repositories")
-public class MongoConfiguration extends AbstractMongoConfiguration {
+public class MongoConfiguration extends AbstractMongoClientConfiguration {
 
     @Override
     protected String getDatabaseName() {

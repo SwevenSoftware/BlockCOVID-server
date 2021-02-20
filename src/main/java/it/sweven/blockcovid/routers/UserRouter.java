@@ -2,6 +2,7 @@ package it.sweven.blockcovid.routers;
 
 /* Java imports */
 import java.util.List;
+import java.util.Optional;
 
 /* Spring Annotations */
 import org.springframework.web.bind.annotation.RestController;
@@ -10,44 +11,50 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-/* Bean factory annotations */
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.http.ResponseEntity;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 /* Our own imports */
-import it.sweven.blockcovid.entities.User.User;
-import it.sweven.blockcovid.entities.User.LoginForm;
+import it.sweven.blockcovid.entities.User;
 import it.sweven.blockcovid.repositories.UserRepository;
+import it.sweven.blockcovid.services.UserAuthenticationService;
+import it.sweven.blockcovid.services.UserRegistrationService;
 
 @RestController
 class UserRouter {
     
     @Autowired
     private final UserRepository repository;
+    @Autowired
+    private UserAuthenticationService authenticationService;
+    @Autowired
+    private UserRegistrationService registrationService;
 
     UserRouter(UserRepository repository) {
 	this.repository = repository;
     }
 
     @PostMapping("/login")
-    @ResponseBody
-    User login(@RequestBody LoginForm loginForm) {
-	return repository.findByLogin(loginForm);
+    Object login(@RequestParam("username") String username,
+		 @RequestParam("password") String password) {
+	try {
+            return authenticationService.login(username, password);
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(UNAUTHORIZED).body(e.getMessage());
+        }	
     }
 
-    @GetMapping("/user/{name}")
-    User name(@PathVariable String name) {
-	return repository.findByUsername(name);
-    }
-
-    @PostMapping("/user/new")
-    @ResponseBody
-    User insert(@RequestBody User newUser) {
-	return repository.save(newUser);
-    }
-
-    @GetMapping("/user/all")
-    List<User> all(){
-	return repository.findAll();
+    @PostMapping("/register")
+    public Object register(@RequestParam("username") String username,
+			   @RequestParam("password") String password) {
+        try {
+            return registrationService
+		.register(username, password);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }
