@@ -1,4 +1,5 @@
 plugins {
+    id 'com.diffplug.spotless' version '5.6.1'
     id 'org.springframework.boot' version '2.4.2'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
@@ -24,9 +25,14 @@ dependencies {
     // reactivex reactive streams
     implementation 'io.reactivex.rxjava2:rxjava'
     implementation 'io.reactivex:rxjava-reactive-streams'
+
     // lombok
     compileOnly 'org.projectlombok:lombok:1.18.16'
     annotationProcessor 'org.projectlombok:lombok:1.18.16'
+
+    // OpenAPI docs
+    implementation 'org.springdoc:springdoc-openapi-ui:1.5.4'
+
 
     // TESTS
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -35,4 +41,16 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+spotless {
+    ratchetFrom 'origin/develop'
+    java {
+        toggleOffOn()
+
+        importOrder()
+        removeUnusedImports()
+
+        googleJavaFormat()
+  }
 }

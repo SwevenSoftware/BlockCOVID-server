@@ -1,13 +1,10 @@
 package it.sweven.blockcovid.configurations;
 
-import org.springframework.security.web.RedirectStrategy;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import org.springframework.security.web.RedirectStrategy;
 
 public class NoRedirectStrategy implements RedirectStrategy {
-    @Override
-    public void sendRedirect(HttpServletRequest request, HttpServletResponse response, String url)  {
-    }
+  @Override
+  public void sendRedirect(HttpServletRequest request, HttpServletResponse response, String url) {}
 }
