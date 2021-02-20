@@ -22,6 +22,8 @@ dependencies {
     // reactivex reactive streams
     implementation 'io.reactivex.rxjava2:rxjava'
     implementation 'io.reactivex:rxjava-reactive-streams'
+    // OpenAPI docs
+    implementation 'org.springdoc:springdoc-openapi-ui:1.5.4'
 
     // TESTS
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
