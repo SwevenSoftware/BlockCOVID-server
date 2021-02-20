@@ -6,11 +6,7 @@ import java.util.Optional;
 
 /* Spring Annotations */
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -24,7 +20,7 @@ import it.sweven.blockcovid.services.UserAuthenticationService;
 import it.sweven.blockcovid.services.UserRegistrationService;
 
 @RestController
-class UserRouter {
+class LoginRouter {
     
     @Autowired
     private final UserRepository repository;
@@ -33,7 +29,7 @@ class UserRouter {
     @Autowired
     private UserRegistrationService registrationService;
 
-    UserRouter(UserRepository repository) {
+    LoginRouter(UserRepository repository) {
 	this.repository = repository;
     }
 
