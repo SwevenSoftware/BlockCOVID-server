@@ -4,3 +4,4 @@ db
 .gradle
 *.pem
 *.p12
+.idea
