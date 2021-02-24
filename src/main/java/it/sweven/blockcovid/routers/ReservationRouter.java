@@ -83,6 +83,11 @@ public class ReservationRouter {
     } catch (IllegalArgumentException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
+    boolean conflict =
+        repository.findAll().stream()
+            .parallel()
+            .anyMatch(r -> r.conflicts(reservation) && !r.getId().equals(reservation.getId()));
+    if (conflict) throw new ResponseStatusException(HttpStatus.CONFLICT);
     return repository.save(reservation);
   }
 
