@@ -1,14 +1,12 @@
-package it.sweven.blockcovid;
+package it.sweven.blockcovid.routers;
 
 /* Spring Annotations */
+import it.sweven.blockcovid.entities.User;
+import it.sweven.blockcovid.services.UserAuthenticationService;
+import it.sweven.blockcovid.services.UserRegistrationService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.*;
 
 /* Bean factory annotations */
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,40 +28,36 @@ import java.util.stream.Collectors;
 
 @RestController
 public class ReservationRouter {
-    @Autowired
-    private final ReservationRepository repository;
+    @Autowired private final ReservationRepository repository;
+    @Autowired private UserAuthenticationService authenticationService;
+    @Autowired private UserRegistrationService registrationService;
 
     public ReservationRouter(ReservationRepository repository) {
         this.repository = repository;
     }
 
     @PostMapping(value="/user/reservations")
-    Map<String, Reservation> getPersonalReservations(@RequestParam String tokenAuth) {
-        return repository.findAllByUser(tokenAuth)
+    Map<String, Reservation> getPersonalReservations(@RequestHeader String Authorization) {
+        String username = authenticationService.authenticateByToken(Authorization).getUsername();
+        return repository.findAllByUser(username)
                 .stream().parallel()
                 .collect(Collectors.toMap(Reservation::getId, Function.identity()));
     }
 
     @PostMapping("/user/reservations/{id}")
-    Reservation getSingleReservation(@PathVariable String id, @RequestParam String tokenAuth) {
-        String user = tokenAuth;  // TODO: placeholder until User.checkToken() is implemented
-        if(user.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-        }
-        return repository.findByIdAndUser(id, user);
+    Reservation getSingleReservation(@PathVariable String id, @RequestHeader String Authorization) {
+        String username = authenticationService.authenticateByToken(Authorization).getUsername();
+        return repository.findByIdAndUser(id, username);
     }
 
     @DeleteMapping("/user/reservations/{id}")
-    String cancelReservation(@PathVariable String id, @RequestParam String tokenAuth) {
-        String user = tokenAuth;  // TODO: placeholder until User.checkToken() is implemented
-        if(user.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-        }
-        return repository.deleteByIdAndUser(id, user).getId();
+    String cancelReservation(@PathVariable String id, @RequestHeader String Authorization) {
+        String username = authenticationService.authenticateByToken(Authorization).getUsername();
+        return repository.deleteByIdAndUser(id, username).getId();
     }
 
     @PutMapping("/user/reservations/{id}")
-    Reservation updateReservation(@PathVariable String id, @RequestParam String tokenAuth,
+    Reservation updateReservation(@PathVariable String id, @RequestHeader String Authorization,
                                   @RequestParam Optional<String> nameRoom,
                                   @RequestParam Optional<Integer> idDesk,
                                   @RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.DATE)
@@ -72,11 +66,8 @@ public class ReservationRouter {
                                           Optional<LocalTime> from,
                                   @RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.TIME)
                                           Optional<LocalTime> to) {
-        String user = tokenAuth;  // TODO: placeholder until User.checkToken() is implemented
-        if(user.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-        }
-        Reservation reservation = repository.findByIdAndUser(id, user);
+        String username = authenticationService.authenticateByToken(Authorization).getUsername();
+        Reservation reservation = repository.findByIdAndUser(id, username);
         nameRoom.ifPresent(reservation::setNameRoom);
         idDesk.ifPresent(reservation::setIdDesk);
         try {
@@ -95,13 +86,10 @@ public class ReservationRouter {
 
     @PostMapping("/rooms/{nameRoom}/reservations")
     List<Reservation> roomReservations(@PathVariable String nameRoom,
-                                       @RequestParam String tokenAuth,
+                                       @RequestParam String Authorization,
                                        @RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.DATE)
                                                Optional<LocalDate> date) {
-        String user = tokenAuth;  // TODO: placeholder until User.checkToken() is implemented
-        if(user.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-        }
+        authenticationService.authenticateByToken(Authorization);
         return repository.findByNameRoomAndDate(nameRoom, date.orElse(LocalDate.now()));
     }
 
@@ -110,14 +98,11 @@ public class ReservationRouter {
                             @RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate date,
                             @RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.TIME) LocalTime from,
                             @RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.TIME) LocalTime to,
-                            @RequestParam String tokenAuth) {
-        String user = tokenAuth;  // TODO: placeholder until User.checkToken() is implemented
-        if(user.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-        }
+                            @RequestHeader String Authorization) {
+        String username = authenticationService.authenticateByToken(Authorization).getUsername();
         Reservation toSave;
         try {
-            toSave = new Reservation(nameRoom, idDesk, date, from, to, user);
+            toSave = new Reservation(nameRoom, idDesk, date, from, to, username);
         } catch( IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
