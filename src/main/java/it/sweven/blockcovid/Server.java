@@ -4,10 +4,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
+// @PropertySource("classpath:application.properties")
 public class Server {
-    
-    public static void main(String[] args) {
-	SpringApplication.run(Server.class, args);
-    }
 
+  public static void main(String[] args) {
+    SpringApplication secureServer = new SpringApplication(Server.class);
+    // secureServer.setAdditionalProfiles("ssl");
+    secureServer.run(args);
+  }
 }

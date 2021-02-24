@@ -15,15 +15,24 @@ repositories {
 
 dependencies {
     // Spring dependencies
-    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springdoc:springdoc-openapi-ui:1.5.4'
     // MongoDB Drivers
-    implementation 'org.mongodb:mongodb-driver-reactivestreams'
+    implementation 'org.mongodb:mongodb-driver-sync'
     // reactivex reactive streams
     implementation 'io.reactivex.rxjava2:rxjava'
     implementation 'io.reactivex:rxjava-reactive-streams'
+
+    // lombok
+    compileOnly 'org.projectlombok:lombok:1.18.16'
+    annotationProcessor 'org.projectlombok:lombok:1.18.16'
+
     // OpenAPI docs
     implementation 'org.springdoc:springdoc-openapi-ui:1.5.4'
+
 
     // TESTS
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

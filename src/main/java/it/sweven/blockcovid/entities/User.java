@@ -1,34 +1,51 @@
 package it.sweven.blockcovid.entities;
 
 /* Java utilities */
+
+import it.sweven.blockcovid.security.Authorization;
+import java.util.Objects;
 import java.util.Set;
-
-/* Spring utilities */
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document
+@Data
+@Getter
+@Setter
+@NoArgsConstructor
 public class User {
 
-    private @Id String name;
-    private String password;
-    // private Token token;
-    // private Set<Authorization> authorizations;
+  @Id private String username;
+  private String password;
+  private String token;
+  private Set<Authorization> authorizations;
+  private boolean expired;
+  private boolean locked;
 
-    public User(String name, String password) {
-	this.name = name;
-	this.password = password;
-    }
+  public void setAdmin() {
+    authorizations.add(Authorization.ADMIN);
+  }
 
-    // public boolean isUser() { return false; }
-    
-    // public boolean isAdmin() { return false; }
+  public void setUser() {
+    authorizations.add(Authorization.USER);
+  }
 
-    public String getName() { return name; }
-    
-    @Override
-    public String toString() {
-	return String.format("{'name': '%s', 'password': '%s'}",
-			     name, password);
-    }
+  public void setCleaner() {
+    authorizations.add(Authorization.CLEANER);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o instanceof User) {
+      User other = (User) o;
+      return username.equals(other.username) && password.equals(other.password);
+    } else return false;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(username, password, token);
+  }
 }
