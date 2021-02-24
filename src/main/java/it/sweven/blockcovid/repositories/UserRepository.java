@@ -1,12 +1,16 @@
 package it.sweven.blockcovid.repositories;
 
-/* Spring imports */
+/* Java imports */
+
+import it.sweven.blockcovid.entities.User;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-/* Our imports */
-import it.sweven.blockcovid.entities.User;
-
 public interface UserRepository extends MongoRepository<User, String> {
-    /* l'implementazione può rimanere vuota, La classe di base si
-     * occupa di fare tutto */
+  public Optional<User> findByToken(String token);
+
+  public Optional<User> findByUsername(String username);
+
+  public List<User> findAll();
 }
