@@ -1,46 +1,45 @@
 package it.sweven.blockcovid.routers;
 
-/* Java imports */
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+/* Spring imports */
 
 import it.sweven.blockcovid.repositories.UserRepository;
 import it.sweven.blockcovid.services.UserAuthenticationService;
 import it.sweven.blockcovid.services.UserRegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 class LoginRouter {
 
-  @Autowired private final UserRepository repository;
+  @Autowired private final UserRepository userRepository;
   @Autowired private UserAuthenticationService authenticationService;
   @Autowired private UserRegistrationService registrationService;
 
-  LoginRouter(UserRepository repository) {
-    this.repository = repository;
+  LoginRouter(UserRepository userRepository) {
+    this.userRepository = userRepository;
   }
 
   @PostMapping("/login")
-  Object login(
+  String login(
       @RequestParam("username") String username, @RequestParam("password") String password) {
     try {
       return authenticationService.login(username, password);
-    } catch (BadCredentialsException e) {
-      return ResponseEntity.status(UNAUTHORIZED).body(e.getMessage());
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
   }
 
   @PostMapping("/register")
-  public Object register(
+  public String register(
       @RequestParam("username") String username, @RequestParam("password") String password) {
     try {
       return registrationService.register(username, password);
     } catch (Exception e) {
-      return ResponseEntity.badRequest().body(e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
   }
 }
