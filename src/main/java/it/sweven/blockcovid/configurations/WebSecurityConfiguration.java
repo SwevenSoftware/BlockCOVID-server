@@ -31,7 +31,9 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
   private static final RequestMatcher PUBLIC_URLS =
       new OrRequestMatcher(
-          new AntPathRequestMatcher("/register"), new AntPathRequestMatcher("/login"));
+          new AntPathRequestMatcher("/api/login"),
+          new AntPathRequestMatcher("/login"),
+          new AntPathRequestMatcher("/built/bundle.js"));
   private static final RequestMatcher PROTECTED_URLS = new NegatedRequestMatcher(PUBLIC_URLS);
 
   @Autowired private TokenAuthenticationProvider authenticationProvider;

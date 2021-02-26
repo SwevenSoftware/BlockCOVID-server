@@ -23,7 +23,7 @@ class LoginRouter {
     this.userRepository = userRepository;
   }
 
-  @PostMapping("/login")
+  @PostMapping("/api/login")
   String login(
       @RequestParam("username") String username, @RequestParam("password") String password) {
     try {
@@ -33,7 +33,7 @@ class LoginRouter {
     }
   }
 
-  @PostMapping("/register")
+  @PostMapping("/api/register")
   public String register(
       @RequestParam("username") String username, @RequestParam("password") String password) {
     try {

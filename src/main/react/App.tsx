@@ -2,7 +2,6 @@ import React from 'react';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import './styles.css';
 import Login from './Login';
-import GeneralLayout from './GeneralLayout';
 
 
 const App: React.FC = () => {

@@ -29,7 +29,7 @@ public class ReservationRouter {
     this.repository = repository;
   }
 
-  @PostMapping(value = "/user/reservations")
+  @PostMapping(value = "/api/user/reservations")
   Map<String, Reservation> getPersonalReservations(@RequestHeader String Authorization) {
     String username = authenticationService.authenticateByToken(Authorization).getUsername();
     return repository
@@ -40,7 +40,7 @@ public class ReservationRouter {
         .collect(Collectors.toMap(Reservation::getId, Function.identity()));
   }
 
-  @PostMapping("/user/reservations/{id}")
+  @PostMapping("/api/user/reservations/{id}")
   Reservation getSingleReservation(@PathVariable String id, @RequestHeader String Authorization) {
     String username = authenticationService.authenticateByToken(Authorization).getUsername();
     return repository
@@ -48,7 +48,7 @@ public class ReservationRouter {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
   }
 
-  @DeleteMapping("/user/reservations/{id}")
+  @DeleteMapping("/api/user/reservations/{id}")
   String cancelReservation(@PathVariable String id, @RequestHeader String Authorization) {
     String username = authenticationService.authenticateByToken(Authorization).getUsername();
     return repository
@@ -57,7 +57,7 @@ public class ReservationRouter {
         .getId();
   }
 
-  @PutMapping("/user/reservations/{id}")
+  @PutMapping("/api/user/reservations/{id}")
   Reservation updateReservation(
       @PathVariable String id,
       @RequestHeader String Authorization,
@@ -91,7 +91,7 @@ public class ReservationRouter {
     return repository.save(reservation);
   }
 
-  @PostMapping("/rooms/{nameRoom}/reservations")
+  @PostMapping("/api/rooms/{nameRoom}/reservations")
   List<Reservation> roomReservations(
       @PathVariable String nameRoom,
       @RequestParam String Authorization,
@@ -102,7 +102,7 @@ public class ReservationRouter {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
   }
 
-  @PostMapping("/rooms/{nameRoom}/reserve")
+  @PostMapping("/api/rooms/{nameRoom}/reserve")
   Reservation reserveRoom(
       @PathVariable String nameRoom,
       @RequestParam Integer idDesk,

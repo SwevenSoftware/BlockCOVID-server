@@ -7,4 +7,4 @@ db
 node*
 package-lock.json
 .idea
-./src/main/resources/static/built/bundle.js
+src/main/resources/static/built/bundle.js

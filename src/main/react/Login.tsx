@@ -147,10 +147,6 @@ const LoginForm = () => {
     const formData = new FormData();
     formData.append('username', state.username);
     formData.append('password', state.password);
-    /*const options = {
-        method: 'POST',
-        body: formData
-      }*/
 
     const config = {headers: { 'content-type': 'multipart/form-data'}};
 
