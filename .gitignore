@@ -4,3 +4,6 @@ db
 .gradle
 *.pem
 *.p12
+node*
+package-lock.json
+.idea
