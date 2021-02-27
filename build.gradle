@@ -33,6 +33,9 @@ dependencies {
     // OpenAPI docs
     implementation 'org.springdoc:springdoc-openapi-ui:1.5.4'
 
+    // iText PDF
+    implementation 'com.itextpdf:itext7-core:7.1.10'
+
 
     // TESTS
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
