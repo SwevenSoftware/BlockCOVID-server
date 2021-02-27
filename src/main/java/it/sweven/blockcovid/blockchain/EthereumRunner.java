@@ -23,7 +23,7 @@ public class EthereumRunner {
     @Autowired private final UserRepository userRepository;
 
     private Credentials credentials;
-    private String contractAddress;
+    private Document contractAddress;
     
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
 
