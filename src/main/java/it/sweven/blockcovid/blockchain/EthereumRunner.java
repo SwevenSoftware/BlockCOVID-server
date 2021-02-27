@@ -3,7 +3,6 @@ package it.sweven.blockcovid.blockchain;
 import it.sweven.blockcovid.contracts.Document;
 import it.sweven.blockcovid.documents.PdfReport;
 import it.sweven.blockcovid.repositories.ReservationRepository;
-import it.sweven.blockcovid.repositories.UserRepository;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
@@ -26,8 +25,7 @@ public class EthereumRunner {
   private Web3j connection;
   private EthereumConfiguration configuration;
 
-  EthereumRunner(UserRepository userRepository, ReservationRepository reservationRepository) {
-    this.userRepository = userRepository;
+  EthereumRunner(ReservationRepository reservationRepository) {
     this.reservationRepository = reservationRepository;
 
     configuration = new EthereumConfiguration();
