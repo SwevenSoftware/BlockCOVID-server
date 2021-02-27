@@ -38,8 +38,10 @@ dependencies {
 
     // web3j
     implementation 'org.web3j:core:4.5.6'
-    // compile ('org.web3j:core:4.8.4')
     
+    // iText PDF
+    implementation 'com.itextpdf:itext7-core:7.1.10'
+
     // TESTS
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'

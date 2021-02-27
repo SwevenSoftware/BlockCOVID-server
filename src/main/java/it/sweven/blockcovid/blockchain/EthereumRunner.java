@@ -1,7 +1,13 @@
 package it.sweven.blockcovid.blockchain;
 
 import it.sweven.blockcovid.contracts.Document;
+import it.sweven.blockcovid.repositories.ReservationRepository;
 import it.sweven.blockcovid.repositories.UserRepository;
+import java.security.NoSuchAlgorithmException;
+import java.time.LocalTime;
+
+import java.time.LocalDate;
+
 import java.security.NoSuchAlgorithmException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,10 +23,10 @@ import org.web3j.tx.gas.DefaultGasProvider;
 public class EthereumRunner {
 
   @Autowired private final UserRepository userRepository;
+  @Autowired private final ReservationRepository repository;
 
   private Web3j connection;
-  private String contractAddress;
-
+  
   private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
 
   // abominio trovato online
@@ -55,7 +61,13 @@ public class EthereumRunner {
 
   @Scheduled(cron = "* * * * * ?")
   public void run() throws NoSuchAlgorithmException {
-    /* Generate document and his hash */
+    PdfReport newReport = new PdfReport(LocalDate.now(), LocalTime.now());
+        String reportHash =
+            newReport
+                .addReservations(repository.findAll())
+                .addHashPreviousReport("previousHash")
+                .save()
+                .hashFile();
     try {
       Credentials credentials = Credentials.create(EthereumConfiguration.ACCOUNT);
       ContractGasProvider contractGasProvider = new DefaultGasProvider();
@@ -65,7 +77,7 @@ public class EthereumRunner {
                   connection,
                   credentials,
                   contractGasProvider)
-              .add("" /*hash of the document*/)
+              .add(reportHash)
               .send();
       System.out.println(receipt.toString());
     } catch (Exception e) {
