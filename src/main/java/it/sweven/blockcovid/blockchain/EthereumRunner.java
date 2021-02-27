@@ -4,12 +4,10 @@ import it.sweven.blockcovid.contracts.Document;
 import it.sweven.blockcovid.documents.PdfReport;
 import it.sweven.blockcovid.repositories.ReservationRepository;
 import it.sweven.blockcovid.repositories.UserRepository;
-
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.LocalTime;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -23,10 +21,8 @@ import org.web3j.tx.gas.DefaultGasProvider;
 @Component
 public class EthereumRunner {
 
-  @Autowired
-  private final UserRepository userRepository;
-  @Autowired
-  private final ReservationRepository reservationRepository;
+  @Autowired private final UserRepository userRepository;
+  @Autowired private final ReservationRepository reservationRepository;
 
   private Web3j connection;
   private EthereumConfiguration configuration;
@@ -49,7 +45,7 @@ public class EthereumRunner {
     this.reservationRepository = reservationRepository;
 
     configuration = new EthereumConfiguration();
-    
+
     connection = Web3j.build(new HttpService(configuration.NETWORK));
     /*
      * Se non è stato indicato un indirizzo del contratto, fare il deploy con
@@ -81,10 +77,7 @@ public class EthereumRunner {
       ContractGasProvider contractGasProvider = new DefaultGasProvider();
       TransactionReceipt receipt =
           Document.load(
-                  configuration.CONTRACT_ADDRESS,
-                  connection,
-                  credentials,
-                  contractGasProvider)
+                  configuration.CONTRACT_ADDRESS, connection, credentials, contractGasProvider)
               .add(reportHash)
               .send();
       System.out.println(receipt.toString());
