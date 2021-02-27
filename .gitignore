@@ -12,3 +12,4 @@ bin/*
 .classpath
 .project
 package-lock.json
+.vscode
