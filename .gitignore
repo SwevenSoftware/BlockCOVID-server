@@ -13,3 +13,4 @@ bin/*
 .project
 package-lock.json
 .vscode
+reports

@@ -1,14 +1,15 @@
 package it.sweven.blockcovid.blockchain;
 
 import it.sweven.blockcovid.contracts.Document;
+import it.sweven.blockcovid.documents.PdfReport;
 import it.sweven.blockcovid.repositories.ReservationRepository;
 import it.sweven.blockcovid.repositories.UserRepository;
+
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
 import java.time.LocalTime;
 
-import java.time.LocalDate;
-
-import java.security.NoSuchAlgorithmException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -22,11 +23,14 @@ import org.web3j.tx.gas.DefaultGasProvider;
 @Component
 public class EthereumRunner {
 
-  @Autowired private final UserRepository userRepository;
-  @Autowired private final ReservationRepository repository;
+  @Autowired
+  private final UserRepository userRepository;
+  @Autowired
+  private final ReservationRepository reservationRepository;
 
   private Web3j connection;
-  
+  private EthereumConfiguration configuration;
+
   private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
 
   // abominio trovato online
@@ -40,40 +44,44 @@ public class EthereumRunner {
     return new String(hexChars);
   }
 
-  EthereumRunner(UserRepository userRepository) {
+  EthereumRunner(UserRepository userRepository, ReservationRepository reservationRepository) {
     this.userRepository = userRepository;
-    connection = Web3j.build(new HttpService());
+    this.reservationRepository = reservationRepository;
+
+    configuration = new EthereumConfiguration();
+    
+    connection = Web3j.build(new HttpService(configuration.NETWORK));
     /*
      * Se non è stato indicato un indirizzo del contratto, fare il deploy con
      * l'account corrente
      */
-    if (EthereumConfiguration.CONTRACT_ADDRESS.equals("")) {
+    if (configuration.CONTRACT_ADDRESS.equals("")) {
       try {
         ContractGasProvider contractGasProvider = new DefaultGasProvider();
-        Credentials credentials = Credentials.create(EthereumConfiguration.ACCOUNT);
+        Credentials credentials = Credentials.create(configuration.ACCOUNT);
         Document contract = Document.deploy(connection, credentials, contractGasProvider).send();
-        EthereumConfiguration.CONTRACT_ADDRESS = new String(contract.getContractAddress());
+        configuration.CONTRACT_ADDRESS = new String(contract.getContractAddress());
       } catch (Exception e) {
         System.out.println(e.getMessage());
       }
     }
   }
 
-  @Scheduled(cron = "* * * * * ?")
-  public void run() throws NoSuchAlgorithmException {
+  @Scheduled(cron = "0 0 * * * ?")
+  public void run() throws NoSuchAlgorithmException, IOException {
     PdfReport newReport = new PdfReport(LocalDate.now(), LocalTime.now());
-        String reportHash =
-            newReport
-                .addReservations(repository.findAll())
-                .addHashPreviousReport("previousHash")
-                .save()
-                .hashFile();
+    String reportHash =
+        newReport
+            .addReservations(reservationRepository.findAll())
+            .addHashPreviousReport("previousHash")
+            .save()
+            .hashFile();
     try {
-      Credentials credentials = Credentials.create(EthereumConfiguration.ACCOUNT);
+      Credentials credentials = Credentials.create(configuration.ACCOUNT);
       ContractGasProvider contractGasProvider = new DefaultGasProvider();
       TransactionReceipt receipt =
           Document.load(
-                  EthereumConfiguration.CONTRACT_ADDRESS,
+                  configuration.CONTRACT_ADDRESS,
                   connection,
                   credentials,
                   contractGasProvider)
