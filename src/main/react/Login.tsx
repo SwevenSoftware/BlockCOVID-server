@@ -1,5 +1,5 @@
-import React, { useReducer, useEffect } from 'react';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
+import React, { useState, useEffect } from 'react';
+import { createStyles, makeStyles, Theme} from '@material-ui/core/styles';
 
 import TextField from '@material-ui/core/TextField';
 import Card from '@material-ui/core/Card';
@@ -7,11 +7,10 @@ import CardContent from '@material-ui/core/CardContent';
 import CardActions from '@material-ui/core/CardActions';
 import CardHeader from '@material-ui/core/CardHeader';
 import Button from '@material-ui/core/Button';
-import { Link } from 'react-router-dom';
-import { FormHelperText } from '@material-ui/core';
-import axios from 'axios'
+import axios from 'axios';
 
-import GeneralLayout from './GeneralLayout'
+import GeneralLayout from './GeneralLayout';
+import Token from './Token';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -41,157 +40,76 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-//state type
-
-type State = {
-  username: string
-  password:  string
-  isButtonDisabled: boolean
-  helperText: string
-  isError: boolean
-};
-
-const initialState:State = {
-  username: '',
-  password: '',
-  isButtonDisabled: true,
-  helperText: '',
-  isError: false
-};
-
-type Action = { type: 'setUsername', payload: string }
-  | { type: 'setPassword', payload: string }
-  | { type: 'setIsButtonDisabled', payload: boolean }
-  | { type: 'loginSuccess', payload: string }
-  | { type: 'loginFailed', payload: string }
-  | { type: 'setIsError', payload: boolean };
-
-const reducer = (state: State, action: Action): State => {
-  switch (action.type) {
-    case 'setUsername':
-      return {
-        ...state,
-        username: action.payload
-      };
-    case 'setPassword':
-      return {
-        ...state,
-        password: action.payload
-      };
-    case 'setIsButtonDisabled':
-      return {
-        ...state,
-        isButtonDisabled: action.payload
-      };
-    case 'loginSuccess':
-      return {
-        ...state,
-        helperText: action.payload,
-        isError: false
-      };
-    case 'loginFailed':
-      return {
-        ...state,
-        helperText: action.payload,
-        isError: true
-      };
-    case 'setIsError':
-      return {
-        ...state,
-        isError: action.payload
-      };
-  }
-}
-
-
-
 const LoginForm = () => {
   const classes = useStyles();
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+  const [helpText, setHelpText] = useState('');
+  const [isError, setIsError] = useState(false);
+
+  const token = new Token();
   const cardTitle = "Login";
   const loginBtnText = "Login";
 
   useEffect(() => {
-    if (state.username.trim() && state.password.trim()) {
-     dispatch({
-       type: 'setIsButtonDisabled',
-       payload: false
-     });
+    if (username.trim() && password.trim()) {
+      setIsButtonDisabled(false)
     } else {
-      dispatch({
-        type: 'setIsButtonDisabled',
-        payload: true
-      });
+      setIsButtonDisabled(true)
     }
-  }, [state.username, state.password]);
+  }, [username, password]);
 
-  const successLogin = (message : string) => {
-    dispatch({
-      type: 'loginSuccess',
-      payload: message,
-    });
+  const successLogin = () => {
+    setHelpText('');
+    setIsError(false);
   }
 
   const failLogin = (message : string) => {
-    dispatch({
-      type: 'loginFailed',
-      payload: message,
-    });
+    setHelpText(message);
+    setIsError(true);
+    console.log("Fail error: ", isError)
   }
 
   const handleLogin = () => {
     console.log(JSON.stringify({
-      username: state.username,
-      password: state.password
+      username,
+      password
     }));
     const formData = new FormData();
-    formData.append('username', state.username);
-    formData.append('password', state.password);
+    formData.append('username', username);
+    formData.append('password', password);
 
     const config = {headers: { 'content-type': 'multipart/form-data'}};
 
-    axios.post("http://localhost:8080/api/login", formData, config).then((res) => {console.log(res)});
-
-    /*fetch("http://localhost:8080/api/login",
-        options
-    ).then(
-      (result) => {
-        console.log(result);
-        switch (result.status) {
-          case 200:
-            successLogin("Login successfully");
-            break;
-          case 401:
-            failLogin("Incorrect username or password");
-            break;
-        }
-      },
-      () => {
-        failLogin('An error occured while processing the request');
+    axios.post("/api/login", formData, config)
+    .then((res) => {
+      successLogin();
+      token.set(res.data);
+      location.href = "/home";
+    }).catch((err) => {
+      if(err.response.status == 401) {
+        failLogin('Incorrect username or password')
+      } else {
+        failLogin('Server error')
       }
-    )*/
+    });
   };
 
   const handleKeyPress = (event: React.KeyboardEvent) => {
     if (event.key == "Enter") {
-      state.isButtonDisabled || handleLogin();
+      isButtonDisabled || handleLogin();
     }
   };
 
   const handleUsernameChange: React.ChangeEventHandler<HTMLInputElement> =
     (event) => {
-      dispatch({
-        type: 'setUsername',
-        payload: event.target.value
-      });
+      setUsername(event.target.value);
     };
 
   const handlePasswordChange: React.ChangeEventHandler<HTMLInputElement> =
     (event) => {
-      dispatch({
-        type: 'setPassword',
-        payload: event.target.value
-      });
+      setPassword(event.target.value);
     }
   return (
     <form className={classes.container} noValidate autoComplete="off">
@@ -200,7 +118,7 @@ const LoginForm = () => {
         <CardContent>
           <div>
             <TextField
-              error={state.isError}
+              error={isError}
               fullWidth
               id="username"
               type="email"
@@ -211,14 +129,14 @@ const LoginForm = () => {
               onKeyPress={handleKeyPress}
             />
             <TextField
-              error={state.isError}
+              error={isError}
               fullWidth
               id="password"
               type="password"
               label="Password"
               placeholder="Password"
               margin="normal"
-              helperText={state.helperText}
+              helperText={helpText}
               onChange={handlePasswordChange}
               onKeyPress={handleKeyPress}
             />
@@ -231,7 +149,7 @@ const LoginForm = () => {
               color="secondary"
               className={classes.loginBtn}
               onClick={handleLogin}
-              disabled={state.isButtonDisabled}>
+              disabled={isButtonDisabled}>
               {loginBtnText}
           </Button>
         </CardActions>

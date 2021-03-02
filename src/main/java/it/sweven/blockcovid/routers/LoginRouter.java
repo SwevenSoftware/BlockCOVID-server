@@ -8,11 +8,13 @@ import it.sweven.blockcovid.services.UserRegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
+@RequestMapping("api")
 class LoginRouter {
 
   @Autowired private final UserRepository userRepository;
@@ -23,7 +25,7 @@ class LoginRouter {
     this.userRepository = userRepository;
   }
 
-  @PostMapping("/api/login")
+  @PostMapping("/login")
   String login(
       @RequestParam("username") String username, @RequestParam("password") String password) {
     try {
@@ -33,7 +35,7 @@ class LoginRouter {
     }
   }
 
-  @PostMapping("/api/register")
+  @PostMapping("/register")
   public String register(
       @RequestParam("username") String username, @RequestParam("password") String password) {
     try {

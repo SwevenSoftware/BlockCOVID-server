@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
+@RequestMapping("api")
 public class ReservationRouter {
   @Autowired private final ReservationRepository repository;
   @Autowired private UserAuthenticationService authenticationService;
@@ -29,7 +30,7 @@ public class ReservationRouter {
     this.repository = repository;
   }
 
-  @PostMapping(value = "/api/user/reservations")
+  @PostMapping(value = "/user/reservations")
   Map<String, Reservation> getPersonalReservations(@RequestHeader String Authorization) {
     String username = authenticationService.authenticateByToken(Authorization).getUsername();
     return repository
@@ -40,7 +41,7 @@ public class ReservationRouter {
         .collect(Collectors.toMap(Reservation::getId, Function.identity()));
   }
 
-  @PostMapping("/api/user/reservations/{id}")
+  @PostMapping("/user/reservations/{id}")
   Reservation getSingleReservation(@PathVariable String id, @RequestHeader String Authorization) {
     String username = authenticationService.authenticateByToken(Authorization).getUsername();
     return repository
@@ -48,7 +49,7 @@ public class ReservationRouter {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
   }
 
-  @DeleteMapping("/api/user/reservations/{id}")
+  @DeleteMapping("/user/reservations/{id}")
   String cancelReservation(@PathVariable String id, @RequestHeader String Authorization) {
     String username = authenticationService.authenticateByToken(Authorization).getUsername();
     return repository
@@ -57,7 +58,7 @@ public class ReservationRouter {
         .getId();
   }
 
-  @PutMapping("/api/user/reservations/{id}")
+  @PutMapping("/user/reservations/{id}")
   Reservation updateReservation(
       @PathVariable String id,
       @RequestHeader String Authorization,
@@ -91,7 +92,7 @@ public class ReservationRouter {
     return repository.save(reservation);
   }
 
-  @PostMapping("/api/rooms/{nameRoom}/reservations")
+  @PostMapping("/rooms/{nameRoom}/reservations")
   List<Reservation> roomReservations(
       @PathVariable String nameRoom,
       @RequestParam String Authorization,
@@ -102,7 +103,7 @@ public class ReservationRouter {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
   }
 
-  @PostMapping("/api/rooms/{nameRoom}/reserve")
+  @PostMapping("/rooms/{nameRoom}/reserve")
   Reservation reserveRoom(
       @PathVariable String nameRoom,
       @RequestParam Integer idDesk,

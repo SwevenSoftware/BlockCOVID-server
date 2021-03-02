@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import { StylesProvider } from '@material-ui/styles';
 import './styles.css';
 import Login from './Login';
 

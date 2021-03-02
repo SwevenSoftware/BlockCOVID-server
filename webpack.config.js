@@ -29,10 +29,15 @@ module.exports = {
                 use: 'ts-loader',
                 exclude: /node_modules/
             },
+            {
+                test: /\.css$/,
+                use: ['style-loader', 'css-loader'],
+                exclude: /node_modules/
+            }
 
         ],
     }, resolve: {
-        extensions: [ '.tsx', '.ts', '.js', '.css', '.png' ],
+        extensions: [ '.tsx', '.ts', '.js', '.css' ],
       },
       output: {
         path: __dirname,
