@@ -20,11 +20,12 @@ import org.web3j.tx.gas.DefaultGasProvider;
 @Component
 public class EthereumRunner {
 
-  @Autowired private final ReservationRepository reservationRepository;
+  private final ReservationRepository reservationRepository;
 
   private Web3j connection;
   private EthereumConfiguration configuration;
 
+  @Autowired
   EthereumRunner(ReservationRepository reservationRepository) {
     this.reservationRepository = reservationRepository;
 

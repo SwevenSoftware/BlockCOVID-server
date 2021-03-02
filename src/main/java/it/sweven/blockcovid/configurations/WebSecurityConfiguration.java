@@ -34,7 +34,12 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
           new AntPathRequestMatcher("/register"), new AntPathRequestMatcher("/login"));
   private static final RequestMatcher PROTECTED_URLS = new NegatedRequestMatcher(PUBLIC_URLS);
 
-  @Autowired private TokenAuthenticationProvider authenticationProvider;
+  private final TokenAuthenticationProvider authenticationProvider;
+
+  @Autowired
+  WebSecurityConfiguration(TokenAuthenticationProvider authenticationProvider) {
+    this.authenticationProvider = authenticationProvider;
+  }
 
   @Override
   protected void configure(AuthenticationManagerBuilder auth) {

@@ -6,7 +6,6 @@ import it.sweven.blockcovid.documents.PdfReport;
 import it.sweven.blockcovid.entities.Reservation;
 import it.sweven.blockcovid.repositories.ReservationRepository;
 import it.sweven.blockcovid.services.UserAuthenticationService;
-import it.sweven.blockcovid.services.UserRegistrationService;
 import java.io.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -24,12 +23,14 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class ReservationRouter {
-  @Autowired private final ReservationRepository repository;
-  @Autowired private UserAuthenticationService authenticationService;
-  @Autowired private UserRegistrationService registrationService;
+  private final ReservationRepository repository;
+  private final UserAuthenticationService authenticationService;
 
-  public ReservationRouter(ReservationRepository repository) {
+  @Autowired
+  public ReservationRouter(
+      ReservationRepository repository, UserAuthenticationService authenticationService) {
     this.repository = repository;
+    this.authenticationService = authenticationService;
   }
 
   @PostMapping(value = "/user/reservations")
