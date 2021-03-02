@@ -20,6 +20,7 @@ import PeopleIcon from '@material-ui/icons/People';
 import MeetingRoomIcon from '@material-ui/icons/MeetingRoom';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import Token from './Token'
 
 const drawerWidth = 240;
 
@@ -92,6 +93,7 @@ export default function GeneralLayout(mainElement : JSX.Element) {
   const classes = useStyles();
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
+  const token = new Token();
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -100,6 +102,11 @@ export default function GeneralLayout(mainElement : JSX.Element) {
   const handleDrawerClose = () => {
     setOpen(false);
   };
+
+  const logout = () => {
+    token.remove();
+    location.href = "/login";
+  }
 
   return (
     <div className={classes.root}>
@@ -159,10 +166,17 @@ export default function GeneralLayout(mainElement : JSX.Element) {
         </List>
         <Divider />
         <List>
-          <ListItem button key="Logout">
-            <ListItemIcon><ExitToAppIcon /></ListItemIcon>
-            <ListItemText primary="Logout" />
-          </ListItem>
+          { token.get() ?
+            <ListItem button key="Logout" onClick={logout}>
+              <ListItemIcon><ExitToAppIcon /></ListItemIcon>
+              <ListItemText primary="Logout" />
+            </ListItem>
+            :
+            <ListItem button key="Login" onClick={() => location.href="/login"}>
+              <ListItemIcon><AccountCircleIcon /></ListItemIcon>
+              <ListItemText primary="Login" />
+            </ListItem>
+          }
         </List>
       </Drawer>
       <main className={classes.content}>
