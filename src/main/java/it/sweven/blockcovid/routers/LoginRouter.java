@@ -2,7 +2,6 @@ package it.sweven.blockcovid.routers;
 
 /* Spring imports */
 
-import it.sweven.blockcovid.repositories.UserRepository;
 import it.sweven.blockcovid.services.UserAuthenticationService;
 import it.sweven.blockcovid.services.UserRegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +18,11 @@ class LoginRouter {
   private final UserRegistrationService registrationService;
 
   @Autowired
-  LoginRouter(UserAuthenticationService authenticationService, UserRegistrationService registrationService) {
+  LoginRouter(
+      UserAuthenticationService authenticationService,
+      UserRegistrationService registrationService) {
     this.authenticationService = authenticationService;
-    this. registrationService = registrationService;
+    this.registrationService = registrationService;
   }
 
   @PostMapping("/login")

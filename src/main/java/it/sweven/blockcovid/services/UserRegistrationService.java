@@ -10,7 +10,8 @@ public class UserRegistrationService {
   private final UserAuthenticationService authenticationService;
 
   @Autowired
-  UserRegistrationService(UserService userService, UserAuthenticationService authenticationService){
+  UserRegistrationService(
+      UserService userService, UserAuthenticationService authenticationService) {
     this.userService = userService;
     this.authenticationService = authenticationService;
   }

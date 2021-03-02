@@ -6,7 +6,6 @@ import it.sweven.blockcovid.documents.PdfReport;
 import it.sweven.blockcovid.entities.Reservation;
 import it.sweven.blockcovid.repositories.ReservationRepository;
 import it.sweven.blockcovid.services.UserAuthenticationService;
-import it.sweven.blockcovid.services.UserRegistrationService;
 import java.io.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -26,9 +25,10 @@ import org.springframework.web.server.ResponseStatusException;
 public class ReservationRouter {
   private final ReservationRepository repository;
   private final UserAuthenticationService authenticationService;
-  
+
   @Autowired
-  public ReservationRouter(ReservationRepository repository, UserAuthenticationService authenticationService) {
+  public ReservationRouter(
+      ReservationRepository repository, UserAuthenticationService authenticationService) {
     this.repository = repository;
     this.authenticationService = authenticationService;
   }

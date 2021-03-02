@@ -12,7 +12,7 @@ public class UserService {
 
   @Autowired
   UserService(UserRepository userRepository) {
-    this.userRepository = userRepository;    
+    this.userRepository = userRepository;
   }
 
   public User save(User user) {

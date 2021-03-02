@@ -37,7 +37,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
   private final TokenAuthenticationProvider authenticationProvider;
 
   @Autowired
-  WebSecurityConfiguration(TokenAuthenticationProvider authenticationProvider){
+  WebSecurityConfiguration(TokenAuthenticationProvider authenticationProvider) {
     this.authenticationProvider = authenticationProvider;
   }
 

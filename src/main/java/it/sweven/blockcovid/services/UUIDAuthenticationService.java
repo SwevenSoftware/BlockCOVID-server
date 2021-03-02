@@ -3,7 +3,6 @@ package it.sweven.blockcovid.services;
 import it.sweven.blockcovid.entities.User;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +11,7 @@ public class UUIDAuthenticationService implements UserAuthenticationService {
   private final UserService userService;
 
   @Autowired
-  UUIDAuthenticationService(UserService userService){
+  UUIDAuthenticationService(UserService userService) {
     this.userService = userService;
   }
 
