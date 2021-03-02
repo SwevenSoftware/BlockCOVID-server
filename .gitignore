@@ -4,7 +4,14 @@ db
 .gradle
 *.pem
 *.p12
-node*
-package-lock.json
 .idea
+node_modules/*
+node/*
+bin/*
+.settings/*
+.classpath
+.project
+package-lock.json
+.vscode
+reports
 src/main/resources/static/built/bundle.js
