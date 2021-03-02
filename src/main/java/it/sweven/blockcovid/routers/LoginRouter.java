@@ -15,12 +15,13 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 class LoginRouter {
 
-  @Autowired private final UserRepository userRepository;
-  @Autowired private UserAuthenticationService authenticationService;
-  @Autowired private UserRegistrationService registrationService;
+  private final UserAuthenticationService authenticationService;
+  private final UserRegistrationService registrationService;
 
-  LoginRouter(UserRepository userRepository) {
-    this.userRepository = userRepository;
+  @Autowired
+  LoginRouter(UserAuthenticationService authenticationService, UserRegistrationService registrationService) {
+    this.authenticationService = authenticationService;
+    this. registrationService = registrationService;
   }
 
   @PostMapping("/login")

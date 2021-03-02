@@ -6,8 +6,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserRegistrationService {
-  @Autowired private UserService userService;
-  @Autowired private UserAuthenticationService authenticationService;
+  private final UserService userService;
+  private final UserAuthenticationService authenticationService;
+
+  @Autowired
+  UserRegistrationService(UserService userService, UserAuthenticationService authenticationService){
+    this.userService = userService;
+    this.authenticationService = authenticationService;
+  }
 
   public String register(String username, String password) throws IllegalArgumentException {
     userService

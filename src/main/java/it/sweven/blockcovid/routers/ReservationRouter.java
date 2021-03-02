@@ -24,12 +24,13 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class ReservationRouter {
-  @Autowired private final ReservationRepository repository;
-  @Autowired private UserAuthenticationService authenticationService;
-  @Autowired private UserRegistrationService registrationService;
-
-  public ReservationRouter(ReservationRepository repository) {
+  private final ReservationRepository repository;
+  private final UserAuthenticationService authenticationService;
+  
+  @Autowired
+  public ReservationRouter(ReservationRepository repository, UserAuthenticationService authenticationService) {
     this.repository = repository;
+    this.authenticationService = authenticationService;
   }
 
   @PostMapping(value = "/user/reservations")

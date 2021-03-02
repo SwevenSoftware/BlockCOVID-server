@@ -7,10 +7,14 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
-@Profile({"default", "uuid"})
 @Service
 public class UUIDAuthenticationService implements UserAuthenticationService {
-  @Autowired private UserService userService;
+  private final UserService userService;
+
+  @Autowired
+  UUIDAuthenticationService(UserService userService){
+    this.userService = userService;
+  }
 
   @Override
   public String login(String username, String password) {
