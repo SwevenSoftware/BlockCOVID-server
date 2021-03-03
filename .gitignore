@@ -14,3 +14,4 @@ bin/*
 package-lock.json
 .vscode
 reports
+src/main/resources/static/built/bundle.js
