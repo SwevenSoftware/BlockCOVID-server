@@ -29,12 +29,12 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
+  private static final RequestMatcher PROTECTED_URLS = new AntPathRequestMatcher("/api/**");
   private static final RequestMatcher PUBLIC_URLS =
       new OrRequestMatcher(
+          new NegatedRequestMatcher(PROTECTED_URLS),
           new AntPathRequestMatcher("/api/login"),
-          new AntPathRequestMatcher("/login"),
-          new AntPathRequestMatcher("/built/bundle.js"));
-  private static final RequestMatcher PROTECTED_URLS = new NegatedRequestMatcher(PUBLIC_URLS);
+          new AntPathRequestMatcher("/api/register"));
 
   @Autowired private TokenAuthenticationProvider authenticationProvider;
 
@@ -45,7 +45,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
   @Override
   public void configure(WebSecurity web) {
-    web.ignoring().requestMatchers(PUBLIC_URLS).antMatchers("/swagger-ui/**", "/v3/api-docs/**");
+    web.ignoring().requestMatchers(PUBLIC_URLS);
   }
 
   @Override
