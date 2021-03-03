@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { RefObject, useEffect, createRef, ReactNode, Component } from 'react';
+import ReactDOM from 'react-dom'
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -7,8 +8,11 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import axios from 'axios'
 
+import './styles.css'
 import GeneralLayout from './GeneralLayout'
+import Token from './Token'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -30,11 +34,11 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-function createData(ID: string, IDdesk: number, room: number, date: string, from: string, to: string, name: string,) {
+/*function createData(ID: string, IDdesk: number, room: number, date: string, from: string, to: string, name: string,) {
   return { ID, IDdesk, room, date, from, to, name };
-}
+}*/
 
-const rows = [
+/*const rows = [
   createData('1111', 1, 1, '1/1/2021', '08:00', '10:00', 'Luca M.'),
   createData('2222', 2, 1, '1/1/2021', '08:00', '12:00', 'Alberto'),
   createData('3333', 3, 2, '1/1/2021', '08:00', '10:00', 'Luca Z.'),
@@ -42,45 +46,134 @@ const rows = [
   createData('5555', 5, 3, '1/1/2021', '08:00', '10:00', 'Francesco'),
   createData('6666', 6, 3, '1/1/2021', '08:00', '14:00', 'Antonio'),
   createData('7777', 7, 2, '1/1/2021', '08:00', '10:00', 'Dardan'),
-];
+];*/
 
-const ReservationsForm = () => {
-  const classes = useStyles();
+interface Reservation {
+  id : number,
+  room : string,
+  desk : number,
+  date : string,
+  from : string,
+  to : string,
+  user : string
+}
 
+class RowTable extends Node {
+  row : Reservation;
+  constructor(row : Reservation) {
+    super()
+    this.row = row
+  }
+  render() {
+    return (
+      <TableRow key={this.row.id}>
+        <TableCell component="th" scope="row">
+          {this.row.id}
+        </TableCell>
+        <TableCell align="right">{this.row.room}</TableCell>
+        <TableCell align="right">{this.row.desk}</TableCell>
+        <TableCell align="right">{this.row.date}</TableCell>
+        <TableCell align="right">{this.row.from}</TableCell>
+        <TableCell align="right">{this.row.to}</TableCell>
+        <TableCell align="right">{this.row.user}</TableCell>
+      </TableRow>
+    )
+  }
+  
+}
+
+class ReservationsForm extends Component {
+  //const classes = useStyles();
+  //let reservations : Array<Reservation> = new Array();
+  //let refTableBody : RefObject<HTMLTableSectionElement> = createRef<HTMLTableSectionElement>();
+  rows : Array<JSX.Element> ;
+
+  constructor(props) {
+    super(props)
+    this.rows = new Array()
+  }
+
+  private addTableRow(row : Reservation) {
+    /* if(refTableBody.current)
+    ReactDOM.render(
+        {refTableBody.current.children}
+        <TableRow key={row.id}>
+          <TableCell component="th" scope="row">
+            {row.id}
+          </TableCell>
+          <TableCell align="right">{row.room}</TableCell>
+          <TableCell align="right">{row.desk}</TableCell>
+          <TableCell align="right">{row.date}</TableCell>
+          <TableCell align="right">{row.from}</TableCell>
+          <TableCell align="right">{row.to}</TableCell>
+          <TableCell align="right">{row.user}</TableCell>
+        </TableRow>, refTableBody.current
+    ) */
+    /* const r : RowTable = new RowTable(row)
+    refTableBody.current?.appendChild(r) */
+    this.rows.push(
+      <TableRow key={row.id}>
+          <TableCell component="th" scope="row">
+            {row.id}
+          </TableCell>
+          <TableCell align="right">{row.room}</TableCell>
+          <TableCell align="right">{row.desk}</TableCell>
+          <TableCell align="right">{row.date}</TableCell>
+          <TableCell align="right">{row.from}</TableCell>
+          <TableCell align="right">{row.to}</TableCell>
+          <TableCell align="right">{row.user}</TableCell>
+        </TableRow>
+    )
+  }
+
+  private retrieveReservations() {
+    const config = {headers: {"Authorization": Token.get()}};
+    axios.post("/api/user/reservations", {}, config).then((res) => {
+      for(var id in res.data) {
+        const data = res.data[id]
+        const newReservation = {
+          id: data.id, 
+          room: data.nameRoom,
+          desk: data.idDesk,
+          date: data.date,
+          from: data.from,
+          to: data.to,
+          user: data.user
+        };
+        this.addTableRow(newReservation);
+        console.log(newReservation)
+        //reservations.push(newReservation);
+      }
+      this.forceUpdate()
+    })
+  }
+
+  componentDidMount() {
+    this.retrieveReservations()
+  }
+
+  render() {
   return (
-    <div className={classes.container}>
-        <TableContainer component={Paper}>
-      <Table className={classes.table} aria-label="simple table">
-        <TableHead className={classes.header}>
+    <div>
+      <TableContainer component={Paper}>
+      <Table aria-label="simple table">
+        <TableHead className="headerReservations">
           <TableRow>
-            <TableCell className={classes.headerText}>Reservation ID</TableCell>
-            <TableCell align="right" className={classes.headerText}>Desk</TableCell>
-            <TableCell align="right" className={classes.headerText}>Room</TableCell>
-            <TableCell align="right" className={classes.headerText}>Date</TableCell>
-            <TableCell align="right" className={classes.headerText}>From</TableCell>
-            <TableCell align="right" className={classes.headerText}>To</TableCell>
-            <TableCell align="right" className={classes.headerText}>Username</TableCell>
+            <TableCell>Reservation ID</TableCell>
+            <TableCell align="right">Room</TableCell>
+            <TableCell align="right">Desk</TableCell>
+            <TableCell align="right">Date</TableCell>
+            <TableCell align="right">From</TableCell>
+            <TableCell align="right">To</TableCell>
+            <TableCell align="right">Username</TableCell>
           </TableRow>
         </TableHead>
-        <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row.ID}>
-              <TableCell component="th" scope="row">
-                {row.ID}
-              </TableCell>
-              <TableCell align="right">{row.IDdesk}</TableCell>
-              <TableCell align="right">{row.room}</TableCell>
-              <TableCell align="right">{row.date}</TableCell>
-              <TableCell align="right">{row.from}</TableCell>
-              <TableCell align="right">{row.to}</TableCell>
-              <TableCell align="right">{row.name}</TableCell>
-            </TableRow>
-          ))}
+        <TableBody>{this.rows}
         </TableBody>
       </Table>
     </TableContainer>
     </div>
-  );
+  )};
 }
 
 const Reservations = () => {

@@ -85,7 +85,7 @@ const LoginForm = () => {
     .then((res) => {
       successLogin();
       Token.set(res.data);
-      location.href = "/home";
+      location.href = "/reservations";
     }).catch((err) => {
       if(err.response.status == 401) {
         failLogin('Incorrect username or password')
