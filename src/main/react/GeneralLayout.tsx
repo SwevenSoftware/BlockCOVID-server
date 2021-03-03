@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom';
 import clsx from 'clsx';
 import { createStyles, makeStyles, useTheme, Theme } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
@@ -12,6 +13,7 @@ import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import EventSeatIcon from '@material-ui/icons/EventSeat';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -154,11 +156,14 @@ export default function GeneralLayout(mainElement : JSX.Element) {
         </div>
         <Divider />
         <List>
-          <ListItem button key="Users">
+          <ListItem button key="Users" component={Link} to="/reservations">
             <ListItemIcon><PeopleIcon /></ListItemIcon>
             <ListItemText primary="Users" />
           </ListItem>
-
+          <ListItem button key="Desks" component={Link} to="/desk">
+            <ListItemIcon><EventSeatIcon /></ListItemIcon>
+            <ListItemText primary="Desks" />
+          </ListItem>
           <ListItem button key="Rooms">
             <ListItemIcon><MeetingRoomIcon /></ListItemIcon>
             <ListItemText primary="Rooms" />
