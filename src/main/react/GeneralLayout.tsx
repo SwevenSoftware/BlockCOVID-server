@@ -95,7 +95,6 @@ export default function GeneralLayout(mainElement : JSX.Element) {
   const classes = useStyles();
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
-  const token = new Token();
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -106,7 +105,7 @@ export default function GeneralLayout(mainElement : JSX.Element) {
   };
 
   const logout = () => {
-    token.remove();
+    Token.remove();
     location.href = "/login";
   }
 
@@ -171,7 +170,7 @@ export default function GeneralLayout(mainElement : JSX.Element) {
         </List>
         <Divider />
         <List>
-          { token.get() ?
+          { Token.get() ?
             <ListItem button key="Logout" onClick={logout}>
               <ListItemIcon><ExitToAppIcon /></ListItemIcon>
               <ListItemText primary="Logout" />

@@ -48,7 +48,6 @@ const LoginForm = () => {
   const [helpText, setHelpText] = useState('');
   const [isError, setIsError] = useState(false);
 
-  const token = new Token();
   const cardTitle = "Login";
   const loginBtnText = "Login";
 
@@ -85,7 +84,7 @@ const LoginForm = () => {
     axios.post("/api/login", formData, config)
     .then((res) => {
       successLogin();
-      token.set(res.data);
+      Token.set(res.data);
       location.href = "/home";
     }).catch((err) => {
       if(err.response.status == 401) {
