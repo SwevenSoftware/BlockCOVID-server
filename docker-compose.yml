@@ -19,6 +19,7 @@ services:
     container_name: blockcovid
     ports:
       - "8080:8080"
+      - "8545:8545"
     links:
       - mongo
     depends_on:
