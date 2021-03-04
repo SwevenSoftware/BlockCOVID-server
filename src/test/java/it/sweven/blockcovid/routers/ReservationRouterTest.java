@@ -4,11 +4,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import it.sweven.blockcovid.blockchain.EthereumRunner;
 import it.sweven.blockcovid.entities.Reservation;
 import it.sweven.blockcovid.entities.User;
 import it.sweven.blockcovid.repositories.ReservationRepository;
 import it.sweven.blockcovid.services.UserAuthenticationService;
-import it.sweven.blockcovid.blockchain.EthereumRunner;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Optional;
