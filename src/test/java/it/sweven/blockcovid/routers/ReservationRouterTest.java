@@ -8,6 +8,7 @@ import it.sweven.blockcovid.entities.Reservation;
 import it.sweven.blockcovid.entities.User;
 import it.sweven.blockcovid.repositories.ReservationRepository;
 import it.sweven.blockcovid.services.UserAuthenticationService;
+import it.sweven.blockcovid.blockchain.EthereumRunner;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Optional;
@@ -21,12 +22,14 @@ class ReservationRouterTest {
   private ReservationRepository repository;
   private UserAuthenticationService service;
   private ReservationRouter router;
+  private EthereumRunner ethereumRunner;
 
   @BeforeEach
   void setup() {
     repository = mock(ReservationRepository.class);
     service = mock(UserAuthenticationService.class);
-    router = new ReservationRouter(repository, service);
+    ethereumRunner = mock(EthereumRunner.class);
+    router = new ReservationRouter(repository, service, ethereumRunner);
   }
 
   @Test
