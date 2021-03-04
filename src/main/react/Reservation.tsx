@@ -12,6 +12,7 @@ import axios from 'axios'
 
 import './styles.css'
 import GeneralLayout from './GeneralLayout'
+import Report from './Report'
 import Token from './Token'
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -178,7 +179,12 @@ class ReservationsForm extends Component {
 
 const Reservations = () => {
   return (
-    GeneralLayout(<ReservationsForm />)
+    GeneralLayout(
+      <div>
+        <ReservationsForm />
+        <Report />
+      </div>
+    )
   );
 }
 
