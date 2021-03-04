@@ -97,6 +97,10 @@ class ReservationsForm extends Component {
 }
 
 const Reservations = () => {
+
+  if(!Token.get())
+    location.href = "/login"
+
   return (
     GeneralLayout(
       <div>

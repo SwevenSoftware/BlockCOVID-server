@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
 import { StylesProvider } from '@material-ui/styles';
 import './styles.css';
 import Login from './Login';
@@ -16,7 +16,7 @@ const App: React.FC = () => {
             <Route path='/login' exact component={Login}/>
             <Route path='/reservations' exact component={Reservations}/>
             <Route path='/desk' exact component={CardGrid}/>
-            <Route path='/' render= {() => <div>Error 404</div>}/>
+            <Redirect from='/' to='/reservations'/>
           </Switch>
         </BrowserRouter>
       </div>

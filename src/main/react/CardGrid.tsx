@@ -12,6 +12,7 @@ import { green, red } from "@material-ui/core/colors";
 import DotGrid from "./DotGrid";
 
 import GeneralLayout from './GeneralLayout'
+import Token from './Token'
 
 const theme = createMuiTheme({
   palette: {
@@ -97,6 +98,10 @@ class CardGridApp extends Component<{}, StateApp, any> {
 }
 
 const CardGrid = () => {
+
+  if(!Token.get())
+    location.href = "/login"
+
   return (
     GeneralLayout(<CardGridApp />)
   );

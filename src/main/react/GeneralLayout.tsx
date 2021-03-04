@@ -163,10 +163,10 @@ export default function GeneralLayout(mainElement : JSX.Element) {
             <ListItemIcon><EventSeatIcon /></ListItemIcon>
             <ListItemText primary="Desks" />
           </ListItem>
-          <ListItem button key="Rooms">
+          {/* <ListItem button key="Rooms">
             <ListItemIcon><MeetingRoomIcon /></ListItemIcon>
             <ListItemText primary="Rooms" />
-          </ListItem>
+          </ListItem> */}
         </List>
         <Divider />
         <List>
