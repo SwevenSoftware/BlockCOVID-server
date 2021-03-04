@@ -8,6 +8,7 @@ import it.sweven.blockcovid.entities.Reservation;
 import it.sweven.blockcovid.repositories.ReservationRepository;
 import it.sweven.blockcovid.services.UserAuthenticationService;
 import java.io.*;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -149,17 +150,10 @@ public class ReservationRouter {
       }
     } else if (date.isEmpty() && time.isEmpty()) {
       try {
-        PdfReport newReport = new PdfReport(LocalDate.now(), LocalTime.now());
-        String reportFilename =
-            newReport
-                .addReservations(repository.findAll())
-                .addHashPreviousReport("previousHash")
-                .save()
-                .filename();
-        System.out.println(newReport.hashFile());
+        String reportFilename = blockchain.run();
         InputStream input = new FileInputStream(reportFilename);
         return input.readAllBytes();
-      } catch (IOException e) {
+      } catch (IOException | NoSuchAlgorithmException e) {
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
       }
     } else {
