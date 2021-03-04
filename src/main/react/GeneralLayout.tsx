@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom';
 import clsx from 'clsx';
 import { createStyles, makeStyles, useTheme, Theme } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
@@ -12,6 +13,7 @@ import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import EventSeatIcon from '@material-ui/icons/EventSeat';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -20,6 +22,7 @@ import PeopleIcon from '@material-ui/icons/People';
 import MeetingRoomIcon from '@material-ui/icons/MeetingRoom';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import Token from './Token'
 
 const drawerWidth = 240;
 
@@ -101,6 +104,11 @@ export default function GeneralLayout(mainElement : JSX.Element) {
     setOpen(false);
   };
 
+  const logout = () => {
+    Token.remove();
+    location.href = "/login";
+  }
+
   return (
     <div className={classes.root}>
       <CssBaseline />
@@ -147,22 +155,32 @@ export default function GeneralLayout(mainElement : JSX.Element) {
         </div>
         <Divider />
         <List>
-          <ListItem button key="Users">
+          <ListItem button key="Users" component={Link} to="/reservations">
             <ListItemIcon><PeopleIcon /></ListItemIcon>
             <ListItemText primary="Users" />
           </ListItem>
-
-          <ListItem button key="Rooms">
+          <ListItem button key="Desks" component={Link} to="/desk">
+            <ListItemIcon><EventSeatIcon /></ListItemIcon>
+            <ListItemText primary="Desks" />
+          </ListItem>
+          {/* <ListItem button key="Rooms">
             <ListItemIcon><MeetingRoomIcon /></ListItemIcon>
             <ListItemText primary="Rooms" />
-          </ListItem>
+          </ListItem> */}
         </List>
         <Divider />
         <List>
-          <ListItem button key="Logout">
-            <ListItemIcon><ExitToAppIcon /></ListItemIcon>
-            <ListItemText primary="Logout" />
-          </ListItem>
+          { Token.get() ?
+            <ListItem button key="Logout" onClick={logout}>
+              <ListItemIcon><ExitToAppIcon /></ListItemIcon>
+              <ListItemText primary="Logout" />
+            </ListItem>
+            :
+            <ListItem button key="Login" onClick={() => location.href="/login"}>
+              <ListItemIcon><AccountCircleIcon /></ListItemIcon>
+              <ListItemText primary="Login" />
+            </ListItem>
+          }
         </List>
       </Drawer>
       <main className={classes.content}>

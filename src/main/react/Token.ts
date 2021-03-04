@@ -1,14 +1,14 @@
 class Token {
 
-    public get() : string | null {
+    public static get() : string | null {
         return localStorage.getItem("TOKEN_AUTH");
     }
 
-    public set(token : string) : void {
+    public static set(token : string) : void {
         localStorage.setItem("TOKEN_AUTH", token);
     }
 
-    public remove() : void {
+    public static remove() : void {
         localStorage.removeItem("TOKEN_AUTH");
     }
 }

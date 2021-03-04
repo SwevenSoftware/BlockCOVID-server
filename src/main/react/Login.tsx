@@ -29,11 +29,6 @@ const useStyles = makeStyles((theme: Theme) =>
         background: "#31729e"
       }
     },
-    header: {
-      textAlign: 'center',
-      background: '#319e77',
-      color: '#fff'
-    },
     card: {
       marginTop: theme.spacing(10)
     }
@@ -48,7 +43,6 @@ const LoginForm = () => {
   const [helpText, setHelpText] = useState('');
   const [isError, setIsError] = useState(false);
 
-  const token = new Token();
   const cardTitle = "Login";
   const loginBtnText = "Login";
 
@@ -85,8 +79,8 @@ const LoginForm = () => {
     axios.post("/api/login", formData, config)
     .then((res) => {
       successLogin();
-      token.set(res.data);
-      location.href = "/home";
+      Token.set(res.data);
+      location.href = "/reservations";
     }).catch((err) => {
       if(err.response.status == 401) {
         failLogin('Incorrect username or password')
@@ -114,7 +108,7 @@ const LoginForm = () => {
   return (
     <form className={classes.container} noValidate autoComplete="off">
       <Card className={classes.card}>
-        <CardHeader className={classes.header} title={cardTitle} />
+        <CardHeader className="headerCard" title={cardTitle} />
         <CardContent>
           <div>
             <TextField

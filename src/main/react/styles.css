@@ -1,0 +1,16 @@
+.cardGrid {
+    width: 40em;
+    max-width: 90%;
+    margin: auto;
+}
+
+.dispGrid {
+    margin-right: 1em;
+}
+
+.headerCard {
+    background-color: #319e77;
+    color : white;
+    text-align: center;
+    font-size: medium;
+}
