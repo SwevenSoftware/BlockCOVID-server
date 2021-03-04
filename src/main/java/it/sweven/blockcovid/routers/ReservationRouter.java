@@ -2,6 +2,7 @@ package it.sweven.blockcovid.routers;
 
 /* Spring Annotations */
 
+import it.sweven.blockcovid.blockchain.EthereumRunner;
 import it.sweven.blockcovid.documents.PdfReport;
 import it.sweven.blockcovid.entities.Reservation;
 import it.sweven.blockcovid.repositories.ReservationRepository;
@@ -26,12 +27,16 @@ import org.springframework.web.server.ResponseStatusException;
 public class ReservationRouter {
   private final ReservationRepository repository;
   private final UserAuthenticationService authenticationService;
+  private final EthereumRunner blockchain;
 
   @Autowired
   public ReservationRouter(
-      ReservationRepository repository, UserAuthenticationService authenticationService) {
+      ReservationRepository repository,
+      UserAuthenticationService authenticationService,
+      EthereumRunner blockchain) {
     this.repository = repository;
     this.authenticationService = authenticationService;
+    this.blockchain = blockchain;
   }
 
   @PostMapping(value = "/user/reservations")

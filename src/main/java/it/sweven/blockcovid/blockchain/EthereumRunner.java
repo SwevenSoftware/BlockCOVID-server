@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
@@ -17,7 +17,7 @@ import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.gas.DefaultGasProvider;
 
-@Component
+@Service
 public class EthereumRunner {
 
   private final ReservationRepository reservationRepository;
@@ -49,7 +49,7 @@ public class EthereumRunner {
   }
 
   @Scheduled(cron = "0 0 * * * ?")
-  public void run() throws NoSuchAlgorithmException, IOException {
+  public String run() throws NoSuchAlgorithmException, IOException {
     PdfReport newReport = new PdfReport(LocalDate.now(), LocalTime.now());
     String reportHash =
         newReport
@@ -69,5 +69,6 @@ public class EthereumRunner {
     } catch (Exception e) {
       System.out.println(e.getMessage());
     }
+    return newReport.filename();
   }
 }
