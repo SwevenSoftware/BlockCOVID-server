@@ -72,18 +72,6 @@ class DotGrid extends Component<{ width: number }, { height: number }> {
     }
   }
 
-  startSelection(e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) {
-    this.selection.started = true;
-    this.selection.posStart = { x: e.clientX, y: e.clientY };
-  }
-
-  endSelection(e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) {
-    this.selection.ended = true;
-    this.selection.posEnd = { x: e.clientX, y: e.clientY };
-    this.updateCanvas();
-    this.selection.started = false;
-  }
-
   checkBox(e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) {
     const boundRect: DOMRect | undefined = this.canvasRef.current?.getBoundingClientRect();
     if(!boundRect || (e.clientX-boundRect.x)/boundRect.width >= 1-1/this.room.cells.x || 
@@ -170,22 +158,6 @@ class DotGrid extends Component<{ width: number }, { height: number }> {
           ctx.closePath();
         }
       }
-    }
-    // selection
-    if (this.selection.started) {
-      ctx.beginPath();
-      ctx.fillStyle = "#f005";
-      ctx.rect(
-        this.selection.posStart.x - canvasRect.x,
-        this.selection.posStart.y - canvasRect.y,
-        this.mousePos.x - this.selection.posStart.x,
-        this.mousePos.y - this.selection.posStart.y
-      );
-      ctx.fill();
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = "red";
-      ctx.stroke();
-      ctx.closePath();
     }
 
     // desks
