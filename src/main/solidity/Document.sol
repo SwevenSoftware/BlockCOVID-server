@@ -5,20 +5,20 @@ contract Document {
     address contractOwner = msg.sender;
 
     function add(string memory hash)
-	public
-	returns (uint256 dateAdded)
+        public
+        returns (uint256 dateAdded)
     {
-	require (msg.sender == contractOwner);
-	uint256 timeAdded = block.timestamp;
-	documents[hash] = timeAdded;
-	return timeAdded;
+        require (msg.sender == contractOwner);
+        uint256 timeAdded = block.timestamp;
+        documents[hash] = timeAdded;
+        return timeAdded;
     }
 
     function verify(string memory hash)
-	view
-	public
-	returns (uint256 dateAdded)
+        view
+        public
+        returns (uint256 dateAdded)
     {
-	return documents[hash];
+        return documents[hash];
     }
 }
