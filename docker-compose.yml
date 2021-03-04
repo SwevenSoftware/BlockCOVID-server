@@ -1,0 +1,27 @@
+version: "3"
+
+networks:
+  db-net:
+    driver: "bridge"
+
+services:
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    networks:
+      - db-net
+
+  blockcovid:
+    image: sweven/blockcovid
+    container_name: blockcovid
+    ports:
+      - "8080:8080"
+    links:
+      - mongo
+    depends_on:
+      - mongo
+    networks:
+      - db-net
