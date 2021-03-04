@@ -29,11 +29,6 @@ const useStyles = makeStyles((theme: Theme) =>
         background: "#31729e"
       }
     },
-    header: {
-      textAlign: 'center',
-      background: '#319e77',
-      color: '#fff'
-    },
     card: {
       marginTop: theme.spacing(10)
     }
@@ -113,7 +108,7 @@ const LoginForm = () => {
   return (
     <form className={classes.container} noValidate autoComplete="off">
       <Card className={classes.card}>
-        <CardHeader className={classes.header} title={cardTitle} />
+        <CardHeader className="headerCard" title={cardTitle} />
         <CardContent>
           <div>
             <TextField

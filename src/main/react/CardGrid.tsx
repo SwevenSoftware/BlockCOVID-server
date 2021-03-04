@@ -3,6 +3,7 @@ import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import Card from "@material-ui/core/Card";
 import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
+import CardHeader from "@material-ui/core/CardHeader";
 import Button from "@material-ui/core/Button";
 import { ThemeProvider } from "@material-ui/styles";
 import { createMuiTheme } from "@material-ui/core/styles";
@@ -76,6 +77,7 @@ class CardGridApp extends Component<{}, StateApp, any> {
       <div>
         <ThemeProvider theme={theme}>
           <Card className="cardGrid">
+            <CardHeader className="headerCard" title="New room"/>
             <CardContent ref={this.dispGrid} className="dispGrid">
               <DotGrid ref={this.dotGrid} width={this.setGrid.width || 0} />
             </CardContent>

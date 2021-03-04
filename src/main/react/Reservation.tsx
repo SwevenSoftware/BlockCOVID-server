@@ -157,7 +157,7 @@ class ReservationsForm extends Component {
     <div>
       <TableContainer component={Paper}>
       <Table aria-label="simple table">
-        <TableHead className="headerReservations">
+        <TableHead className="headerCard">
           <TableRow>
             <TableCell>Reservation ID</TableCell>
             <TableCell align="right">Room</TableCell>
