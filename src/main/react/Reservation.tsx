@@ -1,6 +1,5 @@
 import React, { RefObject, useEffect, createRef, ReactNode, Component } from 'react';
 import ReactDOM from 'react-dom'
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -15,40 +14,6 @@ import GeneralLayout from './GeneralLayout'
 import Report from './Report'
 import Token from './Token'
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    container: {
-      margin: `${theme.spacing(0)} auto`
-    },
-    header: {
-      textAlign: 'center',
-      background: '#319e77',
-      color: '#fff'
-    },
-    headerText:{
-      color: 'white',
-      fontWeight: 'bold'
-    },
-    table: {
-      minWidth: 650,
-    }
-  })
-);
-
-/*function createData(ID: string, IDdesk: number, room: number, date: string, from: string, to: string, name: string,) {
-  return { ID, IDdesk, room, date, from, to, name };
-}*/
-
-/*const rows = [
-  createData('1111', 1, 1, '1/1/2021', '08:00', '10:00', 'Luca M.'),
-  createData('2222', 2, 1, '1/1/2021', '08:00', '12:00', 'Alberto'),
-  createData('3333', 3, 2, '1/1/2021', '08:00', '10:00', 'Luca Z.'),
-  createData('4444', 4, 2, '1/1/2021', '08:00', '14:00', 'Michele'),
-  createData('5555', 5, 3, '1/1/2021', '08:00', '10:00', 'Francesco'),
-  createData('6666', 6, 3, '1/1/2021', '08:00', '14:00', 'Antonio'),
-  createData('7777', 7, 2, '1/1/2021', '08:00', '10:00', 'Dardan'),
-];*/
-
 interface Reservation {
   id : number,
   room : string,
@@ -59,34 +24,7 @@ interface Reservation {
   user : string
 }
 
-class RowTable extends Node {
-  row : Reservation;
-  constructor(row : Reservation) {
-    super()
-    this.row = row
-  }
-  render() {
-    return (
-      <TableRow key={this.row.id}>
-        <TableCell component="th" scope="row">
-          {this.row.id}
-        </TableCell>
-        <TableCell align="right">{this.row.room}</TableCell>
-        <TableCell align="right">{this.row.desk}</TableCell>
-        <TableCell align="right">{this.row.date}</TableCell>
-        <TableCell align="right">{this.row.from}</TableCell>
-        <TableCell align="right">{this.row.to}</TableCell>
-        <TableCell align="right">{this.row.user}</TableCell>
-      </TableRow>
-    )
-  }
-  
-}
-
 class ReservationsForm extends Component {
-  //const classes = useStyles();
-  //let reservations : Array<Reservation> = new Array();
-  //let refTableBody : RefObject<HTMLTableSectionElement> = createRef<HTMLTableSectionElement>();
   rows : Array<JSX.Element> ;
 
   constructor(props) {
@@ -95,34 +33,17 @@ class ReservationsForm extends Component {
   }
 
   private addTableRow(row : Reservation) {
-    /* if(refTableBody.current)
-    ReactDOM.render(
-        {refTableBody.current.children}
-        <TableRow key={row.id}>
-          <TableCell component="th" scope="row">
-            {row.id}
-          </TableCell>
-          <TableCell align="right">{row.room}</TableCell>
-          <TableCell align="right">{row.desk}</TableCell>
-          <TableCell align="right">{row.date}</TableCell>
-          <TableCell align="right">{row.from}</TableCell>
-          <TableCell align="right">{row.to}</TableCell>
-          <TableCell align="right">{row.user}</TableCell>
-        </TableRow>, refTableBody.current
-    ) */
-    /* const r : RowTable = new RowTable(row)
-    refTableBody.current?.appendChild(r) */
     this.rows.push(
       <TableRow key={row.id}>
-          <TableCell component="th" scope="row">
+          <TableCell component="th" scope="row" align="left">
             {row.id}
           </TableCell>
-          <TableCell align="right">{row.room}</TableCell>
-          <TableCell align="right">{row.desk}</TableCell>
-          <TableCell align="right">{row.date}</TableCell>
-          <TableCell align="right">{row.from}</TableCell>
-          <TableCell align="right">{row.to}</TableCell>
-          <TableCell align="right">{row.user}</TableCell>
+          <TableCell align="center">{row.room}</TableCell>
+          <TableCell align="center">{row.desk}</TableCell>
+          <TableCell align="center">{row.date}</TableCell>
+          <TableCell align="center">{row.from}</TableCell>
+          <TableCell align="center">{row.to}</TableCell>
+          <TableCell align="center">{row.user}</TableCell>
         </TableRow>
     )
   }
@@ -142,8 +63,6 @@ class ReservationsForm extends Component {
           user: data.user
         };
         this.addTableRow(newReservation);
-        console.log(newReservation)
-        //reservations.push(newReservation);
       }
       this.forceUpdate()
     })
@@ -160,13 +79,13 @@ class ReservationsForm extends Component {
       <Table aria-label="simple table">
         <TableHead className="headerCard">
           <TableRow>
-            <TableCell>Reservation ID</TableCell>
-            <TableCell align="right">Room</TableCell>
-            <TableCell align="right">Desk</TableCell>
-            <TableCell align="right">Date</TableCell>
-            <TableCell align="right">From</TableCell>
-            <TableCell align="right">To</TableCell>
-            <TableCell align="right">Username</TableCell>
+            <TableCell align="left">Reservation ID</TableCell>
+            <TableCell align="center">Room</TableCell>
+            <TableCell align="center">Desk</TableCell>
+            <TableCell align="center">Date</TableCell>
+            <TableCell align="center">From</TableCell>
+            <TableCell align="center">To</TableCell>
+            <TableCell align="center">Username</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>{this.rows}
