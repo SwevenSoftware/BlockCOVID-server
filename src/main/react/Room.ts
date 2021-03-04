@@ -65,6 +65,10 @@ class Room {
   public getIds(): Array<number> {
     return Array.from(this.desks.keys());
   }
+
+  public clearDesks() {
+    this.desks.clear();
+  }
 }
 
 export default Room;

@@ -105,9 +105,10 @@ class DotGrid extends Component<{ width: number }, { height: number }> {
     this.updateCanvas();
   }
 
-  checkDistance(mouse: number, point: number, step): boolean {
-    if (mouse >= point) return mouse - point < step * 2;
-    else return false;
+  checkDistance(mouse: number, point: number, step: number, dim: number): boolean {
+    if(mouse/dim >= 1 - step/dim || mouse < point)
+      return false;
+    return mouse - point < step;
   }
 
   private static drawDesk(
@@ -130,6 +131,11 @@ class DotGrid extends Component<{ width: number }, { height: number }> {
     ctx.closePath();
   }
 
+  public resetView() {
+    this.room.clearDesks();
+    this.updateCanvas();
+  }
+
   updateCanvas() {
     const canvas: HTMLCanvasElement | null = this.canvasRef.current;
     if(!canvas) return;
@@ -138,6 +144,7 @@ class DotGrid extends Component<{ width: number }, { height: number }> {
       "2d"
     );
     if(!ctx) return;
+    console.log("finish context")
     this.gridSettings.dist = {
       x: canvas.width / this.room.cells.x,
       y: canvas.height / this.room.cells.y
@@ -154,8 +161,8 @@ class DotGrid extends Component<{ width: number }, { height: number }> {
         ctx.closePath();
 
         if (
-          this.checkDistance(this.mousePos.x - canvasRect.x, x, dist.x / 2) &&
-          this.checkDistance(this.mousePos.y - canvasRect.y, y, dist.y / 2)
+          this.checkDistance(this.mousePos.x - canvasRect.x, x, dist.x, canvasRect.width) &&
+          this.checkDistance(this.mousePos.y - canvasRect.y, y, dist.y, canvasRect.height)
         ) {
           ctx.beginPath();
           ctx.fillStyle = "#f005";

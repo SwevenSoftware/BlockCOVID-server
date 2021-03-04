@@ -45,6 +45,7 @@ class CardGridApp extends Component<{}, StateApp, any> {
       width: null,
       height: null
     };
+    this.resetGrid = this.resetGrid.bind(this)
   }
 
   /*updateStateGrid(d: HTMLDivElement | null) {
@@ -66,6 +67,10 @@ class CardGridApp extends Component<{}, StateApp, any> {
     }
   }
 
+  private resetGrid() {
+    this.dotGrid.current?.resetView();
+  }
+
   render() {
     return (
       <div>
@@ -76,10 +81,10 @@ class CardGridApp extends Component<{}, StateApp, any> {
             </CardContent>
             <CardActions>
               <Button size="medium" color="primary">
-                Salva stanza
+                Save room
               </Button>
-              <Button size="medium" color="secondary">
-                Annulla
+              <Button size="medium" color="secondary" onClick={this.resetGrid}>
+                Reset
               </Button>
             </CardActions>
           </Card>

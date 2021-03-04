@@ -4,6 +4,10 @@
     margin: auto;
 }
 
+.dispGrid {
+    margin-right: 1em;
+}
+
 .headerReservations {
     background-color: #319e77;
     color : white;
