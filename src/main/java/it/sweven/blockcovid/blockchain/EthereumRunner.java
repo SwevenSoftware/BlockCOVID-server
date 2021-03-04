@@ -31,11 +31,6 @@ public class EthereumRunner {
 
     configuration = new EthereumConfiguration();
 
-    System.out.println("==================================");
-    System.out.println("==================================");
-    System.out.println("NETWORK = " + configuration.NETWORK);
-    System.out.println("==================================");
-    System.out.println("==================================");
     connection = Web3j.build(new HttpService(configuration.NETWORK));
     /*
      * Se non è stato indicato un indirizzo del contratto, fare il deploy con
