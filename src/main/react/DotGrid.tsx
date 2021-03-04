@@ -57,7 +57,7 @@ class DotGrid extends Component<{ width: number }, { height: number }> {
   }
 
   componentDidMount() {
-    this.updateCanvas();
+    setTimeout(() => this.updateCanvas(), 100);
   }
 
   handleMouseMove(e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) {
@@ -130,7 +130,6 @@ class DotGrid extends Component<{ width: number }, { height: number }> {
       "2d"
     );
     if(!ctx) return;
-    console.log("finish context")
     this.gridSettings.dist = {
       x: canvas.width / this.room.cells.x,
       y: canvas.height / this.room.cells.y
