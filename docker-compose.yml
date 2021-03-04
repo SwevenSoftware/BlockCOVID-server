@@ -17,12 +17,22 @@ services:
   blockcovid:
     image: sweven/blockcovid
     container_name: blockcovid
+    environment:
+      - "ACCOUNT=${ACCOUNT}"
+      - "CONTRACT_ADDRESS=${CONTRACT_ADDRESS}"
+      - "NETWORK=${NETWORK}"
     ports:
       - "8080:8080"
-      - "8545:8545"
     links:
       - mongo
-    depends_on:
-      - mongo
+      - ganache
+    networks:
+      - db-net  
+
+  ganache:
+    image: trufflesuite/ganache-cli:latest
     networks:
       - db-net
+    ports:
+      - "8545:8545"
+    command: --account "0xb43436657ed0d6b922f3e7fab75dc32c610796d374daa6d7f1878669ff79d0e5,100"
