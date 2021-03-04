@@ -29,8 +29,6 @@ class DotGrid extends Component<{ width: number }, { height: number }> {
     super(props);
     this.canvasRef = createRef<HTMLCanvasElement>();
     this.handleMouseMove = this.handleMouseMove.bind(this);
-    this.startSelection = this.startSelection.bind(this);
-    this.endSelection = this.endSelection.bind(this);
     this.checkBox = this.checkBox.bind(this);
 
     this.mousePos = { x: -10, y: -10 };
@@ -181,8 +179,6 @@ class DotGrid extends Component<{ width: number }, { height: number }> {
       <canvas
         ref={this.canvasRef}
         onMouseMove={this.handleMouseMove}
-        onMouseDown={this.startSelection}
-        onMouseUp={this.endSelection}
         onClick={this.checkBox}
         width={this.gridSettings.width}
         height={this.gridSettings.height}
