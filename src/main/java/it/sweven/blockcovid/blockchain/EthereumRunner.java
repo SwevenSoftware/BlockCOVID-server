@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Date;
+import java.math.BigInteger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -60,12 +62,19 @@ public class EthereumRunner {
     try {
       Credentials credentials = Credentials.create(configuration.ACCOUNT);
       ContractGasProvider contractGasProvider = new DefaultGasProvider();
-      TransactionReceipt receipt =
+      System.out.println("reportHash: " + reportHash);
+      TransactionReceipt receiptAdd =
           Document.load(
                   configuration.CONTRACT_ADDRESS, connection, credentials, contractGasProvider)
               .add(reportHash)
               .send();
-      System.out.println(receipt.toString());
+      System.out.println(receiptAdd.toString());
+      BigInteger recepitVerify =
+          Document.load(
+                  configuration.CONTRACT_ADDRESS, connection, credentials, contractGasProvider)
+              .verify(reportHash)
+              .send();
+      System.out.println(recepitVerify.toString());
     } catch (Exception e) {
       System.out.println(e.getMessage());
     }
