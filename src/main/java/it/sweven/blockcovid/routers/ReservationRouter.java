@@ -51,6 +51,14 @@ public class ReservationRouter {
         .collect(Collectors.toMap(Reservation::getId, Function.identity()));
   }
 
+  @PostMapping(value = "/admin/reservations")
+  Map<String, Reservation> getAllReservations(@RequestHeader String Authorization) {
+    authenticationService.authenticateByToken(Authorization);
+    return repository.findAll().stream()
+        .parallel()
+        .collect(Collectors.toMap(Reservation::getId, Function.identity()));
+  }
+
   @PostMapping("/user/reservations/{id}")
   Reservation getSingleReservation(@PathVariable String id, @RequestHeader String Authorization) {
     String username = authenticationService.authenticateByToken(Authorization).getUsername();

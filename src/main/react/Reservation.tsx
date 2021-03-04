@@ -50,7 +50,7 @@ class ReservationsForm extends Component {
 
   private retrieveReservations() {
     const config = {headers: {"Authorization": Token.get()}};
-    axios.post("/api/user/reservations", {}, config).then((res) => {
+    axios.post("/api/admin/reservations", {}, config).then((res) => {
       for(var id in res.data) {
         const data = res.data[id]
         const newReservation = {
