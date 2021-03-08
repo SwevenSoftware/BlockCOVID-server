@@ -5,13 +5,9 @@ db
 *.pem
 *.p12
 .idea
-node_modules/*
-node/*
 bin/*
 .settings/*
 .classpath
 .project
-package-lock.json
 .vscode
 reports
-src/main/resources/static/built/bundle.js
