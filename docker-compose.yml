@@ -8,21 +8,18 @@ services:
 
   mongo:
     image: mongo:latest
-    container_name: mongo
-    ports:
-      - "27017:27017"
     networks:
       - db-net
 
   blockcovid:
-    image: sweven/blockcovid
-    container_name: blockcovid
+    build:
+      context: .
     environment:
       - "ACCOUNT=0xb43436657ed0d6b922f3e7fab75dc32c610796d374daa6d7f1878669ff79d0e5"
       - "CONTRACT_ADDRESS=${CONTRACT_ADDRESS}"
       - "NETWORK=http://ganache:8545"
     ports:
-      - "8080:8080"
+      - "8091:8091"
     links:
       - mongo
       - ganache
@@ -33,6 +30,4 @@ services:
     image: trufflesuite/ganache-cli:latest
     networks:
       - db-net
-    ports:
-      - "8545:8545"
     command: --account "0xb43436657ed0d6b922f3e7fab75dc32c610796d374daa6d7f1878669ff79d0e5,1000000000000000000000000000000000000000"
