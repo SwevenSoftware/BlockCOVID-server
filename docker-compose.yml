@@ -22,7 +22,7 @@ services:
       - "CONTRACT_ADDRESS=${CONTRACT_ADDRESS}"
       - "NETWORK=http://ganache:8545"
     ports:
-      - "8080:8080"
+      - "8091:8091"
     links:
       - mongo
       - ganache
