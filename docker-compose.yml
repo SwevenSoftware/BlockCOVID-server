@@ -8,14 +8,14 @@ services:
 
   mongo:
     image: mongo:latest
-    container_name: mongo
     ports:
       - "27017:27017"
     networks:
       - db-net
 
   blockcovid:
-    image: sweven/blockcovid
+    build:
+      context: .
     container_name: blockcovid
     environment:
       - "ACCOUNT=0xb43436657ed0d6b922f3e7fab75dc32c610796d374daa6d7f1878669ff79d0e5"
