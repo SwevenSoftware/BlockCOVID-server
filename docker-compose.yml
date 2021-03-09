@@ -8,8 +8,6 @@ services:
 
   mongo:
     image: mongo:latest
-    ports:
-      - "27017:27017"
     networks:
       - db-net
 
@@ -32,6 +30,4 @@ services:
     image: trufflesuite/ganache-cli:latest
     networks:
       - db-net
-    ports:
-      - "8545:8545"
     command: --account "0xb43436657ed0d6b922f3e7fab75dc32c610796d374daa6d7f1878669ff79d0e5,1000000000000000000000000000000000000000"
