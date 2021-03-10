@@ -3,37 +3,36 @@ package it.sweven.blockcovid.entities;
 /* Java utilities */
 
 import it.sweven.blockcovid.security.Authorization;
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Set;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.data.annotation.Id;
+import org.springframework.security.core.userdetails.UserDetails;
 
-@Data
-@Getter
-@Setter
-@NoArgsConstructor
-public class User {
+public class User implements UserDetails {
 
   @Id private String username;
   private String password;
   private String token;
   private Set<Authorization> authorizations;
-  private boolean expired;
+  private LocalDate expireDate;
+  private LocalDate credentialsExpireDate;
   private boolean locked;
+  private boolean enabled;
 
-  public void setAdmin() {
-    authorizations.add(Authorization.ADMIN);
-  }
-
-  public void setUser() {
-    authorizations.add(Authorization.USER);
-  }
-
-  public void setCleaner() {
-    authorizations.add(Authorization.CLEANER);
+  public User(
+      String username,
+      String password,
+      Set<Authorization> authorizations,
+      LocalDate expireDate,
+      LocalDate credentialsExpireDate) {
+    this.username = username;
+    this.password = password;
+    this.authorizations = authorizations;
+    this.expireDate = expireDate;
+    this.credentialsExpireDate = credentialsExpireDate;
+    this.locked = false;
+    this.enabled = true;
   }
 
   @Override
@@ -52,5 +51,89 @@ public class User {
   @Override
   public String toString() {
     return "User{" + username + "}";
+  }
+
+  @Override
+  public Set<Authorization> getAuthorities() {
+    return authorizations;
+  }
+
+  @Override
+  public boolean isAccountNonExpired() {
+    return !LocalDate.now().isBefore(expireDate);
+  }
+
+  @Override
+  public boolean isAccountNonLocked() {
+    return locked;
+  }
+
+  @Override
+  public boolean isCredentialsNonExpired() {
+    return !LocalDate.now().isBefore(credentialsExpireDate);
+  }
+
+  @Override
+  public boolean isEnabled() {
+    return enabled;
+  }
+
+  public User lock() {
+    this.locked = true;
+    return this;
+  }
+
+  public User unlock() {
+    this.locked = true;
+    return this;
+  }
+
+  public User disable() {
+    this.enabled = false;
+    return this;
+  }
+
+  public User enable() {
+    this.enabled = true;
+    return this;
+  }
+
+  public String getUsername() {
+    return username;
+  }
+
+  public User setUsername(String newUsername) {
+    this.username = newUsername;
+    return this;
+  }
+
+  public String getPassword() {
+    return password;
+  }
+
+  public User setPassword(String newPassword) {
+    this.password = newPassword;
+    return this;
+  }
+
+  public void setAdmin() {
+    authorizations.add(Authorization.ADMIN);
+  }
+
+  public void setUser() {
+    authorizations.add(Authorization.USER);
+  }
+
+  public void setCleaner() {
+    authorizations.add(Authorization.CLEANER);
+  }
+
+  public String getToken() {
+    return token;
+  }
+
+  public User setToken(String token) {
+    this.token = token;
+    return this;
   }
 }
