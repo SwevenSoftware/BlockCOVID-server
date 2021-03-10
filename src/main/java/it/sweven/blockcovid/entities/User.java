@@ -2,7 +2,7 @@ package it.sweven.blockcovid.entities;
 
 /* Java utilities */
 
-import it.sweven.blockcovid.security.Authorization;
+import it.sweven.blockcovid.security.Authority;
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Set;
@@ -14,7 +14,7 @@ public class User implements UserDetails {
   @Id private String username;
   private String password;
   private String token;
-  private Set<Authorization> authorizations;
+  private Set<Authority> authorities;
   private LocalDate expireDate;
   private LocalDate credentialsExpireDate;
   private boolean locked;
@@ -23,12 +23,12 @@ public class User implements UserDetails {
   public User(
       String username,
       String password,
-      Set<Authorization> authorizations,
+      Set<Authority> authorities,
       LocalDate expireDate,
       LocalDate credentialsExpireDate) {
     this.username = username;
     this.password = password;
-    this.authorizations = authorizations;
+    this.authorities = authorities;
     this.expireDate = expireDate;
     this.credentialsExpireDate = credentialsExpireDate;
     this.locked = false;
@@ -54,8 +54,13 @@ public class User implements UserDetails {
   }
 
   @Override
-  public Set<Authorization> getAuthorities() {
-    return authorizations;
+  public Set<Authority> getAuthorities() {
+    return authorities;
+  }
+
+  public User setAuthorities(Set<Authority> authorities) {
+    this.authorities = authorities;
+    return this;
   }
 
   @Override
@@ -114,18 +119,6 @@ public class User implements UserDetails {
   public User setPassword(String newPassword) {
     this.password = newPassword;
     return this;
-  }
-
-  public void setAdmin() {
-    authorizations.add(Authorization.ADMIN);
-  }
-
-  public void setUser() {
-    authorizations.add(Authorization.USER);
-  }
-
-  public void setCleaner() {
-    authorizations.add(Authorization.CLEANER);
   }
 
   public String getToken() {

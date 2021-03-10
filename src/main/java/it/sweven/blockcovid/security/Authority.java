@@ -2,7 +2,7 @@ package it.sweven.blockcovid.security;
 
 import org.springframework.security.core.GrantedAuthority;
 
-public enum Authorization implements GrantedAuthority {
+public enum Authority implements GrantedAuthority {
   ADMIN,
   USER,
   CLEANER;

@@ -1,7 +1,7 @@
 package it.sweven.blockcovid.services;
 
 import it.sweven.blockcovid.entities.User;
-import it.sweven.blockcovid.security.Authorization;
+import it.sweven.blockcovid.security.Authority;
 import java.time.LocalDate;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ public class UserRegistrationService {
     this.authenticationService = authenticationService;
   }
 
-  public String register(String username, String password, Set<Authorization> roles)
+  public String register(String username, String password, Set<Authority> roles)
       throws IllegalArgumentException {
     userService
         .getByUsername(username)
