@@ -6,7 +6,7 @@ import static org.mockito.Mockito.when;
 
 import it.sweven.blockcovid.blockchain.EthereumRunner;
 import it.sweven.blockcovid.entities.Reservation;
-import it.sweven.blockcovid.entities.User;
+import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.repositories.ReservationRepository;
 import it.sweven.blockcovid.services.UserAuthenticationService;
 import java.time.LocalDate;
