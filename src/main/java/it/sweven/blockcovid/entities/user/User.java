@@ -22,12 +22,10 @@ public class User implements UserDetails {
       String username,
       String password,
       Set<Authority> authorities,
-      LocalDateTime expireDate,
       LocalDateTime credentialsExpireDate) {
     this.username = username;
     this.password = password;
     this.authorities = authorities;
-    this.expireDate = expireDate;
     this.credentialsExpireDate = credentialsExpireDate;
     this.locked = false;
     this.enabled = true;

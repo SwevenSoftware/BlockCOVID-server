@@ -28,13 +28,7 @@ public class UserRegistrationService {
             u -> {
               throw new IllegalArgumentException("Username already in use.");
             });
-    User user =
-        new User(
-            username,
-            password,
-            roles,
-            LocalDateTime.now().plusYears(2L),
-            LocalDateTime.now().plusMonths(3L));
+    User user = new User(username, password, roles, LocalDateTime.now().plusMonths(3L));
     userService.save(user);
     return authenticationService.login(username, password);
   }
