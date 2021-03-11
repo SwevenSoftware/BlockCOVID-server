@@ -40,9 +40,9 @@ class LoginRouter {
   @ResponseBody
   public EntityModel<Token> login(@RequestBody User user) {
     return EntityModel.of(
-            authenticationService.login(user.getUsername(), user.getPassword()),
-            linkTo(methodOn(LoginRouter.class).login(user)).withSelfRel(),
-            linkTo(methodOn(LoginRouter.class).register(user)).withRel("register"));
+        authenticationService.login(user.getUsername(), user.getPassword()),
+        linkTo(methodOn(LoginRouter.class).login(user)).withSelfRel(),
+        linkTo(methodOn(LoginRouter.class).register(user)).withRel("register"));
   }
 
   @PostMapping(value = "/register", consumes = "application/json", produces = "application/json")

@@ -2,12 +2,10 @@ package it.sweven.blockcovid.entities.user;
 
 /* Java utilities */
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.sweven.blockcovid.security.Authority;
-
 import java.time.LocalDateTime;
 import java.util.Set;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.annotation.Transient;
@@ -26,18 +24,20 @@ public class User implements UserDetails {
   private boolean locked;
   private boolean enabled;
 
-  private @Transient PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+  private @Transient PasswordEncoder passwordEncoder =
+      PasswordEncoderFactories.createDelegatingPasswordEncoder();
 
   public User() {}
 
   @PersistenceConstructor
-  public User(String username,
-              String hashPassword,
-              Token token,
-              Set<Authority> authorities,
-              LocalDateTime credentialsExpireDate,
-              boolean locked,
-              boolean enabled) {
+  public User(
+      String username,
+      String hashPassword,
+      Token token,
+      Set<Authority> authorities,
+      LocalDateTime credentialsExpireDate,
+      boolean locked,
+      boolean enabled) {
     this.username = username;
     this.hashPassword = hashPassword;
     this.token = token;
@@ -47,10 +47,7 @@ public class User implements UserDetails {
     this.enabled = enabled;
   }
 
-  public User(
-      String username,
-      String password,
-      Set<Authority> authorities) {
+  public User(String username, String password, Set<Authority> authorities) {
     this.username = username;
     this.password = password;
     this.hashPassword = passwordEncoder.encode(password);
@@ -150,6 +147,7 @@ public class User implements UserDetails {
 
   /**
    * Check if password matches the stored one
+   *
    * @param password Raw password to check
    * @return true if given password corresponds with the one stored
    */
@@ -160,10 +158,10 @@ public class User implements UserDetails {
   @Override
   @JsonIgnore
   /**
-   * Password is a transient value, thus a non-null value will be
-   * returned only if the password has been just set in this object.
-   * Calling this method after retrieving the document from the database,
-   * without first setting the password, will result in a null value.
+   * Password is a transient value, thus a non-null value will be returned only if the password has
+   * been just set in this object. Calling this method after retrieving the document from the
+   * database, without first setting the password, will result in a null value.
+   *
    * @return Plain text password or null
    */
   public String getPassword() {
@@ -171,10 +169,10 @@ public class User implements UserDetails {
   }
 
   /**
-   * Change this object password, both a plain text password and an
-   * hashed one will be saved, but only the latter will be saved
-   * in the database, while the former will be available through
+   * Change this object password, both a plain text password and an hashed one will be saved, but
+   * only the latter will be saved in the database, while the former will be available through
    * getPassword() until this object is destroyed
+   *
    * @param newPassword New raw password to set
    * @return this object modified
    */
@@ -191,9 +189,8 @@ public class User implements UserDetails {
 
   @JsonIgnore
   /**
-   * Setter used by the database repository, please use
-   * setPassword() to set a new password.
-   * Do not change the hashPassword value directly.
+   * Setter used by the database repository, please use setPassword() to set a new password. Do not
+   * change the hashPassword value directly.
    */
   public User setHashPassword(String hashPassword) {
     this.hashPassword = hashPassword;

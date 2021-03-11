@@ -2,9 +2,6 @@ package it.sweven.blockcovid.services;
 
 import it.sweven.blockcovid.entities.user.Token;
 import it.sweven.blockcovid.entities.user.User;
-import it.sweven.blockcovid.security.Authority;
-import java.time.LocalDateTime;
-import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,8 +17,7 @@ public class UserRegistrationService {
     this.authenticationService = authenticationService;
   }
 
-  public Token register(User user)
-      throws IllegalArgumentException {
+  public Token register(User user) throws IllegalArgumentException {
     userService
         .getByUsername(user.getUsername())
         .ifPresent(
