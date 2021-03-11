@@ -1,10 +1,9 @@
-package it.sweven.blockcovid.entities;
+package it.sweven.blockcovid.entities.user;
 
 /* Java utilities */
 
 import it.sweven.blockcovid.security.Authority;
-import java.time.LocalDate;
-import java.util.Objects;
+import java.time.LocalDateTime;
 import java.util.Set;
 import org.springframework.data.annotation.Id;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,10 +12,10 @@ public class User implements UserDetails {
 
   @Id private String username;
   private String password;
-  private String token;
+  private Token token;
   private Set<Authority> authorities;
-  private LocalDate expireDate;
-  private LocalDate credentialsExpireDate;
+  private LocalDateTime credentialsExpireDate;
+  private LocalDateTime expireDate;
   private boolean locked;
   private boolean enabled;
 
@@ -24,8 +23,8 @@ public class User implements UserDetails {
       String username,
       String password,
       Set<Authority> authorities,
-      LocalDate expireDate,
-      LocalDate credentialsExpireDate) {
+      LocalDateTime expireDate,
+      LocalDateTime credentialsExpireDate) {
     this.username = username;
     this.password = password;
     this.authorities = authorities;
@@ -44,13 +43,22 @@ public class User implements UserDetails {
   }
 
   @Override
-  public int hashCode() {
-    return Objects.hash(username, password, token);
-  }
-
-  @Override
   public String toString() {
-    return "User{" + username + "}";
+    return "User{ username="
+        + username
+        + ", password="
+        + password
+        + ", token="
+        + token.toString()
+        + ", authorities="
+        + authorities.toString()
+        + ", credentials_expDate="
+        + credentialsExpireDate.toString()
+        + ", locked="
+        + locked
+        + ", enabled="
+        + enabled
+        + "}";
   }
 
   @Override
@@ -65,7 +73,7 @@ public class User implements UserDetails {
 
   @Override
   public boolean isAccountNonExpired() {
-    return !LocalDate.now().isBefore(expireDate);
+    return !LocalDateTime.now().isBefore(expireDate);
   }
 
   @Override
@@ -75,12 +83,16 @@ public class User implements UserDetails {
 
   @Override
   public boolean isCredentialsNonExpired() {
-    return !LocalDate.now().isBefore(credentialsExpireDate);
+    return !LocalDateTime.now().isBefore(credentialsExpireDate);
   }
 
   @Override
   public boolean isEnabled() {
     return enabled;
+  }
+
+  public boolean isTokenNonExpired() {
+    return token.expired();
   }
 
   public User lock() {
@@ -121,11 +133,11 @@ public class User implements UserDetails {
     return this;
   }
 
-  public String getToken() {
+  public Token getToken() {
     return token;
   }
 
-  public User setToken(String token) {
+  public User setToken(Token token) {
     this.token = token;
     return this;
   }

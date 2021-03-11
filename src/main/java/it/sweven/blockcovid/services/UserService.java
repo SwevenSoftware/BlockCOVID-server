@@ -1,6 +1,7 @@
 package it.sweven.blockcovid.services;
 
-import it.sweven.blockcovid.entities.User;
+import it.sweven.blockcovid.entities.user.Token;
+import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.repositories.UserRepository;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,7 @@ public class UserService {
     return userRepository.save(user);
   }
 
-  public Optional<User> getByToken(String token) {
+  public Optional<User> getByToken(Token token) {
     return userRepository.findByToken(token);
   }
 

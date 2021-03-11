@@ -1,10 +1,15 @@
 package it.sweven.blockcovid.routers;
 
-import it.sweven.blockcovid.entities.User;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
+import it.sweven.blockcovid.entities.user.Token;
+import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.repositories.UserRepository;
 import it.sweven.blockcovid.services.UserAuthenticationService;
 import it.sweven.blockcovid.services.UserRegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,9 +38,12 @@ class LoginRouter {
 
   @PostMapping(value = "/login", consumes = "application/json", produces = "application/json")
   @ResponseBody
-  String login(@RequestBody User user) {
+  public EntityModel<Token> login(@RequestBody User user) {
     try {
-      return authenticationService.login(user.getUsername(), user.getPassword());
+      return EntityModel.of(
+          authenticationService.login(user.getUsername(), user.getPassword()),
+          linkTo(methodOn(LoginRouter.class).login(user)).withSelfRel(),
+          linkTo(methodOn(LoginRouter.class).register(user)).withRel("register"));
     } catch (Exception e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
@@ -43,10 +51,13 @@ class LoginRouter {
 
   @PostMapping(value = "/register", consumes = "application/json", produces = "application/json")
   @ResponseBody
-  public String register(@RequestBody User user) {
+  public EntityModel<Token> register(@RequestBody User user) {
     try {
-      return registrationService.register(
-          user.getUsername(), user.getPassword(), user.getAuthorities());
+      return EntityModel.of(
+          registrationService.register(
+              user.getUsername(), user.getPassword(), user.getAuthorities()),
+          linkTo(methodOn(LoginRouter.class).register(user)).withSelfRel(),
+          linkTo(methodOn(LoginRouter.class).login(user)).withRel("login"));
     } catch (Exception e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
