@@ -15,7 +15,6 @@ public class User implements UserDetails {
   private Token token;
   private Set<Authority> authorities;
   private LocalDateTime credentialsExpireDate;
-  private LocalDateTime expireDate;
   private boolean locked;
   private boolean enabled;
 
@@ -73,7 +72,7 @@ public class User implements UserDetails {
 
   @Override
   public boolean isAccountNonExpired() {
-    return !LocalDateTime.now().isBefore(expireDate);
+    return true;
   }
 
   @Override

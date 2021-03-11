@@ -37,7 +37,7 @@ public class Token {
   public boolean equals(Object other) {
     if (other instanceof Token) {
       Token o = (Token) other;
-      return token.equals(o.toString());
+      return token.equals(o.token);
     } else return false;
   }
 
