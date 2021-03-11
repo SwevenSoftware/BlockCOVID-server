@@ -1,9 +1,12 @@
 package it.sweven.blockcovid.services;
 
-import it.sweven.blockcovid.entities.User;
+import it.sweven.blockcovid.entities.user.Token;
+import it.sweven.blockcovid.entities.user.User;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,13 +19,13 @@ public class UUIDAuthenticationService implements UserAuthenticationService {
   }
 
   @Override
-  public String login(String username, String password) {
+  public Token login(String username, String password) throws BadCredentialsException {
     return userService
         .getByUsername(username)
         .filter(u -> u.getPassword().equals(password))
         .map(
             u -> {
-              u.setToken(UUID.randomUUID().toString());
+              u.setToken(new Token(UUID.randomUUID().toString(), LocalDateTime.now().plusDays(2)));
               userService.save(u);
               return u.getToken();
             })
@@ -30,9 +33,9 @@ public class UUIDAuthenticationService implements UserAuthenticationService {
   }
 
   @Override
-  public User authenticateByToken(String token) {
+  public User authenticateByToken(String token) throws AuthenticationException {
     return userService
-        .getByToken(token)
+        .getByToken(Token.fromString(token))
         .orElseThrow(() -> new BadCredentialsException("Token not found."));
   }
 
