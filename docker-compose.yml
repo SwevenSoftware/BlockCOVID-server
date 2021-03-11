@@ -3,6 +3,8 @@ version: "3"
 networks:
   db-net:
     driver: "bridge"
+  blockchain-net:
+    driver: "bridge"
 
 services:
 
@@ -23,11 +25,15 @@ services:
     links:
       - mongo
       - ganache
+    depends_on:
+      - mongo
+      - ganache
     networks:
       - db-net  
+      - blockchain-net  
 
   ganache:
     image: trufflesuite/ganache-cli:latest
     networks:
-      - db-net
+      - blockchain-net
     command: --account "0xb43436657ed0d6b922f3e7fab75dc32c610796d374daa6d7f1878669ff79d0e5,1000000000000000000000000000000000000000"
