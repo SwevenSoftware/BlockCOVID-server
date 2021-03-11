@@ -18,7 +18,7 @@ public class User implements UserDetails {
   @Id private String username;
   private @Transient @JsonIgnore String password;
   private String hashPassword;
-  private @JsonIgnore Token token;
+  private Token token;
   private Set<Authority> authorities;
   private LocalDateTime credentialsExpireDate;
   private boolean locked;
