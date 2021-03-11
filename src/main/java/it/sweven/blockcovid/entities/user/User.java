@@ -4,35 +4,60 @@ package it.sweven.blockcovid.entities.user;
 
 import it.sweven.blockcovid.security.Authority;
 
-import java.security.MessageDigest;
 import java.time.LocalDateTime;
 import java.util.Set;
 
 import net.minidev.json.annotate.JsonIgnore;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.annotation.Transient;
+import org.springframework.security.config.authentication.PasswordEncoderParser;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class User implements UserDetails {
 
   @Id private String username;
-  private @JsonIgnore String hashPassword;
+  private @Transient String password;
+  private String hashPassword;
   private Token token;
   private Set<Authority> authorities;
   private LocalDateTime credentialsExpireDate;
   private boolean locked;
   private boolean enabled;
 
+  private @Transient PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+
+  public User() {}
+
+  @PersistenceConstructor
+  public User(String username,
+              String hashPassword,
+              Token token,
+              Set<Authority> authorities,
+              LocalDateTime credentialsExpireDate,
+              boolean locked,
+              boolean enabled) {
+    this.username = username;
+    this.hashPassword = hashPassword;
+    this.token = token;
+    this.authorities = authorities;
+    this.credentialsExpireDate = credentialsExpireDate;
+    this.locked = locked;
+    this.enabled = enabled;
+  }
+
   public User(
       String username,
       String password,
-      Set<Authority> authorities,
-      LocalDateTime credentialsExpireDate) {
+      Set<Authority> authorities) {
     this.username = username;
-    this.hashPassword = DigestUtils.sha256Hex(password);
+    this.password = password;
+    this.hashPassword = passwordEncoder.encode(password);
     this.authorities = authorities;
-    this.credentialsExpireDate = credentialsExpireDate;
+    this.credentialsExpireDate = LocalDateTime.now().plusMonths(3L);
     this.locked = false;
     this.enabled = true;
   }
@@ -41,7 +66,7 @@ public class User implements UserDetails {
   public boolean equals(Object o) {
     if (o instanceof User) {
       User other = (User) o;
-      return username.equals(other.username) && hashPassword.equals(other.hashPassword);
+      return username.equals(other.username) && password.equals(other.password);
     } else return false;
   }
 
@@ -50,11 +75,11 @@ public class User implements UserDetails {
     return "User{ username="
         + username
         + ", token="
-        + token.toString()
+        + token
         + ", authorities="
-        + authorities.toString()
+        + authorities
         + ", credentials_expDate="
-        + credentialsExpireDate.toString()
+        + credentialsExpireDate
         + ", locked="
         + locked
         + ", enabled="
@@ -125,17 +150,55 @@ public class User implements UserDetails {
     return this;
   }
 
+  /**
+   * Check if password matches the stored one
+   * @param password Raw password to check
+   * @return true if given password corresponds with the one stored
+   */
   public boolean checkPassword(String password) {
-    return hashPassword.equals(DigestUtils.sha256Hex(password));
+    return passwordEncoder.matches(password, this.hashPassword);
   }
 
   @Override
+  @JsonIgnore
+  /**
+   * Password is a transient value, thus a non-null value will be
+   * returned only if the password has been just set in this object.
+   * Calling this method after retrieving the document from the database,
+   * without first setting the password, will result in a null value.
+   * @return Plain text password or null
+   */
   public String getPassword() {
+    return this.password;
+  }
+
+  /**
+   * Change this object password, both a plain text password and an
+   * hashed one will be saved, but only the latter will be saved
+   * in the database, while the former will be available through
+   * getPassword() until this object is destroyed
+   * @param newPassword New raw password to set
+   * @return this object modified
+   */
+  public User setPassword(String newPassword) {
+    this.password = newPassword;
+    this.hashPassword = passwordEncoder.encode(newPassword);
+    return this;
+  }
+
+  @JsonIgnore
+  public String getHashPassword() {
     return this.hashPassword;
   }
 
-  public User setPassword(String newPassword) {
-    this.hashPassword = DigestUtils.sha256Hex(newPassword);
+  @JsonIgnore
+  /**
+   * Setter used by the database repository, please use
+   * setPassword() to set a new password.
+   * Do not change the hashPassword value directly.
+   */
+  public User setHashPassword(String hashPassword) {
+    this.hashPassword = hashPassword;
     return this;
   }
 
@@ -145,6 +208,11 @@ public class User implements UserDetails {
 
   public User setToken(Token token) {
     this.token = token;
+    return this;
+  }
+
+  protected User setPasswordEncoder(PasswordEncoder passwordEncoder) {
+    this.passwordEncoder = passwordEncoder;
     return this;
   }
 }

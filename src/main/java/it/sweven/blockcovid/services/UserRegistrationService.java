@@ -20,16 +20,15 @@ public class UserRegistrationService {
     this.authenticationService = authenticationService;
   }
 
-  public Token register(String username, String password, Set<Authority> roles)
+  public Token register(User user)
       throws IllegalArgumentException {
     userService
-        .getByUsername(username)
+        .getByUsername(user.getUsername())
         .ifPresent(
             u -> {
               throw new IllegalArgumentException("Username already in use.");
             });
-    User user = new User(username, password, roles, LocalDateTime.now().plusMonths(3L));
     userService.save(user);
-    return authenticationService.login(username, password);
+    return authenticationService.login(user.getUsername(), user.getPassword());
   }
 }
