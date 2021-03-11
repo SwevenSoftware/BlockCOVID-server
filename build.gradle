@@ -43,6 +43,9 @@ dependencies {
     // iText PDF
     implementation 'com.itextpdf:itext7-core:7.1.10'
 
+    // Apache Commons Codec
+    implementation 'commons-codec:commons-codec:1.15'
+
     // TESTS
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'

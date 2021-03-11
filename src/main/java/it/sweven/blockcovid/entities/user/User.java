@@ -3,15 +3,21 @@ package it.sweven.blockcovid.entities.user;
 /* Java utilities */
 
 import it.sweven.blockcovid.security.Authority;
+
+import java.security.MessageDigest;
 import java.time.LocalDateTime;
 import java.util.Set;
+
+import net.minidev.json.annotate.JsonIgnore;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.security.core.userdetails.UserDetails;
 
 public class User implements UserDetails {
 
   @Id private String username;
-  private String password;
+  private @JsonIgnore String hashPassword;
   private Token token;
   private Set<Authority> authorities;
   private LocalDateTime credentialsExpireDate;
@@ -24,7 +30,7 @@ public class User implements UserDetails {
       Set<Authority> authorities,
       LocalDateTime credentialsExpireDate) {
     this.username = username;
-    this.password = password;
+    this.hashPassword = DigestUtils.sha256Hex(password);
     this.authorities = authorities;
     this.credentialsExpireDate = credentialsExpireDate;
     this.locked = false;
@@ -35,7 +41,7 @@ public class User implements UserDetails {
   public boolean equals(Object o) {
     if (o instanceof User) {
       User other = (User) o;
-      return username.equals(other.username) && password.equals(other.password);
+      return username.equals(other.username) && hashPassword.equals(other.hashPassword);
     } else return false;
   }
 
@@ -43,8 +49,6 @@ public class User implements UserDetails {
   public String toString() {
     return "User{ username="
         + username
-        + ", password="
-        + password
         + ", token="
         + token.toString()
         + ", authorities="
@@ -121,12 +125,17 @@ public class User implements UserDetails {
     return this;
   }
 
+  public boolean checkPassword(String password) {
+    return hashPassword.equals(DigestUtils.sha256Hex(password));
+  }
+
+  @Override
   public String getPassword() {
-    return password;
+    return this.hashPassword;
   }
 
   public User setPassword(String newPassword) {
-    this.password = newPassword;
+    this.hashPassword = DigestUtils.sha256Hex(newPassword);
     return this;
   }
 
