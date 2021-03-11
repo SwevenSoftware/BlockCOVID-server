@@ -7,12 +7,10 @@ import it.sweven.blockcovid.security.Authority;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-import net.minidev.json.annotate.JsonIgnore;
-import org.apache.commons.codec.digest.DigestUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.annotation.Transient;
-import org.springframework.security.config.authentication.PasswordEncoderParser;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,9 +18,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class User implements UserDetails {
 
   @Id private String username;
-  private @Transient String password;
+  private @Transient @JsonIgnore String password;
   private String hashPassword;
-  private Token token;
+  private @JsonIgnore Token token;
   private Set<Authority> authorities;
   private LocalDateTime credentialsExpireDate;
   private boolean locked;
