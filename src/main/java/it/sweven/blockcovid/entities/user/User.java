@@ -101,26 +101,31 @@ public class User implements UserDetails {
   }
 
   @Override
+  @JsonIgnore
   public boolean isAccountNonExpired() {
     return true;
   }
 
   @Override
+  @JsonIgnore
   public boolean isAccountNonLocked() {
     return locked;
   }
 
   @Override
+  @JsonIgnore
   public boolean isCredentialsNonExpired() {
     if (credentialsExpireDate == null) return false;
     return !LocalDateTime.now().isBefore(credentialsExpireDate);
   }
 
   @Override
+  @JsonIgnore
   public boolean isEnabled() {
     return enabled;
   }
 
+  @JsonIgnore
   public boolean isTokenNonExpired() {
     if (token == null) return false;
     return token.expired();
