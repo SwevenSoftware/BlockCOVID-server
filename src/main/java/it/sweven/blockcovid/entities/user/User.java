@@ -104,6 +104,8 @@ public class User implements UserDetails {
 
   @Override
   public boolean isCredentialsNonExpired() {
+    if(credentialsExpireDate == null)
+      return true;
     return !LocalDateTime.now().isBefore(credentialsExpireDate);
   }
 
