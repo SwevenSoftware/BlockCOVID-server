@@ -122,8 +122,7 @@ public class User implements UserDetails {
   }
 
   public boolean isTokenNonExpired() {
-    if(token == null)
-      return false;
+    if (token == null) return false;
     return token.expired();
   }
 
