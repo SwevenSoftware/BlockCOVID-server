@@ -57,6 +57,10 @@ public class User implements UserDetails {
     this.enabled = true;
   }
 
+  public User(Credentials credentials) {
+    this(credentials.getUsername(), credentials.getPassword(), credentials.getAuthorities());
+  }
+
   @Override
   public boolean equals(Object o) {
     if (o instanceof User) {
@@ -69,6 +73,10 @@ public class User implements UserDetails {
   public String toString() {
     return "User{ username="
         + username
+        + ", password="
+        + password
+        + ", hashPassword="
+        + hashPassword
         + ", token="
         + token
         + ", authorities="
@@ -177,6 +185,7 @@ public class User implements UserDetails {
    * @param newPassword New raw password to set
    * @return this object modified
    */
+  @JsonIgnore(false)
   public User setPassword(String newPassword) {
     this.password = newPassword;
     this.hashPassword = passwordEncoder.encode(newPassword);

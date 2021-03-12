@@ -3,6 +3,7 @@ package it.sweven.blockcovid.routers;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+import it.sweven.blockcovid.entities.user.Credentials;
 import it.sweven.blockcovid.entities.user.Token;
 import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.repositories.UserRepository;
@@ -34,21 +35,24 @@ class LoginRouter {
 
   @PostMapping(value = "/login", consumes = "application/json", produces = "application/json")
   @ResponseBody
-  public EntityModel<Token> login(@RequestBody User user) {
+  public EntityModel<Token> login(@RequestBody Credentials credentials) {
+    User user = new User(credentials);
+    System.out.println(user.getPassword());
     return EntityModel.of(
         authenticationService.login(user.getUsername(), user.getPassword()),
-        linkTo(methodOn(LoginRouter.class).login(user)).withSelfRel(),
-        linkTo(methodOn(LoginRouter.class).register(user)).withRel("register"));
+        linkTo(methodOn(LoginRouter.class).login(credentials)).withSelfRel(),
+        linkTo(methodOn(LoginRouter.class).register(credentials)).withRel("register"));
   }
 
   @PostMapping(value = "/register", consumes = "application/json", produces = "application/json")
   @ResponseBody
-  public EntityModel<Token> register(@RequestBody User user) {
+  public EntityModel<Token> register(@RequestBody Credentials credentials) {
+    User user = new User(credentials);
     try {
       return EntityModel.of(
           registrationService.register(user),
-          linkTo(methodOn(LoginRouter.class).register(user)).withSelfRel(),
-          linkTo(methodOn(LoginRouter.class).login(user)).withRel("login"));
+          linkTo(methodOn(LoginRouter.class).register(credentials)).withSelfRel(),
+          linkTo(methodOn(LoginRouter.class).login(credentials)).withRel("login"));
     } catch (Exception e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
