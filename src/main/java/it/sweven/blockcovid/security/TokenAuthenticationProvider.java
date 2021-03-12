@@ -30,17 +30,7 @@ public class TokenAuthenticationProvider extends AbstractUserDetailsAuthenticati
   protected UserDetails retrieveUser(
       String username, UsernamePasswordAuthenticationToken authentication) {
     Object token = authentication.getCredentials();
-    return Optional.ofNullable(token)
-        .flatMap(
-            t ->
-                Optional.of(userAuthenticationService.authenticateByToken(String.valueOf(t)))
-                    .map(
-                        u ->
-                            User.builder()
-                                .username(u.getUsername())
-                                .password(u.getPassword())
-                                .roles("user")
-                                .build()))
+    return Optional.ofNullable(userAuthenticationService.authenticateByToken(String.valueOf(token)))
         .orElseThrow(() -> new BadCredentialsException("Invalid authentication token=" + token));
   }
 }
