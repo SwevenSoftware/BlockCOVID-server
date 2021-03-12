@@ -16,7 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class User implements UserDetails {
 
   @Id private String username;
-  private @Transient @JsonIgnore String password;
+  private @Transient String password;
   private String hashPassword;
   private Token token;
   private Set<Authority> authorities;
@@ -155,8 +155,6 @@ public class User implements UserDetails {
     return passwordEncoder.matches(password, this.hashPassword);
   }
 
-  @Override
-  @JsonIgnore
   /**
    * Password is a transient value, thus a non-null value will be returned only if the password has
    * been just set in this object. Calling this method after retrieving the document from the
@@ -164,6 +162,8 @@ public class User implements UserDetails {
    *
    * @return Plain text password or null
    */
+  @Override
+  @JsonIgnore
   public String getPassword() {
     return this.password;
   }
@@ -185,16 +185,6 @@ public class User implements UserDetails {
   @JsonIgnore
   public String getHashPassword() {
     return this.hashPassword;
-  }
-
-  @JsonIgnore
-  /**
-   * Setter used by the database repository, please use setPassword() to set a new password. Do not
-   * change the hashPassword value directly.
-   */
-  public User setHashPassword(String hashPassword) {
-    this.hashPassword = hashPassword;
-    return this;
   }
 
   public Token getToken() {

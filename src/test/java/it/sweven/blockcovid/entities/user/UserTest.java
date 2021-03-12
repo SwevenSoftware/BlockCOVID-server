@@ -22,19 +22,27 @@ class UserTest {
   }
 
   @Test
-  void checkPassword_CorrectRawPassword() {
-    user.setPassword("1234");
-    user.setHashPassword("0000");
-    when(passwordEncoder.matches("1234", "0000")).thenReturn(true);
-    assertTrue(user.checkPassword("1234"));
+  void checkPassword_CorrectPassword() {
+    String rawPwd = "1234";
+    user.setPassword(rawPwd);
+    when(passwordEncoder.matches(rawPwd, user.getHashPassword())).thenReturn(true);
+    assertTrue(user.checkPassword(rawPwd));
   }
 
   @Test
   void checkPassword_WrongRawPassword() {
-    user.setPassword("1234");
-    user.setHashPassword("0000");
-    when(passwordEncoder.matches("1234", "0000")).thenReturn(true);
-    assertFalse(user.checkPassword("9999"));
+    String rawPwd = "1234";
+    user.setPassword(rawPwd);
+    when(passwordEncoder.matches(rawPwd, user.getHashPassword())).thenReturn(true);
+    assertFalse(user.checkPassword(rawPwd + "error"));
+  }
+
+  @Test
+  void checkPassword_WrongHashPassword() {
+    String rawPwd = "1234";
+    user.setPassword(rawPwd);
+    when(passwordEncoder.matches(rawPwd, user.getHashPassword() + "error")).thenReturn(true);
+    assertFalse(user.checkPassword(rawPwd));
   }
 
   @Test
