@@ -25,6 +25,8 @@ public class Token {
   }
 
   public boolean expired() {
+    if(expiryDate == null)
+      return true;
     return LocalDateTime.now().isAfter(expiryDate);
   }
 

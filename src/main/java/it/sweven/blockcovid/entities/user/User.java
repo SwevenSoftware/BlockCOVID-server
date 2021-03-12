@@ -112,7 +112,7 @@ public class User implements UserDetails {
 
   @Override
   public boolean isCredentialsNonExpired() {
-    if (credentialsExpireDate == null) return true;
+    if (credentialsExpireDate == null) return false;
     return !LocalDateTime.now().isBefore(credentialsExpireDate);
   }
 
@@ -122,6 +122,8 @@ public class User implements UserDetails {
   }
 
   public boolean isTokenNonExpired() {
+    if(token == null)
+      return false;
     return token.expired();
   }
 
