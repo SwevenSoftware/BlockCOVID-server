@@ -2,7 +2,6 @@ package it.sweven.blockcovid.repositories;
 
 /* Java imports */
 
-import it.sweven.blockcovid.entities.user.Token;
 import it.sweven.blockcovid.entities.user.User;
 import java.util.List;
 import java.util.Optional;

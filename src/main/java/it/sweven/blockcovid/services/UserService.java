@@ -1,6 +1,5 @@
 package it.sweven.blockcovid.services;
 
-import it.sweven.blockcovid.entities.user.Token;
 import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.repositories.UserRepository;
 import java.util.Optional;

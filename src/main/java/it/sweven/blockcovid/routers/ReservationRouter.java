@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
+@RequestMapping("api")
 public class ReservationRouter {
   private final ReservationRepository repository;
   private final UserAuthenticationService authenticationService;
