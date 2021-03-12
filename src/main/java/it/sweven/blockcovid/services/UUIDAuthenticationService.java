@@ -35,7 +35,7 @@ public class UUIDAuthenticationService implements UserAuthenticationService {
   @Override
   public User authenticateByToken(String token) throws AuthenticationException {
     return userService
-        .getByToken(Token.fromString(token))
+        .getByToken(token)
         .orElseThrow(() -> new BadCredentialsException("Token not found."));
   }
 
