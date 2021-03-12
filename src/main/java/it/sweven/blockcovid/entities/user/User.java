@@ -2,31 +2,57 @@ package it.sweven.blockcovid.entities.user;
 
 /* Java utilities */
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.sweven.blockcovid.security.Authority;
 import java.time.LocalDateTime;
 import java.util.Set;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.data.annotation.Transient;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class User implements UserDetails {
 
   @Id private String username;
-  private String password;
+  private @Transient String password;
+  private String hashPassword;
   private Token token;
   private Set<Authority> authorities;
   private LocalDateTime credentialsExpireDate;
   private boolean locked;
   private boolean enabled;
 
+  private @Transient PasswordEncoder passwordEncoder =
+      PasswordEncoderFactories.createDelegatingPasswordEncoder();
+
+  public User() {}
+
+  @PersistenceConstructor
   public User(
       String username,
-      String password,
+      String hashPassword,
+      Token token,
       Set<Authority> authorities,
-      LocalDateTime credentialsExpireDate) {
+      LocalDateTime credentialsExpireDate,
+      boolean locked,
+      boolean enabled) {
     this.username = username;
-    this.password = password;
+    this.hashPassword = hashPassword;
+    this.token = token;
     this.authorities = authorities;
     this.credentialsExpireDate = credentialsExpireDate;
+    this.locked = locked;
+    this.enabled = enabled;
+  }
+
+  public User(String username, String password, Set<Authority> authorities) {
+    this.username = username;
+    this.password = password;
+    this.hashPassword = passwordEncoder.encode(password);
+    this.authorities = authorities;
+    this.credentialsExpireDate = LocalDateTime.now().plusMonths(3L);
     this.locked = false;
     this.enabled = true;
   }
@@ -43,14 +69,12 @@ public class User implements UserDetails {
   public String toString() {
     return "User{ username="
         + username
-        + ", password="
-        + password
         + ", token="
-        + token.toString()
+        + token
         + ", authorities="
-        + authorities.toString()
+        + authorities
         + ", credentials_expDate="
-        + credentialsExpireDate.toString()
+        + credentialsExpireDate
         + ", locked="
         + locked
         + ", enabled="
@@ -121,13 +145,46 @@ public class User implements UserDetails {
     return this;
   }
 
-  public String getPassword() {
-    return password;
+  /**
+   * Check if password matches the stored one
+   *
+   * @param password Raw password to check
+   * @return true if given password corresponds with the one stored
+   */
+  public boolean checkPassword(String password) {
+    return passwordEncoder.matches(password, this.hashPassword);
   }
 
+  /**
+   * Password is a transient value, thus a non-null value will be returned only if the password has
+   * been just set in this object. Calling this method after retrieving the document from the
+   * database, without first setting the password, will result in a null value.
+   *
+   * @return Plain text password or null
+   */
+  @Override
+  @JsonIgnore
+  public String getPassword() {
+    return this.password;
+  }
+
+  /**
+   * Change this object password, both a plain text password and an hashed one will be saved, but
+   * only the latter will be saved in the database, while the former will be available through
+   * getPassword() until this object is destroyed
+   *
+   * @param newPassword New raw password to set
+   * @return this object modified
+   */
   public User setPassword(String newPassword) {
     this.password = newPassword;
+    this.hashPassword = passwordEncoder.encode(newPassword);
     return this;
+  }
+
+  @JsonIgnore
+  public String getHashPassword() {
+    return this.hashPassword;
   }
 
   public Token getToken() {
@@ -136,6 +193,11 @@ public class User implements UserDetails {
 
   public User setToken(Token token) {
     this.token = token;
+    return this;
+  }
+
+  protected User setPasswordEncoder(PasswordEncoder passwordEncoder) {
+    this.passwordEncoder = passwordEncoder;
     return this;
   }
 }

@@ -22,7 +22,7 @@ public class UUIDAuthenticationService implements UserAuthenticationService {
   public Token login(String username, String password) throws BadCredentialsException {
     return userService
         .getByUsername(username)
-        .filter(u -> u.getPassword().equals(password))
+        .filter(u -> u.checkPassword(password))
         .map(
             u -> {
               u.setToken(new Token(UUID.randomUUID().toString(), LocalDateTime.now().plusDays(2)));
