@@ -32,4 +32,7 @@ public class TokenAuthenticationProvider extends AbstractUserDetailsAuthenticati
     return Optional.ofNullable(userAuthenticationService.authenticateByToken(String.valueOf(token)))
         .orElseThrow(() -> new BadCredentialsException("Invalid authentication token=" + token));
   }
+  /* this.tokenProvider.setPasswordEncoder(this.passwordEncoder);
+  this.tokenProvider.setUserDetailsService(this.userService);*/
+
 }

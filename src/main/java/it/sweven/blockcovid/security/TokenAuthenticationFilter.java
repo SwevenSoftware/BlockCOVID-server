@@ -1,5 +1,6 @@
 package it.sweven.blockcovid.security;
 
+import it.sweven.blockcovid.services.TokenService;
 import java.io.IOException;
 import java.util.Optional;
 import javax.servlet.FilterChain;
@@ -15,9 +16,11 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 public class TokenAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
   private static final String AUTHORIZATION = "Authorization";
   private static final String BEARER = "Bearer";
+  private final TokenService tokenService;
 
-  public TokenAuthenticationFilter(RequestMatcher requiresAuth) {
+  public TokenAuthenticationFilter(RequestMatcher requiresAuth, TokenService tokenService) {
     super(requiresAuth);
+    this.tokenService = tokenService;
   }
 
   @Override
@@ -27,8 +30,8 @@ public class TokenAuthenticationFilter extends AbstractAuthenticationProcessingF
         Optional.ofNullable(request.getHeader(AUTHORIZATION))
             .map(v -> v.replace(BEARER, "").trim())
             .orElseThrow(() -> new BadCredentialsException("Missing authentication token."));
-
-    Authentication auth = new UsernamePasswordAuthenticationToken(token, token);
+    String username = tokenService.getToken(token).getUsername();
+    Authentication auth = new UsernamePasswordAuthenticationToken(username, token);
     return getAuthenticationManager().authenticate(auth);
   }
 

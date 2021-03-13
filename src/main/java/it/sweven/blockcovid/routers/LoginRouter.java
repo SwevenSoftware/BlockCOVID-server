@@ -5,7 +5,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import it.sweven.blockcovid.entities.user.Credentials;
 import it.sweven.blockcovid.entities.user.Token;
-import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.repositories.UserRepository;
 import it.sweven.blockcovid.services.UserAuthenticationService;
 import it.sweven.blockcovid.services.UserRegistrationService;
@@ -36,9 +35,9 @@ class LoginRouter {
   @PostMapping(value = "/login", consumes = "application/json", produces = "application/json")
   @ResponseBody
   public EntityModel<Token> login(@RequestBody Credentials credentials) {
-    User user = new User(credentials);
+    System.out.println(userRepository.findAll());
     return EntityModel.of(
-        authenticationService.login(user.getUsername(), user.getPassword()),
+        authenticationService.login(credentials.getUsername(), credentials.getPassword()),
         linkTo(methodOn(LoginRouter.class).login(credentials)).withSelfRel(),
         linkTo(methodOn(LoginRouter.class).register(credentials)).withRel("register"));
   }
@@ -46,10 +45,9 @@ class LoginRouter {
   @PostMapping(value = "/register", consumes = "application/json", produces = "application/json")
   @ResponseBody
   public EntityModel<Token> register(@RequestBody Credentials credentials) {
-    User user = new User(credentials);
     try {
       return EntityModel.of(
-          registrationService.register(user),
+          registrationService.register(credentials),
           linkTo(methodOn(LoginRouter.class).register(credentials)).withSelfRel(),
           linkTo(methodOn(LoginRouter.class).login(credentials)).withRel("login"));
     } catch (Exception e) {
