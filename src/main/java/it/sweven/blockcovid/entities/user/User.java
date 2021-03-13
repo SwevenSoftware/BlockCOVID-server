@@ -109,14 +109,14 @@ public class User implements UserDetails {
   @Override
   @JsonIgnore
   public boolean isAccountNonLocked() {
-    return locked;
+    return !locked;
   }
 
   @Override
   @JsonIgnore
   public boolean isCredentialsNonExpired() {
     if (credentialsExpireDate == null) return false;
-    return !LocalDateTime.now().isBefore(credentialsExpireDate);
+    return LocalDateTime.now().isBefore(credentialsExpireDate);
   }
 
   @Override
@@ -128,7 +128,7 @@ public class User implements UserDetails {
   @JsonIgnore
   public boolean isTokenNonExpired() {
     if (token == null) return false;
-    return token.expired();
+    return !token.expired();
   }
 
   public User lock() {

@@ -37,7 +37,6 @@ class LoginRouter {
   @ResponseBody
   public EntityModel<Token> login(@RequestBody Credentials credentials) {
     User user = new User(credentials);
-    System.out.println(user.getPassword());
     return EntityModel.of(
         authenticationService.login(user.getUsername(), user.getPassword()),
         linkTo(methodOn(LoginRouter.class).login(credentials)).withSelfRel(),
