@@ -3,19 +3,15 @@ package it.sweven.blockcovid.routers;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+import it.sweven.blockcovid.entities.user.Credentials;
 import it.sweven.blockcovid.entities.user.Token;
-import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.repositories.UserRepository;
 import it.sweven.blockcovid.services.UserAuthenticationService;
 import it.sweven.blockcovid.services.UserRegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
@@ -38,21 +34,21 @@ class LoginRouter {
 
   @PostMapping(value = "/login", consumes = "application/json", produces = "application/json")
   @ResponseBody
-  public EntityModel<Token> login(@RequestBody User user) {
+  public EntityModel<Token> login(@RequestBody Credentials credentials) {
     return EntityModel.of(
-        authenticationService.login(user.getUsername(), user.getPassword()),
-        linkTo(methodOn(LoginRouter.class).login(user)).withSelfRel(),
-        linkTo(methodOn(LoginRouter.class).register(user)).withRel("register"));
+        authenticationService.login(credentials.getUsername(), credentials.getPassword()),
+        linkTo(methodOn(LoginRouter.class).login(credentials)).withSelfRel(),
+        linkTo(methodOn(LoginRouter.class).register(credentials)).withRel("register"));
   }
 
   @PostMapping(value = "/register", consumes = "application/json", produces = "application/json")
   @ResponseBody
-  public EntityModel<Token> register(@RequestBody User user) {
+  public EntityModel<Token> register(@RequestBody Credentials credentials) {
     try {
       return EntityModel.of(
-          registrationService.register(user),
-          linkTo(methodOn(LoginRouter.class).register(user)).withSelfRel(),
-          linkTo(methodOn(LoginRouter.class).login(user)).withRel("login"));
+          registrationService.register(credentials),
+          linkTo(methodOn(LoginRouter.class).register(credentials)).withSelfRel(),
+          linkTo(methodOn(LoginRouter.class).login(credentials)).withRel("login"));
     } catch (Exception e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }

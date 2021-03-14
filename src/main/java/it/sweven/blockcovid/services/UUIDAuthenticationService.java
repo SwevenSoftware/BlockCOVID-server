@@ -7,46 +7,39 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UUIDAuthenticationService implements UserAuthenticationService {
   private final UserService userService;
+  private final TokenService tokenService;
+  private final PasswordEncoder passwordEncoder;
 
   @Autowired
-  UUIDAuthenticationService(UserService userService) {
+  UUIDAuthenticationService(
+      UserService userService, PasswordEncoder passwordEncoder, TokenService tokenService) {
     this.userService = userService;
+    this.passwordEncoder = passwordEncoder;
+    this.tokenService = tokenService;
   }
 
   @Override
-  public Token login(String username, String password) throws BadCredentialsException {
-    return userService
-        .getByUsername(username)
-        .filter(u -> u.checkPassword(password))
-        .map(
-            u -> {
-              u.setToken(new Token(UUID.randomUUID().toString(), LocalDateTime.now().plusDays(2)));
-              userService.save(u);
-              return u.getToken();
-            })
-        .orElseThrow(() -> new BadCredentialsException("Invalid username or password."));
+  public Token login(String username, String password) throws AuthenticationException {
+    User user = userService.getByUsername(username);
+    if (passwordEncoder.matches(password, user.getPassword()))
+      return tokenService.save(
+          new Token(UUID.randomUUID().toString(), LocalDateTime.now().plusDays(2), username));
+    else throw new BadCredentialsException("Invalid username or password.");
   }
 
   @Override
   public User authenticateByToken(String token) throws AuthenticationException {
-    return userService
-        .getByToken(Token.fromString(token))
-        .orElseThrow(() -> new BadCredentialsException("Token not found."));
+    return userService.getByUsername(tokenService.getToken(token).getUsername());
   }
 
   @Override
-  public void logout(String username) {
-    userService
-        .getByUsername(username)
-        .ifPresent(
-            u -> {
-              u.setToken(null);
-              userService.save(u);
-            });
+  public void logout(String token) {
+    tokenService.delete(token);
   }
 }
