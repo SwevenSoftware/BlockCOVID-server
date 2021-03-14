@@ -74,6 +74,7 @@ public class AdminRouter {
                 schema = @Schema(implementation = User.class))),
     @ApiResponse(responseCode = "400", description = "No credentials provided"),
     @ApiResponse(responseCode = "401", description = "Invalid authentication token"),
+    @ApiResponse(responseCode = "403", description = "Method not allowed"),
     @ApiResponse(responseCode = "404", description = "Username not found")
   })
   public EntityModel<User> modifyUser(
@@ -81,6 +82,8 @@ public class AdminRouter {
       @PathVariable String username,
       @RequestBody Credentials newCredentials) {
     User admin = authenticationService.authenticateByToken(Authorization);
+    if (!admin.getAuthorities().contains(Authority.ADMIN))
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Method not allowed");
     if (newCredentials == null)
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No credentials provided");
     User user;
