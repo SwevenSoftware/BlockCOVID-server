@@ -36,9 +36,15 @@ public class UserService implements UserDetailsService {
 
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    return userRepository
-        .findByUsername(username)
-        .orElseThrow(() -> new UsernameNotFoundException(username + " not found"));
+    return getByUsername(username);
+  }
+
+  public void updatePassword(User user, String newPassword) {
+    save(user.setPassword(passwordEncoder.encode(newPassword)));
+  }
+
+  public void updateAuthorities(User user, Set<Authority> newAuthorities) {
+    save(user.setAuthorities(newAuthorities));
   }
 
   @PostConstruct
