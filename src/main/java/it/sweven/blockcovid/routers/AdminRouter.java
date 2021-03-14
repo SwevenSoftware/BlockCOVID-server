@@ -9,9 +9,7 @@ import it.sweven.blockcovid.services.UserRegistrationService;
 import javax.security.auth.login.CredentialException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -33,7 +31,7 @@ public class AdminRouter {
   }
 
   @PostMapping(value = "user/new", consumes = "application/json", produces = "application/json")
-  public ResponseEntity<?> register(
+  public EntityModel<User> register(
       @RequestBody Credentials credentials, @RequestHeader String Authorization) {
     if (authenticationService
         .authenticateByToken(Authorization)
@@ -41,13 +39,10 @@ public class AdminRouter {
         .contains(Authority.ADMIN)) {
       try {
         User registeredUser = registrationService.register(credentials);
-        EntityModel<User> entityUser = adminUserModelAssembler.toModel(registeredUser);
-        return ResponseEntity.created(entityUser.getRequiredLink(IanaLinkRelations.SELF).toUri())
-            .body(entityUser);
+        return adminUserModelAssembler.toModel(registeredUser);
       } catch (CredentialException exception) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getMessage());
       }
-
     } else
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User has not enough privileges");
   }
