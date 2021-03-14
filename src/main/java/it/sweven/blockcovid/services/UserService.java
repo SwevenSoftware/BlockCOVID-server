@@ -1,20 +1,27 @@
 package it.sweven.blockcovid.services;
 
 import it.sweven.blockcovid.entities.user.User;
+import it.sweven.blockcovid.entities.user.UserBuilder;
 import it.sweven.blockcovid.repositories.UserRepository;
+import it.sweven.blockcovid.security.Authority;
+import java.util.Set;
+import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserService implements UserDetailsService {
-  private UserRepository userRepository;
+  private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
 
   @Autowired
-  UserService(UserRepository userRepository) {
+  UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
     this.userRepository = userRepository;
+    this.passwordEncoder = passwordEncoder;
   }
 
   public User save(User user) {
@@ -32,5 +39,18 @@ public class UserService implements UserDetailsService {
     return userRepository
         .findByUsername(username)
         .orElseThrow(() -> new UsernameNotFoundException(username + " not found"));
+  }
+
+  @PostConstruct
+  private void initDB() {
+    if (userRepository.findAll().isEmpty()) {
+      UserBuilder builder = new UserBuilder();
+      userRepository.save(
+          builder
+              .setUsername("admin")
+              .setPassword(passwordEncoder.encode("password"))
+              .setAuthorities(Set.of(Authority.ADMIN))
+              .createUser());
+    }
   }
 }

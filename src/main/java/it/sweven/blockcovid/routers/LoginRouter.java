@@ -16,10 +16,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("api")
-class LoginRouter {
+public class LoginRouter {
 
   private final UserAuthenticationService authenticationService;
-  private final UserRegistrationService registrationService;
   private final UserRepository userRepository;
 
   @Autowired
@@ -28,29 +27,19 @@ class LoginRouter {
       UserRegistrationService registrationService,
       UserRepository userRepository) {
     this.authenticationService = authenticationService;
-    this.registrationService = registrationService;
     this.userRepository = userRepository;
   }
 
   @PostMapping(value = "/login", consumes = "application/json", produces = "application/json")
   @ResponseBody
   public EntityModel<Token> login(@RequestBody Credentials credentials) {
-    return EntityModel.of(
-        authenticationService.login(credentials.getUsername(), credentials.getPassword()),
-        linkTo(methodOn(LoginRouter.class).login(credentials)).withSelfRel(),
-        linkTo(methodOn(LoginRouter.class).register(credentials)).withRel("register"));
-  }
-
-  @PostMapping(value = "/register", consumes = "application/json", produces = "application/json")
-  @ResponseBody
-  public EntityModel<Token> register(@RequestBody Credentials credentials) {
     try {
       return EntityModel.of(
-          registrationService.register(credentials),
-          linkTo(methodOn(LoginRouter.class).register(credentials)).withSelfRel(),
-          linkTo(methodOn(LoginRouter.class).login(credentials)).withRel("login"));
-    } catch (Exception e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+          authenticationService.login(credentials.getUsername(), credentials.getPassword()),
+          linkTo(methodOn(LoginRouter.class).login(credentials)).withSelfRel(),
+          linkTo(methodOn(AdminRouter.class).register(credentials, "")).withRel("register"));
+    } catch (Exception exception) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Credentials not found");
     }
   }
 }
