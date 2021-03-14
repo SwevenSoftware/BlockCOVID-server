@@ -35,7 +35,6 @@ class LoginRouter {
   @PostMapping(value = "/login", consumes = "application/json", produces = "application/json")
   @ResponseBody
   public EntityModel<Token> login(@RequestBody Credentials credentials) {
-    System.out.println(userRepository.findAll());
     return EntityModel.of(
         authenticationService.login(credentials.getUsername(), credentials.getPassword()),
         linkTo(methodOn(LoginRouter.class).login(credentials)).withSelfRel(),

@@ -2,7 +2,6 @@ package it.sweven.blockcovid.services;
 
 import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.repositories.UserRepository;
-import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -22,8 +21,10 @@ public class UserService implements UserDetailsService {
     return userRepository.save(user);
   }
 
-  public Optional<User> getByUsername(String username) {
-    return userRepository.findByUsername(username);
+  public User getByUsername(String username) throws UsernameNotFoundException {
+    return userRepository
+        .findByUsername(username)
+        .orElseThrow(() -> new UsernameNotFoundException(username + "not found"));
   }
 
   @Override

@@ -12,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -121,13 +119,5 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
   @Bean
   AuthenticationEntryPoint forbiddenEntryPoint() {
     return new HttpStatusEntryPoint(FORBIDDEN);
-  }
-
-  @Bean
-  public AuthenticationProvider daoAuthenticationProvider() {
-    DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-    provider.setPasswordEncoder(this.passwordEncoder);
-    provider.setUserDetailsService(this.userService);
-    return provider;
   }
 }
