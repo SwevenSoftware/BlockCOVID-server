@@ -31,20 +31,17 @@ public class LoginRouter {
   @PostMapping(value = "/login", consumes = "application/json", produces = "application/json")
   @ResponseBody
   @ApiResponses({
-          @ApiResponse(
-                  responseCode = "200",
-                  description = "Authenticated Successfully",
-                  content =
-                  @Content(
-                          mediaType = "application/json",
-                          schema = @Schema(implementation = Token.class))),
-          @ApiResponse(
-                  responseCode = "400",
-                  description = "Invalid username or password",
-                  content = @Content(
-                          schema = @Schema(implementation = void.class)
-                  )
-          )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Authenticated Successfully",
+        content =
+            @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = Token.class))),
+    @ApiResponse(
+        responseCode = "400",
+        description = "Invalid username or password",
+        content = @Content(schema = @Schema(implementation = void.class)))
   })
   public EntityModel<Token> login(@RequestBody Credentials credentials) {
     try {

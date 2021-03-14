@@ -107,7 +107,6 @@ public class AdminRouter {
         description = "Username not found",
         content = @Content(schema = @Schema(implementation = void.class)))
   })
-
   public EntityModel<User> modifyUser(
       @RequestHeader String Authorization,
       @PathVariable String username,
