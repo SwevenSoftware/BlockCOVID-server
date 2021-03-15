@@ -87,14 +87,14 @@ class UserRouterTest {
   }
 
   @Test
-  void modify_nullCredentials() {
+  void modifyPassword_nullCredentials() {
     ResponseStatusException thrown =
         assertThrows(ResponseStatusException.class, () -> userRouter.modifyPassword("", null));
     assertEquals(HttpStatus.BAD_REQUEST, thrown.getStatus());
   }
 
   @Test
-  void modify_nullPasswordCredentials() {
+  void modifyPassword_nullPasswordCredentials() {
     Credentials newCredentials = new Credentials("newUsername", null, Set.of(Authority.ADMIN));
     ResponseStatusException thrown =
         assertThrows(
