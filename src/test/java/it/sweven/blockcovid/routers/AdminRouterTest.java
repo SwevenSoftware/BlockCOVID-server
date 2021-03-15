@@ -2,7 +2,7 @@ package it.sweven.blockcovid.routers;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 import it.sweven.blockcovid.assemblers.UserAssembler;
 import it.sweven.blockcovid.entities.user.Credentials;
@@ -12,9 +12,14 @@ import it.sweven.blockcovid.security.Authority;
 import it.sweven.blockcovid.services.UserAuthenticationService;
 import it.sweven.blockcovid.services.UserRegistrationService;
 import it.sweven.blockcovid.services.UserService;
+import java.util.Collections;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.server.ResponseStatusException;
 
 class AdminRouterTest {
 
@@ -22,13 +27,52 @@ class AdminRouterTest {
   private UserAuthenticationService authenticationService;
   private UserRegistrationService registrationService;
   private UserAssembler userAssembler;
+  private UserService userService;
 
   @BeforeEach
   void setUp() {
+    // Mock AuthenticationService
     authenticationService = mock(UserAuthenticationService.class);
+    // Basic mock AuthenticationService.authenticateByToken
+    when(authenticationService.authenticateByToken(any())).thenReturn(new User());
+
     registrationService = mock(UserRegistrationService.class);
-    userAssembler = new UserAssembler();
-    UserService userService = mock(UserService.class);
+
+    // Mock UserAssembler
+    userAssembler =
+        spy(
+            new UserAssembler() {
+              @Override
+              public EntityModel<User> toModel(User entity) {
+                return EntityModel.of(entity);
+              }
+            });
+    when(userAssembler.setAuthorities(anySet())).thenReturn(userAssembler);
+
+    // Mock UserService
+    userService = mock(UserService.class);
+    // Mock UserService.updatePassword
+    doAnswer(
+            invocation -> {
+              User user = invocation.getArgument(0);
+              String newPassword = invocation.getArgument(1);
+              user.setPassword(newPassword);
+              return null;
+            })
+        .when(userService)
+        .updatePassword(any(), any());
+    // Mock UserService.updateAuthorities
+    doAnswer(
+            invocation -> {
+              User user = invocation.getArgument(0);
+              Set<Authority> newAuthorities = invocation.getArgument(1);
+              user.setAuthorities(newAuthorities);
+              return null;
+            })
+        .when(userService)
+        .updateAuthorities(any(), any());
+
+    // Instantiation UserRoute
     router =
         new AdminRouter(authenticationService, registrationService, userAssembler, userService);
   }
@@ -50,5 +94,62 @@ class AdminRouterTest {
             .setAuthorities(Set.of(Authority.ADMIN))
             .createUser();
     // assertEquals(userAssembler.toModel(testUser), router.register(testCredentials, auth));
+  }
+
+  @Test
+  void modifyUser_validRequest() {
+    User admin = new User("admin", "password", Set.of(Authority.ADMIN));
+    User oldUser = new User("user", "password", Collections.emptySet());
+    Credentials newCredentials = new Credentials("newUser", "newPassword", Set.of(Authority.ADMIN));
+    User expectedUser =
+        new User(
+            oldUser.getUsername(), newCredentials.getPassword(), newCredentials.getAuthorities());
+    when(authenticationService.authenticateByToken("auth")).thenReturn(admin);
+    when(userService.getByUsername(oldUser.getUsername())).thenReturn(oldUser);
+    assertEquals(
+        expectedUser,
+        router.modifyUser("auth", oldUser.getUsername(), newCredentials).getContent());
+  }
+
+  @Test
+  void modifyUser_requestNotMadeByAdmin() {
+    User user = new User("user", "password", Set.of(Authority.USER, Authority.CLEANER));
+    User oldUser = new User("oldUser", "password", Collections.emptySet());
+    Credentials newCredentials = new Credentials("newUser", "newPassword", Set.of(Authority.ADMIN));
+    when(authenticationService.authenticateByToken("auth")).thenReturn(user);
+    when(userService.getByUsername(oldUser.getUsername())).thenReturn(oldUser);
+    ResponseStatusException thrown =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> router.modifyUser("auth", oldUser.getUsername(), newCredentials));
+    assertEquals(HttpStatus.FORBIDDEN, thrown.getStatus());
+  }
+
+  @Test
+  void modifyUser_nullCredentials() {
+    User admin = new User("admin", "password", Set.of(Authority.ADMIN));
+    User oldUser = new User("oldUser", "password", Collections.emptySet());
+    when(authenticationService.authenticateByToken("auth")).thenReturn(admin);
+    when(userService.getByUsername(oldUser.getUsername())).thenReturn(oldUser);
+    ResponseStatusException thrown =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> router.modifyUser("auth", oldUser.getUsername(), null));
+    assertEquals(HttpStatus.BAD_REQUEST, thrown.getStatus());
+  }
+
+  @Test
+  void modifyUser_usernameNotFound() {
+    User admin = new User("admin", "password", Set.of(Authority.ADMIN));
+    User oldUser = new User("oldUser", "password", Collections.emptySet());
+    Credentials newCredentials = new Credentials("newUser", "newPassword", Set.of(Authority.ADMIN));
+    when(authenticationService.authenticateByToken("auth")).thenReturn(admin);
+    when(userService.getByUsername(oldUser.getUsername()))
+        .thenThrow(new UsernameNotFoundException(oldUser.getUsername() + " not found"));
+    ResponseStatusException thrown =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> router.modifyUser("auth", oldUser.getUsername(), newCredentials));
+    assertEquals(HttpStatus.NOT_FOUND, thrown.getStatus());
   }
 }
