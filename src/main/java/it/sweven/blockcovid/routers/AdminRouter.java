@@ -135,7 +135,7 @@ public class AdminRouter {
     return assembler.setAuthorities(admin.getAuthorities()).toModel(user);
   }
 
-  @PostMapping(value = "/users", consumes = "application/json", produces = "application/json")
+  @GetMapping(value = "/users", consumes = "application/json", produces = "application/json")
   @ResponseBody
   @ApiResponses({
     @ApiResponse(responseCode = "200", description = "List of existing users"),
