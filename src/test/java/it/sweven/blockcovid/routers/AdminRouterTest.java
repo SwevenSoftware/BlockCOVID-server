@@ -104,7 +104,9 @@ class AdminRouterTest {
     User adminTest = new User("admin", "password", Set.of(Authority.ADMIN));
     when(authenticationService.authenticateByToken("auth")).thenReturn(adminTest);
     when(registrationService.register(any())).thenThrow(new CredentialException());
-    assertThrows(ResponseStatusException.class, () -> router.register(testCredentials, "auth"));
+    ResponseStatusException thrown =
+        assertThrows(ResponseStatusException.class, () -> router.register(testCredentials, "auth"));
+    assertTrue(thrown.getStatus().equals(HttpStatus.CONFLICT));
   }
 
   @Test
@@ -112,7 +114,9 @@ class AdminRouterTest {
     User adminTest = new User("admin", "password", Set.of(Authority.ADMIN));
     when(authenticationService.authenticateByToken("auth")).thenReturn(adminTest);
     when(registrationService.register(any())).thenThrow(new NullPointerException());
-    assertThrows(ResponseStatusException.class, () -> router.register(null, "auth"));
+    ResponseStatusException thrown =
+        assertThrows(ResponseStatusException.class, () -> router.register(null, "auth"));
+    assertTrue(thrown.getStatus().equals(HttpStatus.BAD_REQUEST));
   }
 
   @Test
