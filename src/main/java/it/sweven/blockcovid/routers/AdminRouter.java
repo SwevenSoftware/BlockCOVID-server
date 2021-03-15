@@ -136,6 +136,14 @@ public class AdminRouter {
   }
 
   @PostMapping(value = "/users", consumes = "application/json", produces = "application/json")
+  @ResponseBody
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "List of existing users"),
+    @ApiResponse(
+        responseCode = "403",
+        description = "Method not allowed",
+        content = @Content(schema = @Schema(implementation = void.class)))
+  })
   public CollectionModel<EntityModel<User>> listUsers(@RequestHeader String Authorization) {
     User admin = authenticationService.authenticateByToken(Authorization);
     if (!admin.getAuthorities().contains(Authority.ADMIN))
@@ -145,6 +153,6 @@ public class AdminRouter {
             .map(u -> assembler.setAuthorities(admin.getAuthorities()).toModel(u))
             .collect(Collectors.toList());
     return CollectionModel.of(
-        users, linkTo(methodOn(AdminRouter.class).listUsers("")).withSelfRel());
+        users, linkTo(methodOn(AdminRouter.class).listUsers(null)).withSelfRel());
   }
 }
