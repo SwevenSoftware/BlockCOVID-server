@@ -33,11 +33,13 @@ public class UserAssembler implements RepresentationModelAssembler<User, EntityM
             entity,
             linkTo(methodOn(UserRouter.class).info(null)).withSelfRel(),
             linkTo(methodOn(UserRouter.class).modifyPassword(null, null))
-                .withRel("change password"));
-    if (authorities.contains(Authority.ADMIN))
+                .withRel("change_password"));
+    if (authorities.contains(Authority.ADMIN)) {
       userModel.add(
           linkTo(methodOn(AdminRouter.class).modifyUser(null, entity.getUsername(), null))
-              .withRel("modify user"));
+              .withRel("modify_user"));
+      userModel.add(linkTo(methodOn(AdminRouter.class).listUsers(null)).withRel("list_users"));
+    }
     clearAuthorities();
     return userModel;
   }
