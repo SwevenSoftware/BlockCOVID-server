@@ -74,7 +74,7 @@ public class AdminRouter {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getMessage());
       }
     } else
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User has not enough privileges");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User has not enough privileges");
   }
 
   @PostMapping(
