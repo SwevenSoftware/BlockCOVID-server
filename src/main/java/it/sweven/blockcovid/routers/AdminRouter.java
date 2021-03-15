@@ -61,6 +61,10 @@ public class AdminRouter {
     @ApiResponse(
         responseCode = "403",
         description = "Method not allowed",
+        content = @Content(schema = @Schema(implementation = void.class))),
+    @ApiResponse(
+        responseCode = "409",
+        description = "Username already taken",
         content = @Content(schema = @Schema(implementation = void.class)))
   })
   public EntityModel<User> register(
@@ -71,7 +75,9 @@ public class AdminRouter {
         User registeredUser = registrationService.register(credentials);
         return assembler.setAuthorities(submitter.getAuthorities()).toModel(registeredUser);
       } catch (CredentialException exception) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getMessage());
+        throw new ResponseStatusException(HttpStatus.CONFLICT, exception.getMessage());
+      } catch (NullPointerException exception) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No credentials provided");
       }
     } else
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User has not enough privileges");
