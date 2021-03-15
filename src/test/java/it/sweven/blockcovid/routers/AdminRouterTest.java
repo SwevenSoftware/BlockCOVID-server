@@ -106,7 +106,7 @@ class AdminRouterTest {
     when(registrationService.register(any())).thenThrow(new CredentialException());
     ResponseStatusException thrown =
         assertThrows(ResponseStatusException.class, () -> router.register(testCredentials, "auth"));
-    assertTrue(thrown.getStatus().equals(HttpStatus.CONFLICT));
+    assertEquals(thrown.getStatus(), HttpStatus.CONFLICT);
   }
 
   @Test
@@ -116,7 +116,7 @@ class AdminRouterTest {
     when(registrationService.register(any())).thenThrow(new NullPointerException());
     ResponseStatusException thrown =
         assertThrows(ResponseStatusException.class, () -> router.register(null, "auth"));
-    assertTrue(thrown.getStatus().equals(HttpStatus.BAD_REQUEST));
+    assertEquals(thrown.getStatus(), HttpStatus.BAD_REQUEST);
   }
 
   @Test
