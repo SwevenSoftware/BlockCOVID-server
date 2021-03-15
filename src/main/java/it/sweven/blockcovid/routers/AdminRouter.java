@@ -15,9 +15,7 @@ import java.util.Optional;
 import javax.security.auth.login.CredentialException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -43,20 +41,40 @@ public class AdminRouter {
   }
 
   @PostMapping(value = "user/new", consumes = "application/json", produces = "application/json")
-  public ResponseEntity<?> register(
+  @ResponseBody
+  @ApiResponses({
+    @ApiResponse(
+        responseCode = "200",
+        description = "Provided user registered successfully",
+        content =
+            @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = User.class))),
+    @ApiResponse(
+        responseCode = "400",
+        description = "No credentials provided",
+        content = @Content(schema = @Schema(implementation = void.class))),
+    @ApiResponse(
+        responseCode = "401",
+        description = "Invalid authentication token",
+        content = @Content(schema = @Schema(implementation = void.class))),
+    @ApiResponse(
+        responseCode = "403",
+        description = "Method not allowed",
+        content = @Content(schema = @Schema(implementation = void.class)))
+  })
+  public EntityModel<User> register(
       @RequestBody Credentials credentials, @RequestHeader String Authorization) {
-    User admin = authenticationService.authenticateByToken(Authorization);
-    if (!admin.getAuthorities().contains(Authority.ADMIN))
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Method not allowed");
-    try {
-      User registeredUser = registrationService.register(credentials);
-      EntityModel<User> entityUser =
-          assembler.setAuthorities(admin.getAuthorities()).toModel(registeredUser);
-      return ResponseEntity.created(entityUser.getRequiredLink(IanaLinkRelations.SELF).toUri())
-          .body(entityUser);
-    } catch (CredentialException exception) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getMessage());
-    }
+    User submitter = authenticationService.authenticateByToken(Authorization);
+    if (submitter.getAuthorities().contains(Authority.ADMIN)) {
+      try {
+        User registeredUser = registrationService.register(credentials);
+        return assembler.setAuthorities(submitter.getAuthorities()).toModel(registeredUser);
+      } catch (CredentialException exception) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getMessage());
+      }
+    } else
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User has not enough privileges");
   }
 
   @PostMapping(
@@ -72,10 +90,22 @@ public class AdminRouter {
             @Content(
                 mediaType = "application/json",
                 schema = @Schema(implementation = User.class))),
-    @ApiResponse(responseCode = "400", description = "No credentials provided"),
-    @ApiResponse(responseCode = "401", description = "Invalid authentication token"),
-    @ApiResponse(responseCode = "403", description = "Method not allowed"),
-    @ApiResponse(responseCode = "404", description = "Username not found")
+    @ApiResponse(
+        responseCode = "400",
+        description = "No credentials provided",
+        content = @Content(schema = @Schema(implementation = void.class))),
+    @ApiResponse(
+        responseCode = "401",
+        description = "Invalid authentication token",
+        content = @Content(schema = @Schema(implementation = void.class))),
+    @ApiResponse(
+        responseCode = "403",
+        description = "Method not allowed",
+        content = @Content(schema = @Schema(implementation = void.class))),
+    @ApiResponse(
+        responseCode = "404",
+        description = "Username not found",
+        content = @Content(schema = @Schema(implementation = void.class)))
   })
   public EntityModel<User> modifyUser(
       @RequestHeader String Authorization,
