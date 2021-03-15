@@ -48,7 +48,7 @@ public class UserRouter {
     return assembler.setAuthorities(user.getAuthorities()).toModel(user);
   }
 
-  @PostMapping(
+  @PutMapping(
       value = "/modify/password",
       consumes = "application/json",
       produces = "application/json")

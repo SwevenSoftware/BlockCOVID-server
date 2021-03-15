@@ -83,7 +83,7 @@ public class AdminRouter {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User has not enough privileges");
   }
 
-  @PostMapping(
+  @PutMapping(
       value = "/user/{username}/modify",
       consumes = "application/json",
       produces = "application/json")
