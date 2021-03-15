@@ -13,7 +13,9 @@ import it.sweven.blockcovid.services.UserAuthenticationService;
 import it.sweven.blockcovid.services.UserRegistrationService;
 import it.sweven.blockcovid.services.UserService;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.EntityModel;
@@ -151,5 +153,37 @@ class AdminRouterTest {
             ResponseStatusException.class,
             () -> router.modifyUser("auth", oldUser.getUsername(), newCredentials));
     assertEquals(HttpStatus.NOT_FOUND, thrown.getStatus());
+  }
+
+  @Test
+  void listUsers_validRequest() {
+    User admin = new User("admin", "password", Set.of(Authority.ADMIN));
+    when(authenticationService.authenticateByToken("auth")).thenReturn(admin);
+    List<User> expectedList =
+        List.of(
+            new User("user1", "password", Set.of(Authority.USER)),
+            new User("user2", "password", Collections.emptySet()),
+            new User("user3", "password", Set.of(Authority.CLEANER, Authority.ADMIN)));
+    when(userService.getAllUsers()).thenReturn(expectedList);
+    assertEquals(
+        expectedList,
+        router.listUsers("auth").getContent().stream()
+            .map(EntityModel::getContent)
+            .collect(Collectors.toList()));
+  }
+
+  @Test
+  void listUsers_requestNotMadeByAdmin() {
+    User user = new User("user", "password", Set.of(Authority.USER, Authority.CLEANER));
+    when(authenticationService.authenticateByToken("auth")).thenReturn(user);
+    List<User> expectedList =
+        List.of(
+            new User("user1", "password", Set.of(Authority.USER)),
+            new User("user2", "password", Collections.emptySet()),
+            new User("user3", "password", Set.of(Authority.CLEANER, Authority.ADMIN)));
+    when(userService.getAllUsers()).thenReturn(expectedList);
+    ResponseStatusException thrown =
+        assertThrows(ResponseStatusException.class, () -> router.listUsers("auth"));
+    assertEquals(HttpStatus.FORBIDDEN, thrown.getStatus());
   }
 }
