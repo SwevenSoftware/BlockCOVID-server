@@ -7,17 +7,18 @@ import static org.mockito.Mockito.*;
 import it.sweven.blockcovid.assemblers.UserAssembler;
 import it.sweven.blockcovid.entities.user.Credentials;
 import it.sweven.blockcovid.entities.user.User;
-import it.sweven.blockcovid.entities.user.UserBuilder;
 import it.sweven.blockcovid.security.Authority;
 import it.sweven.blockcovid.services.UserAuthenticationService;
 import it.sweven.blockcovid.services.UserRegistrationService;
 import it.sweven.blockcovid.services.UserService;
 import java.util.Collections;
 import java.util.Set;
+import javax.security.auth.login.CredentialException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -78,22 +79,44 @@ class AdminRouterTest {
   }
 
   @Test
-  void register() {
-    Credentials testCredentials = new Credentials("test", "test", Set.of(Authority.USER));
-    String auth = "testAuthorization";
-    User testUser =
-        new UserBuilder()
-            .setUsername(testCredentials.getUsername())
-            .setPassword(testCredentials.getPassword())
-            .setAuthorities(Set.of(Authority.USER))
-            .createUser();
-    User testAdmin =
-        new UserBuilder()
-            .setUsername("testUser")
-            .setPassword("testPassword")
-            .setAuthorities(Set.of(Authority.ADMIN))
-            .createUser();
-    // assertEquals(userAssembler.toModel(testUser), router.register(testCredentials, auth));
+  void register_validRequest() throws CredentialException {
+    Credentials testCredentials = new Credentials("user", "password", Set.of(Authority.USER));
+    User testUser = new User("user", "password", Set.of(Authority.USER));
+    User testAdmin = new User("admin", "password", Set.of(Authority.ADMIN));
+    when(authenticationService.authenticateByToken("auth")).thenReturn(testAdmin);
+    when(registrationService.register(any())).thenReturn(testUser);
+    assertEquals(userAssembler.toModel(testUser), router.register(testCredentials, "auth"));
+  }
+
+  @Test
+  void register_wrongToken_throwsAuthenticationCredentialsException() {
+    Credentials testCredentials = new Credentials("user", "password", Set.of(Authority.USER));
+    when(authenticationService.authenticateByToken("auth"))
+        .thenThrow(new AuthenticationCredentialsNotFoundException(""));
+    assertThrows(
+        AuthenticationCredentialsNotFoundException.class,
+        () -> router.register(testCredentials, "auth"));
+  }
+
+  @Test
+  void register_usernameAlreadyInUse_throwsResponseStatusException() throws CredentialException {
+    Credentials testCredentials = new Credentials("user", "password", Set.of(Authority.USER));
+    User adminTest = new User("admin", "password", Set.of(Authority.ADMIN));
+    when(authenticationService.authenticateByToken("auth")).thenReturn(adminTest);
+    when(registrationService.register(any())).thenThrow(new CredentialException());
+    ResponseStatusException thrown =
+        assertThrows(ResponseStatusException.class, () -> router.register(testCredentials, "auth"));
+    assertEquals(thrown.getStatus(), HttpStatus.CONFLICT);
+  }
+
+  @Test
+  void register_nullCredentials_throwsResponseStatusException() throws CredentialException {
+    User adminTest = new User("admin", "password", Set.of(Authority.ADMIN));
+    when(authenticationService.authenticateByToken("auth")).thenReturn(adminTest);
+    when(registrationService.register(any())).thenThrow(new NullPointerException());
+    ResponseStatusException thrown =
+        assertThrows(ResponseStatusException.class, () -> router.register(null, "auth"));
+    assertEquals(thrown.getStatus(), HttpStatus.BAD_REQUEST);
   }
 
   @Test
