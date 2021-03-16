@@ -209,4 +209,33 @@ class AdminRouterTest {
         assertThrows(ResponseStatusException.class, () -> router.listUsers("auth"));
     assertEquals(HttpStatus.FORBIDDEN, thrown.getStatus());
   }
+
+  @Test
+  void delete_validDeletion() {
+    User userToDelete = new User("user", "password", Set.of(Authority.USER));
+    User admin = new User("admin", "password", Set.of(Authority.ADMIN));
+    when(authenticationService.authenticateByToken("auth")).thenReturn(admin);
+    when(userService.deleteByUsername("user")).thenReturn(userToDelete);
+    assertEquals(userToDelete, router.delete("user", "auth").getContent());
+  }
+
+  @Test
+  void delete_requestNotMadeByAdmin_throwsResponseStatusException() {
+    User submitter = new User("user", "password", Set.of(Authority.USER, Authority.CLEANER));
+    when(authenticationService.authenticateByToken("auth")).thenReturn(submitter);
+    ResponseStatusException thrown =
+        assertThrows(ResponseStatusException.class, () -> router.delete("user", "auth"));
+    assertEquals(HttpStatus.FORBIDDEN, thrown.getStatus());
+  }
+
+  @Test
+  void delete_requestWithInvalidUsername_throwsResponseStatusException() {
+    User admin = new User("admin", "password", Set.of(Authority.ADMIN));
+    when(authenticationService.authenticateByToken("auth")).thenReturn(admin);
+    when(userService.deleteByUsername("user"))
+        .thenThrow(new UsernameNotFoundException("username user not found"));
+    ResponseStatusException thrown =
+        assertThrows(ResponseStatusException.class, () -> router.delete("user", "auth"));
+    assertEquals(HttpStatus.NOT_FOUND, thrown.getStatus());
+  }
 }
