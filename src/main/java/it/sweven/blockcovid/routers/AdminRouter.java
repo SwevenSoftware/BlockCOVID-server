@@ -161,4 +161,30 @@ public class AdminRouter {
     return CollectionModel.of(
         users, linkTo(methodOn(AdminRouter.class).listUsers(null)).withSelfRel());
   }
+
+  @DeleteMapping(value = "/user/{username}", produces = "application/json")
+  @ResponseBody
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "Username successfully deleted"),
+    @ApiResponse(
+        responseCode = "403",
+        description = "Method not allowed",
+        content = @Content(schema = @Schema(implementation = void.class))),
+    @ApiResponse(
+        responseCode = "404",
+        description = "Username not found",
+        content = @Content(schema = @Schema(implementation = void.class)))
+  })
+  public EntityModel<User> delete(
+      @PathVariable String username, @RequestHeader String Authorization) {
+    User submitter = authenticationService.authenticateByToken(Authorization);
+    if (!submitter.getAuthorities().contains(Authority.ADMIN))
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Method not allowed");
+    try {
+      User deletedUser = userService.deleteByUsername(username);
+      return assembler.toModel(deletedUser);
+    } catch (UsernameNotFoundException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Username not found");
+    }
+  }
 }

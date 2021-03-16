@@ -32,7 +32,7 @@ public class UserService implements UserDetailsService {
   public User getByUsername(String username) throws UsernameNotFoundException {
     return userRepository
         .findByUsername(username)
-        .orElseThrow(() -> new UsernameNotFoundException(username + "not found"));
+        .orElseThrow(() -> new UsernameNotFoundException("username" + username + "not found"));
   }
 
   public List<User> getAllUsers() {
@@ -63,5 +63,11 @@ public class UserService implements UserDetailsService {
               .setAuthorities(Set.of(Authority.ADMIN))
               .createUser());
     }
+  }
+
+  public User deleteByUsername(String username) throws UsernameNotFoundException {
+    return userRepository
+        .deleteUserByUsername(username)
+        .orElseThrow(() -> new UsernameNotFoundException("username " + username + " not found"));
   }
 }
