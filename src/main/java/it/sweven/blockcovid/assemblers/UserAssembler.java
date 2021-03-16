@@ -2,10 +2,10 @@ package it.sweven.blockcovid.assemblers;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
+import it.sweven.blockcovid.entities.user.Authority;
 import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.routers.AdminRouter;
 import it.sweven.blockcovid.routers.UserRouter;
-import it.sweven.blockcovid.security.Authority;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;

@@ -1,4 +1,4 @@
-package it.sweven.blockcovid.blockchain;
+package it.sweven.blockcovid.services.blockchain;
 
 import java.util.Map;
 
