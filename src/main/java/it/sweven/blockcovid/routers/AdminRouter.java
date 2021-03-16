@@ -1,5 +1,8 @@
 package it.sweven.blockcovid.routers;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,9 +14,12 @@ import it.sweven.blockcovid.security.Authority;
 import it.sweven.blockcovid.services.UserAuthenticationService;
 import it.sweven.blockcovid.services.UserRegistrationService;
 import it.sweven.blockcovid.services.UserService;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.security.auth.login.CredentialException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -133,5 +139,26 @@ public class AdminRouter {
     Optional.ofNullable(newCredentials.getAuthorities())
         .ifPresent(auth -> userService.updateAuthorities(user, auth));
     return assembler.setAuthorities(admin.getAuthorities()).toModel(user);
+  }
+
+  @GetMapping(value = "/users", consumes = "application/json", produces = "application/json")
+  @ResponseBody
+  @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "List of existing users"),
+    @ApiResponse(
+        responseCode = "403",
+        description = "Method not allowed",
+        content = @Content(schema = @Schema(implementation = void.class)))
+  })
+  public CollectionModel<EntityModel<User>> listUsers(@RequestHeader String Authorization) {
+    User admin = authenticationService.authenticateByToken(Authorization);
+    if (!admin.getAuthorities().contains(Authority.ADMIN))
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Method not allowed");
+    List<EntityModel<User>> users =
+        userService.getAllUsers().stream()
+            .map(u -> assembler.setAuthorities(admin.getAuthorities()).toModel(u))
+            .collect(Collectors.toList());
+    return CollectionModel.of(
+        users, linkTo(methodOn(AdminRouter.class).listUsers(null)).withSelfRel());
   }
 }

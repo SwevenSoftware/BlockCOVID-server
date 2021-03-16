@@ -4,6 +4,7 @@ import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.entities.user.UserBuilder;
 import it.sweven.blockcovid.repositories.UserRepository;
 import it.sweven.blockcovid.security.Authority;
+import java.util.List;
 import java.util.Set;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,10 @@ public class UserService implements UserDetailsService {
     return userRepository
         .findByUsername(username)
         .orElseThrow(() -> new UsernameNotFoundException(username + "not found"));
+  }
+
+  public List<User> getAllUsers() {
+    return userRepository.findAll();
   }
 
   @Override
