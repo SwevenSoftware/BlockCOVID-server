@@ -1,4 +1,4 @@
-name: Build Gradle
+name: Code Coverage
 
 on:
   push:
