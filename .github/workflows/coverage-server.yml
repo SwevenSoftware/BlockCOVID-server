@@ -8,7 +8,7 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  run:
+  coverage:
 
     runs-on: ubuntu-20.04
 
@@ -27,5 +27,5 @@ jobs:
 
       - uses: codecov/codecov-action@v1
         with:
-          - directory: build/reports/jacoco/test/
-          - verbose: true
+          directory: "build/reports/jacoco/test/"
+          verbose: true
