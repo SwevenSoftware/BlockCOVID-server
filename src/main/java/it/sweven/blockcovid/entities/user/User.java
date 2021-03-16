@@ -1,7 +1,6 @@
 package it.sweven.blockcovid.entities.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import it.sweven.blockcovid.security.Authority;
 import java.time.LocalDateTime;
 import java.util.Set;
 import org.springframework.data.annotation.Id;
