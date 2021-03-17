@@ -1,6 +1,6 @@
 package it.sweven.blockcovid.services;
 
-import it.sweven.blockcovid.entities.user.Credentials;
+import it.sweven.blockcovid.dto.CredentialsWithAuthorities;
 import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.entities.user.UserBuilder;
 import javax.security.auth.login.CredentialException;
@@ -20,7 +20,7 @@ public class UserRegistrationService {
     this.passwordEncoder = passwordEncoder;
   }
 
-  public User register(Credentials credentials) throws CredentialException {
+  public User register(CredentialsWithAuthorities credentials) throws CredentialException {
     try {
       userService.getByUsername(credentials.getUsername());
       throw new CredentialException("Username already in use");

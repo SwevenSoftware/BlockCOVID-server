@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.sweven.blockcovid.assemblers.UserAssembler;
 import it.sweven.blockcovid.dto.CredentialChangeRequestForm;
-import it.sweven.blockcovid.entities.user.Credentials;
 import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.services.UserAuthenticationService;
 import it.sweven.blockcovid.services.UserService;
@@ -33,15 +32,10 @@ public class UserRouter {
     this.userService = userService;
   }
 
-  @PostMapping(value = "/info", consumes = "application/json", produces = "application/json")
+  @GetMapping(value = "/info", consumes = "application/json", produces = "application/json")
   @ResponseBody
   @ApiResponses({
-    @ApiResponse(
-        responseCode = "200",
-        content =
-            @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = User.class))),
+    @ApiResponse(responseCode = "200"),
     @ApiResponse(responseCode = "401", description = "Invalid authentication token")
   })
   public EntityModel<User> info(@RequestHeader String Authorization) {
@@ -66,14 +60,13 @@ public class UserRouter {
     @ApiResponse(responseCode = "401", description = "Invalid authentication token")
   })
   public EntityModel<User> modifyPassword(
-      @RequestHeader String Authorization,
-      @RequestBody CredentialChangeRequestForm credentialsPair) {
-    if (credentialsPair == null)
+      @RequestHeader String Authorization, @RequestBody CredentialChangeRequestForm requestForm) {
+    if (requestForm == null
+        || requestForm.getNewPassword() == null
+        || requestForm.getOldPassword() == null)
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong or missing credentials");
     User user = authenticationService.authenticateByToken(Authorization);
-    Credentials oldCredentials = credentialsPair.getOldCredentials();
-    Credentials newCredentials = credentialsPair.getNewCredentials();
-    userService.updatePassword(user, oldCredentials.getPassword(), newCredentials.getPassword());
+    userService.updatePassword(user, requestForm.getOldPassword(), requestForm.getNewPassword());
     return assembler.setAuthorities(user.getAuthorities()).toModel(user);
   }
 }

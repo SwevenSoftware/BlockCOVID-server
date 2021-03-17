@@ -6,8 +6,9 @@ import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.*;
 
 import it.sweven.blockcovid.assemblers.UserAssembler;
+import it.sweven.blockcovid.dto.CredentialChangeRequestForm;
+import it.sweven.blockcovid.dto.CredentialsWithAuthorities;
 import it.sweven.blockcovid.entities.user.Authority;
-import it.sweven.blockcovid.entities.user.Credentials;
 import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.services.UserAuthenticationService;
 import it.sweven.blockcovid.services.UserService;
@@ -15,7 +16,6 @@ import java.util.Collections;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.util.Pair;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -85,14 +85,11 @@ class UserRouterTest {
   @Test
   void modifyPassword_validCredentials() {
     User oldUser = new User("user", "password", Collections.emptySet());
-    Credentials oldCredentials =
-        new Credentials(oldUser.getUsername(), oldUser.getPassword(), oldUser.getAuthorities());
-    Credentials newCredentials = new Credentials("newUser", "newPassword", Set.of(Authority.ADMIN));
+    CredentialChangeRequestForm requestForm =
+        new CredentialChangeRequestForm("password", "newPassword");
     User expectedUser = new User("user", "newPassword", Collections.emptySet());
     when(authenticationService.authenticateByToken("auth")).thenReturn(oldUser);
-    assertEquals(
-        expectedUser,
-        userRouter.modifyPassword("auth", Pair.of(oldCredentials, newCredentials)).getContent());
+    assertEquals(expectedUser, userRouter.modifyPassword("auth", requestForm).getContent());
   }
 
   @Test
@@ -104,9 +101,10 @@ class UserRouterTest {
 
   @Test
   void modifyPassword_nullPasswordCredentials() {
-    Credentials newCredentials = new Credentials("newUsername", null, Set.of(Authority.ADMIN));
-    Credentials oldCredentials =
-        new Credentials("newUsername", "oldPassword", Collections.emptySet());
+    CredentialsWithAuthorities newCredentials =
+        new CredentialsWithAuthorities("newUsername", null, Set.of(Authority.ADMIN));
+    CredentialsWithAuthorities oldCredentials =
+        new CredentialsWithAuthorities("newUsername", "oldPassword", Collections.emptySet());
     ResponseStatusException thrown =
         assertThrows(ResponseStatusException.class, () -> userRouter.modifyPassword("", null));
     assertEquals(HttpStatus.BAD_REQUEST, thrown.getStatus());
