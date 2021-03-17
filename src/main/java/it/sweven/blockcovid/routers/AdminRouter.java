@@ -8,8 +8,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.sweven.blockcovid.assemblers.UserAssembler;
+import it.sweven.blockcovid.dto.CredentialsWithAuthorities;
 import it.sweven.blockcovid.entities.user.Authority;
-import it.sweven.blockcovid.entities.user.Credentials;
 import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.services.UserAuthenticationService;
 import it.sweven.blockcovid.services.UserRegistrationService;
@@ -59,22 +59,22 @@ public class AdminRouter {
     @ApiResponse(
         responseCode = "400",
         description = "No credentials provided",
-        content = @Content(schema = @Schema(implementation = void.class))),
+        content = @Content(schema = @Schema(implementation = ResponseStatusException.class))),
     @ApiResponse(
         responseCode = "401",
         description = "Invalid authentication token",
-        content = @Content(schema = @Schema(implementation = void.class))),
+        content = @Content(schema = @Schema(implementation = ResponseStatusException.class))),
     @ApiResponse(
         responseCode = "403",
         description = "Method not allowed",
-        content = @Content(schema = @Schema(implementation = void.class))),
+        content = @Content(schema = @Schema(implementation = ResponseStatusException.class))),
     @ApiResponse(
         responseCode = "409",
         description = "Username already taken",
-        content = @Content(schema = @Schema(implementation = void.class)))
+        content = @Content(schema = @Schema(implementation = ResponseStatusException.class)))
   })
   public EntityModel<User> register(
-      @RequestBody Credentials credentials, @RequestHeader String Authorization) {
+      @RequestBody CredentialsWithAuthorities credentials, @RequestHeader String Authorization) {
     User submitter = authenticationService.authenticateByToken(Authorization);
     if (submitter.getAuthorities().contains(Authority.ADMIN)) {
       try {
@@ -122,7 +122,7 @@ public class AdminRouter {
   public EntityModel<User> modifyUser(
       @RequestHeader String Authorization,
       @PathVariable String username,
-      @RequestBody Credentials newCredentials) {
+      @RequestBody CredentialsWithAuthorities newCredentials) {
     User admin = authenticationService.authenticateByToken(Authorization);
     if (!admin.getAuthorities().contains(Authority.ADMIN))
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Method not allowed");
@@ -135,7 +135,7 @@ public class AdminRouter {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User " + username + " not found");
     }
     Optional.ofNullable(newCredentials.getPassword())
-        .ifPresent(pwd -> userService.updatePassword(user, pwd));
+        .ifPresent(pwd -> userService.setPassword(user, pwd));
     Optional.ofNullable(newCredentials.getAuthorities())
         .ifPresent(auth -> userService.updateAuthorities(user, auth));
     return assembler.setAuthorities(admin.getAuthorities()).toModel(user);
