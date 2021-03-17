@@ -36,7 +36,10 @@ public class UserRouter {
   @ResponseBody
   @ApiResponses({
     @ApiResponse(responseCode = "200"),
-    @ApiResponse(responseCode = "401", description = "Invalid authentication token")
+    @ApiResponse(
+        responseCode = "401",
+        description = "Invalid authentication token",
+        content = @Content(schema = @Schema(implementation = ResponseStatusException.class)))
   })
   public EntityModel<User> info(@RequestHeader String Authorization) {
     User user = authenticationService.authenticateByToken(Authorization);
@@ -56,8 +59,14 @@ public class UserRouter {
             @Content(
                 mediaType = "application/json",
                 schema = @Schema(implementation = User.class))),
-    @ApiResponse(responseCode = "400", description = "Wrong or missing credentials"),
-    @ApiResponse(responseCode = "401", description = "Invalid authentication token")
+    @ApiResponse(
+        responseCode = "400",
+        description = "Wrong or missing credentials",
+        content = @Content(schema = @Schema(implementation = ResponseStatusException.class))),
+    @ApiResponse(
+        responseCode = "401",
+        description = "Invalid authentication token",
+        content = @Content(schema = @Schema(implementation = ResponseStatusException.class)))
   })
   public EntityModel<User> modifyPassword(
       @RequestHeader String Authorization, @RequestBody CredentialChangeRequestForm requestForm) {

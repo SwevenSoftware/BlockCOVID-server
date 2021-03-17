@@ -42,7 +42,7 @@ public class LoginRouter {
     @ApiResponse(
         responseCode = "400",
         description = "Invalid username or password",
-        content = @Content(schema = @Schema(implementation = void.class)))
+        content = @Content(schema = @Schema(implementation = ResponseStatusException.class)))
   })
   public EntityModel<Token> login(@RequestBody Credentials credentials) {
     try {

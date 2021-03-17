@@ -59,19 +59,19 @@ public class AdminRouter {
     @ApiResponse(
         responseCode = "400",
         description = "No credentials provided",
-        content = @Content(schema = @Schema(implementation = void.class))),
+        content = @Content(schema = @Schema(implementation = ResponseStatusException.class))),
     @ApiResponse(
         responseCode = "401",
         description = "Invalid authentication token",
-        content = @Content(schema = @Schema(implementation = void.class))),
+        content = @Content(schema = @Schema(implementation = ResponseStatusException.class))),
     @ApiResponse(
         responseCode = "403",
         description = "Method not allowed",
-        content = @Content(schema = @Schema(implementation = void.class))),
+        content = @Content(schema = @Schema(implementation = ResponseStatusException.class))),
     @ApiResponse(
         responseCode = "409",
         description = "Username already taken",
-        content = @Content(schema = @Schema(implementation = void.class)))
+        content = @Content(schema = @Schema(implementation = ResponseStatusException.class)))
   })
   public EntityModel<User> register(
       @RequestBody CredentialsWithAuthorities credentials, @RequestHeader String Authorization) {
