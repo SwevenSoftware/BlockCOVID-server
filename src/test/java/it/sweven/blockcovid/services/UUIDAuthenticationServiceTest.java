@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -56,6 +57,16 @@ class UUIDAuthenticationServiceTest {
             });
     authenticationService.login("user", "password");
     assertTrue(tokenSaved.get());
+  }
+
+  @Test
+  void login_incorrectPassword_throwsBadCredentialsException() {
+    User user = mock(User.class);
+    when(user.getPassword()).thenReturn("userPassword");
+    when(userService.getByUsername("user")).thenReturn(user);
+    when(encoder.matches("password", "userPassword")).thenReturn(false);
+    assertThrows(
+        BadCredentialsException.class, () -> authenticationService.login("user", "password"));
   }
 
   @Test
