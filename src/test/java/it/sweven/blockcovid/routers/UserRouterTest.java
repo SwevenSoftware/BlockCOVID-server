@@ -6,8 +6,9 @@ import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.*;
 
 import it.sweven.blockcovid.assemblers.UserAssembler;
+import it.sweven.blockcovid.dto.CredentialChangeRequestForm;
+import it.sweven.blockcovid.dto.CredentialsWithAuthorities;
 import it.sweven.blockcovid.entities.user.Authority;
-import it.sweven.blockcovid.entities.user.Credentials;
 import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.services.UserAuthenticationService;
 import it.sweven.blockcovid.services.UserService;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.server.ResponseStatusException;
 
 class UserRouterTest {
@@ -49,12 +51,15 @@ class UserRouterTest {
     doAnswer(
             invocation -> {
               User user = invocation.getArgument(0);
-              String newPassword = invocation.getArgument(1);
+              String oldPassword = invocation.getArgument(1);
+              String newPassword = invocation.getArgument(2);
+              if (!oldPassword.equals(user.getPassword()))
+                throw new BadCredentialsException("Old password does not match");
               user.setPassword(newPassword);
               return null;
             })
         .when(userService)
-        .updatePassword(any(), any());
+        .updatePassword(any(), any(), any());
     // Mock UserService.updateAuthorities
     doAnswer(
             invocation -> {
@@ -80,10 +85,11 @@ class UserRouterTest {
   @Test
   void modifyPassword_validCredentials() {
     User oldUser = new User("user", "password", Collections.emptySet());
-    Credentials newCredentials = new Credentials("newUser", "newPassword", Set.of(Authority.ADMIN));
+    CredentialChangeRequestForm requestForm =
+        new CredentialChangeRequestForm("password", "newPassword");
     User expectedUser = new User("user", "newPassword", Collections.emptySet());
     when(authenticationService.authenticateByToken("auth")).thenReturn(oldUser);
-    assertEquals(expectedUser, userRouter.modifyPassword("auth", newCredentials).getContent());
+    assertEquals(expectedUser, userRouter.modifyPassword("auth", requestForm).getContent());
   }
 
   @Test
@@ -95,10 +101,12 @@ class UserRouterTest {
 
   @Test
   void modifyPassword_nullPasswordCredentials() {
-    Credentials newCredentials = new Credentials("newUsername", null, Set.of(Authority.ADMIN));
+    CredentialsWithAuthorities newCredentials =
+        new CredentialsWithAuthorities("newUsername", null, Set.of(Authority.ADMIN));
+    CredentialsWithAuthorities oldCredentials =
+        new CredentialsWithAuthorities("newUsername", "oldPassword", Collections.emptySet());
     ResponseStatusException thrown =
-        assertThrows(
-            ResponseStatusException.class, () -> userRouter.modifyPassword("", newCredentials));
+        assertThrows(ResponseStatusException.class, () -> userRouter.modifyPassword("", null));
     assertEquals(HttpStatus.BAD_REQUEST, thrown.getStatus());
   }
 }

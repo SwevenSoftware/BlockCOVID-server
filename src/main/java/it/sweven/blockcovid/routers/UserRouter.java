@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.sweven.blockcovid.assemblers.UserAssembler;
-import it.sweven.blockcovid.entities.user.Credentials;
+import it.sweven.blockcovid.dto.CredentialChangeRequestForm;
 import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.services.UserAuthenticationService;
 import it.sweven.blockcovid.services.UserService;
@@ -32,16 +32,14 @@ public class UserRouter {
     this.userService = userService;
   }
 
-  @PostMapping(value = "/info", consumes = "application/json", produces = "application/json")
+  @GetMapping(value = "/info", consumes = "application/json", produces = "application/json")
   @ResponseBody
   @ApiResponses({
+    @ApiResponse(responseCode = "200"),
     @ApiResponse(
-        responseCode = "200",
-        content =
-            @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = User.class))),
-    @ApiResponse(responseCode = "401", description = "Invalid authentication token")
+        responseCode = "401",
+        description = "Invalid authentication token",
+        content = @Content(schema = @Schema(implementation = ResponseStatusException.class)))
   })
   public EntityModel<User> info(@RequestHeader String Authorization) {
     User user = authenticationService.authenticateByToken(Authorization);
@@ -61,17 +59,23 @@ public class UserRouter {
             @Content(
                 mediaType = "application/json",
                 schema = @Schema(implementation = User.class))),
-    @ApiResponse(responseCode = "400", description = "Password not provided"),
-    @ApiResponse(responseCode = "401", description = "Invalid authentication token")
+    @ApiResponse(
+        responseCode = "400",
+        description = "Wrong or missing credentials",
+        content = @Content(schema = @Schema(implementation = ResponseStatusException.class))),
+    @ApiResponse(
+        responseCode = "401",
+        description = "Invalid authentication token",
+        content = @Content(schema = @Schema(implementation = ResponseStatusException.class)))
   })
   public EntityModel<User> modifyPassword(
-      @RequestHeader String Authorization, @RequestBody Credentials newCredentials) {
+      @RequestHeader String Authorization, @RequestBody CredentialChangeRequestForm requestForm) {
+    if (requestForm == null
+        || requestForm.getNewPassword() == null
+        || requestForm.getOldPassword() == null)
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong or missing credentials");
     User user = authenticationService.authenticateByToken(Authorization);
-    if (newCredentials == null || newCredentials.getPassword() == null)
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password not provided");
-    else {
-      userService.updatePassword(user, newCredentials.getPassword());
-      return assembler.setAuthorities(user.getAuthorities()).toModel(user);
-    }
+    userService.updatePassword(user, requestForm.getOldPassword(), requestForm.getNewPassword());
+    return assembler.setAuthorities(user.getAuthorities()).toModel(user);
   }
 }

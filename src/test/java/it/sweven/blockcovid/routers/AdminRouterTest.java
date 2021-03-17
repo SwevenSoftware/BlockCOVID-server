@@ -5,8 +5,8 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import it.sweven.blockcovid.assemblers.UserAssembler;
+import it.sweven.blockcovid.dto.CredentialsWithAuthorities;
 import it.sweven.blockcovid.entities.user.Authority;
-import it.sweven.blockcovid.entities.user.Credentials;
 import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.services.UserAuthenticationService;
 import it.sweven.blockcovid.services.UserRegistrationService;
@@ -58,12 +58,12 @@ class AdminRouterTest {
     doAnswer(
             invocation -> {
               User user = invocation.getArgument(0);
-              String newPassword = invocation.getArgument(1);
+              String newPassword = invocation.getArgument(2);
               user.setPassword(newPassword);
               return null;
             })
         .when(userService)
-        .updatePassword(any(), any());
+        .updatePassword(any(), any(), any());
     // Mock UserService.updateAuthorities
     doAnswer(
             invocation -> {
@@ -74,6 +74,15 @@ class AdminRouterTest {
             })
         .when(userService)
         .updateAuthorities(any(), any());
+    doAnswer(
+            invocation -> {
+              User user = invocation.getArgument(0);
+              String newPassword = invocation.getArgument(1);
+              user.setPassword(newPassword);
+              return null;
+            })
+        .when(userService)
+        .setPassword(any(), any());
 
     // Instantiation UserRoute
     router =
@@ -82,7 +91,8 @@ class AdminRouterTest {
 
   @Test
   void register_validRequest() throws CredentialException {
-    Credentials testCredentials = new Credentials("user", "password", Set.of(Authority.USER));
+    CredentialsWithAuthorities testCredentials =
+        new CredentialsWithAuthorities("user", "password", Set.of(Authority.USER));
     User testUser = new User("user", "password", Set.of(Authority.USER));
     User testAdmin = new User("admin", "password", Set.of(Authority.ADMIN));
     when(authenticationService.authenticateByToken("auth")).thenReturn(testAdmin);
@@ -92,7 +102,8 @@ class AdminRouterTest {
 
   @Test
   void register_wrongToken_throwsAuthenticationCredentialsException() {
-    Credentials testCredentials = new Credentials("user", "password", Set.of(Authority.USER));
+    CredentialsWithAuthorities testCredentials =
+        new CredentialsWithAuthorities("user", "password", Set.of(Authority.USER));
     when(authenticationService.authenticateByToken("auth"))
         .thenThrow(new AuthenticationCredentialsNotFoundException(""));
     assertThrows(
@@ -102,7 +113,8 @@ class AdminRouterTest {
 
   @Test
   void register_usernameAlreadyInUse_throwsResponseStatusException() throws CredentialException {
-    Credentials testCredentials = new Credentials("user", "password", Set.of(Authority.USER));
+    CredentialsWithAuthorities testCredentials =
+        new CredentialsWithAuthorities("user", "password", Set.of(Authority.USER));
     User adminTest = new User("admin", "password", Set.of(Authority.ADMIN));
     when(authenticationService.authenticateByToken("auth")).thenReturn(adminTest);
     when(registrationService.register(any())).thenThrow(new CredentialException());
@@ -125,7 +137,8 @@ class AdminRouterTest {
   void modifyUser_validRequest() {
     User admin = new User("admin", "password", Set.of(Authority.ADMIN));
     User oldUser = new User("user", "password", Collections.emptySet());
-    Credentials newCredentials = new Credentials("newUser", "newPassword", Set.of(Authority.ADMIN));
+    CredentialsWithAuthorities newCredentials =
+        new CredentialsWithAuthorities("newUser", "newPassword", Set.of(Authority.ADMIN));
     User expectedUser =
         new User(
             oldUser.getUsername(), newCredentials.getPassword(), newCredentials.getAuthorities());
@@ -140,7 +153,8 @@ class AdminRouterTest {
   void modifyUser_requestNotMadeByAdmin() {
     User user = new User("user", "password", Set.of(Authority.USER, Authority.CLEANER));
     User oldUser = new User("oldUser", "password", Collections.emptySet());
-    Credentials newCredentials = new Credentials("newUser", "newPassword", Set.of(Authority.ADMIN));
+    CredentialsWithAuthorities newCredentials =
+        new CredentialsWithAuthorities("newUser", "newPassword", Set.of(Authority.ADMIN));
     when(authenticationService.authenticateByToken("auth")).thenReturn(user);
     when(userService.getByUsername(oldUser.getUsername())).thenReturn(oldUser);
     ResponseStatusException thrown =
@@ -167,7 +181,8 @@ class AdminRouterTest {
   void modifyUser_usernameNotFound() {
     User admin = new User("admin", "password", Set.of(Authority.ADMIN));
     User oldUser = new User("oldUser", "password", Collections.emptySet());
-    Credentials newCredentials = new Credentials("newUser", "newPassword", Set.of(Authority.ADMIN));
+    CredentialsWithAuthorities newCredentials =
+        new CredentialsWithAuthorities("newUser", "newPassword", Set.of(Authority.ADMIN));
     when(authenticationService.authenticateByToken("auth")).thenReturn(admin);
     when(userService.getByUsername(oldUser.getUsername()))
         .thenThrow(new UsernameNotFoundException(oldUser.getUsername() + " not found"));

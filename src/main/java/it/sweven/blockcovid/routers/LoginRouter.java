@@ -7,9 +7,10 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import it.sweven.blockcovid.entities.user.Credentials;
+import it.sweven.blockcovid.dto.Credentials;
 import it.sweven.blockcovid.entities.user.Token;
 import it.sweven.blockcovid.services.UserAuthenticationService;
+import java.util.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
@@ -41,14 +42,17 @@ public class LoginRouter {
     @ApiResponse(
         responseCode = "400",
         description = "Invalid username or password",
-        content = @Content(schema = @Schema(implementation = void.class)))
+        content = @Content(schema = @Schema(implementation = ResponseStatusException.class)))
   })
   public EntityModel<Token> login(@RequestBody Credentials credentials) {
     try {
       return EntityModel.of(
           authenticationService.login(credentials.getUsername(), credentials.getPassword()),
           linkTo(methodOn(LoginRouter.class).login(credentials)).withSelfRel(),
-          linkTo(methodOn(AdminRouter.class).register(credentials, "")).withRel("register"));
+          linkTo(
+                  methodOn(AdminRouter.class)
+                      .register(credentials.withAuthorities(Collections.emptySet()), ""))
+              .withRel("register"));
     } catch (BadCredentialsException exception) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
