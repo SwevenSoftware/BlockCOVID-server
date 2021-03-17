@@ -3,8 +3,8 @@ package it.sweven.blockcovid.services;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import it.sweven.blockcovid.dto.CredentialsWithAuthorities;
 import it.sweven.blockcovid.entities.user.Authority;
-import it.sweven.blockcovid.entities.user.Credentials;
 import it.sweven.blockcovid.entities.user.User;
 import java.util.Set;
 import javax.security.auth.login.CredentialException;
@@ -28,8 +28,8 @@ class UserRegistrationServiceTest {
 
   @Test
   void register_validCredentials() throws CredentialException {
-    Credentials inputCredentials =
-        new Credentials("inputUser", "inputPassword", Set.of(Authority.CLEANER));
+    CredentialsWithAuthorities inputCredentials =
+        new CredentialsWithAuthorities("inputUser", "inputPassword", Set.of(Authority.CLEANER));
     User expectedUser = new User("inputUser", "inputPassword", Set.of(Authority.CLEANER));
     when(userService.getByUsername("inputUser")).thenThrow(UsernameNotFoundException.class);
     when(userService.save(expectedUser)).thenReturn(expectedUser);
@@ -38,8 +38,8 @@ class UserRegistrationServiceTest {
 
   @Test
   void register_usernameAlreadyInUse_throwsCredentialException() {
-    Credentials inputCredentials =
-        new Credentials("inputUser", "inputPassword", Set.of(Authority.CLEANER));
+    CredentialsWithAuthorities inputCredentials =
+        new CredentialsWithAuthorities("inputUser", "inputPassword", Set.of(Authority.CLEANER));
     User user = new User("inputUser", "inputPassword", Set.of(Authority.CLEANER));
     when(userService.getByUsername("inputUser")).thenReturn(user);
     assertThrows(CredentialException.class, () -> registrationService.register(inputCredentials));
