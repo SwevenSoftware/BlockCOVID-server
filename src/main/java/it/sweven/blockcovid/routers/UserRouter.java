@@ -5,12 +5,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.sweven.blockcovid.assemblers.UserAssembler;
+import it.sweven.blockcovid.dto.CredentialChangeRequestForm;
 import it.sweven.blockcovid.entities.user.Credentials;
 import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.services.UserAuthenticationService;
 import it.sweven.blockcovid.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -67,12 +67,12 @@ public class UserRouter {
   })
   public EntityModel<User> modifyPassword(
       @RequestHeader String Authorization,
-      @RequestBody Pair<Credentials, Credentials> credentialsPair) {
+      @RequestBody CredentialChangeRequestForm credentialsPair) {
     if (credentialsPair == null)
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong or missing credentials");
     User user = authenticationService.authenticateByToken(Authorization);
-    Credentials oldCredentials = credentialsPair.getFirst();
-    Credentials newCredentials = credentialsPair.getSecond();
+    Credentials oldCredentials = credentialsPair.getOldCredentials();
+    Credentials newCredentials = credentialsPair.getNewCredentials();
     userService.updatePassword(user, oldCredentials.getPassword(), newCredentials.getPassword());
     return assembler.setAuthorities(user.getAuthorities()).toModel(user);
   }
