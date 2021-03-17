@@ -5,9 +5,9 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import it.sweven.blockcovid.assemblers.UserAssembler;
+import it.sweven.blockcovid.entities.user.Authority;
 import it.sweven.blockcovid.entities.user.Credentials;
 import it.sweven.blockcovid.entities.user.User;
-import it.sweven.blockcovid.security.Authority;
 import it.sweven.blockcovid.services.UserAuthenticationService;
 import it.sweven.blockcovid.services.UserRegistrationService;
 import it.sweven.blockcovid.services.UserService;

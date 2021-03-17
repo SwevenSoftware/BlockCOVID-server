@@ -1,9 +1,9 @@
 package it.sweven.blockcovid.services;
 
+import it.sweven.blockcovid.entities.user.Authority;
 import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.entities.user.UserBuilder;
 import it.sweven.blockcovid.repositories.UserRepository;
-import it.sweven.blockcovid.security.Authority;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.PostConstruct;

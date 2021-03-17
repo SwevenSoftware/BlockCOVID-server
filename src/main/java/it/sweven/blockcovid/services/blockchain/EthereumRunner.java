@@ -1,4 +1,4 @@
-package it.sweven.blockcovid.blockchain;
+package it.sweven.blockcovid.services.blockchain;
 
 import it.sweven.blockcovid.contracts.Document;
 import it.sweven.blockcovid.documents.PdfReport;

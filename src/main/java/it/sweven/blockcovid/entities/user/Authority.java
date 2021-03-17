@@ -1,4 +1,4 @@
-package it.sweven.blockcovid.security;
+package it.sweven.blockcovid.entities.user;
 
 import org.springframework.security.core.GrantedAuthority;
 

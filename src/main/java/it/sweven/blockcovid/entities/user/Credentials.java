@@ -1,6 +1,5 @@
 package it.sweven.blockcovid.entities.user;
 
-import it.sweven.blockcovid.security.Authority;
 import java.util.Set;
 
 public class Credentials {
