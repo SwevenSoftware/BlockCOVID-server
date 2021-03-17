@@ -58,12 +58,12 @@ class AdminRouterTest {
     doAnswer(
             invocation -> {
               User user = invocation.getArgument(0);
-              String newPassword = invocation.getArgument(1);
+              String newPassword = invocation.getArgument(2);
               user.setPassword(newPassword);
               return null;
             })
         .when(userService)
-        .updatePassword(any(), any());
+        .updatePassword(any(), any(), any());
     // Mock UserService.updateAuthorities
     doAnswer(
             invocation -> {
@@ -74,6 +74,15 @@ class AdminRouterTest {
             })
         .when(userService)
         .updateAuthorities(any(), any());
+    doAnswer(
+            invocation -> {
+              User user = invocation.getArgument(0);
+              String newPassword = invocation.getArgument(1);
+              user.setPassword(newPassword);
+              return null;
+            })
+        .when(userService)
+        .setPassword(any(), any());
 
     // Instantiation UserRoute
     router =

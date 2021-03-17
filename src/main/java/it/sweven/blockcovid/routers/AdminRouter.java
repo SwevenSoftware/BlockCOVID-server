@@ -135,7 +135,7 @@ public class AdminRouter {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User " + username + " not found");
     }
     Optional.ofNullable(newCredentials.getPassword())
-        .ifPresent(pwd -> userService.updatePassword(user, pwd));
+        .ifPresent(pwd -> userService.setPassword(user, pwd));
     Optional.ofNullable(newCredentials.getAuthorities())
         .ifPresent(auth -> userService.updateAuthorities(user, auth));
     return assembler.setAuthorities(admin.getAuthorities()).toModel(user);

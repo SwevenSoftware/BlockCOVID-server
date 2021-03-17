@@ -15,8 +15,10 @@ import java.util.Collections;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.util.Pair;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.server.ResponseStatusException;
 
 class UserRouterTest {
@@ -49,12 +51,15 @@ class UserRouterTest {
     doAnswer(
             invocation -> {
               User user = invocation.getArgument(0);
-              String newPassword = invocation.getArgument(1);
+              String oldPassword = invocation.getArgument(1);
+              String newPassword = invocation.getArgument(2);
+              if (!oldPassword.equals(user.getPassword()))
+                throw new BadCredentialsException("Old password does not match");
               user.setPassword(newPassword);
               return null;
             })
         .when(userService)
-        .updatePassword(any(), any());
+        .updatePassword(any(), any(), any());
     // Mock UserService.updateAuthorities
     doAnswer(
             invocation -> {
@@ -80,10 +85,14 @@ class UserRouterTest {
   @Test
   void modifyPassword_validCredentials() {
     User oldUser = new User("user", "password", Collections.emptySet());
+    Credentials oldCredentials =
+        new Credentials(oldUser.getUsername(), oldUser.getPassword(), oldUser.getAuthorities());
     Credentials newCredentials = new Credentials("newUser", "newPassword", Set.of(Authority.ADMIN));
     User expectedUser = new User("user", "newPassword", Collections.emptySet());
     when(authenticationService.authenticateByToken("auth")).thenReturn(oldUser);
-    assertEquals(expectedUser, userRouter.modifyPassword("auth", newCredentials).getContent());
+    assertEquals(
+        expectedUser,
+        userRouter.modifyPassword("auth", Pair.of(oldCredentials, newCredentials)).getContent());
   }
 
   @Test
@@ -96,9 +105,10 @@ class UserRouterTest {
   @Test
   void modifyPassword_nullPasswordCredentials() {
     Credentials newCredentials = new Credentials("newUsername", null, Set.of(Authority.ADMIN));
+    Credentials oldCredentials =
+        new Credentials("newUsername", "oldPassword", Collections.emptySet());
     ResponseStatusException thrown =
-        assertThrows(
-            ResponseStatusException.class, () -> userRouter.modifyPassword("", newCredentials));
+        assertThrows(ResponseStatusException.class, () -> userRouter.modifyPassword("", null));
     assertEquals(HttpStatus.BAD_REQUEST, thrown.getStatus());
   }
 }

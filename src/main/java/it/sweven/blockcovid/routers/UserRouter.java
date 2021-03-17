@@ -10,6 +10,7 @@ import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.services.UserAuthenticationService;
 import it.sweven.blockcovid.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -61,17 +62,18 @@ public class UserRouter {
             @Content(
                 mediaType = "application/json",
                 schema = @Schema(implementation = User.class))),
-    @ApiResponse(responseCode = "400", description = "Password not provided"),
+    @ApiResponse(responseCode = "400", description = "Wrong or missing credentials"),
     @ApiResponse(responseCode = "401", description = "Invalid authentication token")
   })
   public EntityModel<User> modifyPassword(
-      @RequestHeader String Authorization, @RequestBody Credentials newCredentials) {
+      @RequestHeader String Authorization,
+      @RequestBody Pair<Credentials, Credentials> credentialsPair) {
+    if (credentialsPair == null)
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong or missing credentials");
     User user = authenticationService.authenticateByToken(Authorization);
-    if (newCredentials == null || newCredentials.getPassword() == null)
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password not provided");
-    else {
-      userService.updatePassword(user, newCredentials.getPassword());
-      return assembler.setAuthorities(user.getAuthorities()).toModel(user);
-    }
+    Credentials oldCredentials = credentialsPair.getFirst();
+    Credentials newCredentials = credentialsPair.getSecond();
+    userService.updatePassword(user, oldCredentials.getPassword(), newCredentials.getPassword());
+    return assembler.setAuthorities(user.getAuthorities()).toModel(user);
   }
 }

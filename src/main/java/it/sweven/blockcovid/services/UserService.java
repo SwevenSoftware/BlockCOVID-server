@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -44,7 +45,14 @@ public class UserService implements UserDetailsService {
     return getByUsername(username);
   }
 
-  public void updatePassword(User user, String newPassword) {
+  public void updatePassword(User user, String oldPassword, String newPassword)
+      throws BadCredentialsException {
+    if (passwordEncoder.matches(oldPassword, user.getPassword()))
+      save(user.setPassword(passwordEncoder.encode(newPassword)));
+    else throw new BadCredentialsException("Old password does not match");
+  }
+
+  public void setPassword(User user, String newPassword) {
     save(user.setPassword(passwordEncoder.encode(newPassword)));
   }
 
