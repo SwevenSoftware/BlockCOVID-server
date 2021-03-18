@@ -1,5 +1,5 @@
 ![Build status](https://github.com/SwevenSoftware/BlockCOVID-server/actions/workflows/build-server.yml/badge.svg?branch=develop)
-[![codecov](https://codecov.io/gh/SwevenSoftware/BlockCOVID-server/branch/develop/graph/badge.svg?token=LD3HF3EPRD)](https://codecov.io/gh/SwevenSoftware/BlockCOVID-server)
+[![codecov](https://codecov.io/gh/SwevenSoftware/BlockCOVID-server/branch/develop/graph/badge.svg)](https://codecov.io/gh/SwevenSoftware/BlockCOVID-server)
 # BlockCOVID-server
 Server module for the project BlockCOVID (SWE 2020-2021)
 
