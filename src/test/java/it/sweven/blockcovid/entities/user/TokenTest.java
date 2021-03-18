@@ -36,6 +36,13 @@ class TokenTest {
   }
 
   @Test
+  void equals() {
+    Token first = new Token("1", LocalDateTime.now().plusMinutes(5L), "user");
+    Token second = new Token("2", LocalDateTime.now().plusMinutes(10L), "admin");
+    assertNotEquals(first, second);
+  }
+
+  @Test
   void toStringRightFormat() {
     Token test = new Token("1", LocalDateTime.now().plusMinutes(5L), "username");
     assertTrue(test.toString().contains("id="));
