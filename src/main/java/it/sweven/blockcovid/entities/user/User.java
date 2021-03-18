@@ -109,7 +109,7 @@ public class User implements UserDetails {
   }
 
   public User unlock() {
-    this.locked = true;
+    this.locked = false;
     return this;
   }
 
