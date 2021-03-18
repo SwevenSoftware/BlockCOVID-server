@@ -1,0 +1,24 @@
+version: "3"
+
+networks:
+  db-net:
+    driver: "bridge"
+
+services:
+
+  mongo:
+    image: mongo:latest
+    networks:
+      - db-net
+
+  blockcovid:
+    build:
+      context: .
+    ports:
+      - "8091:8091"
+    links:
+      - mongo
+    depends_on:
+      - mongo
+    networks:
+      - db-net  

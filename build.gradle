@@ -1,0 +1,66 @@
+plugins {
+    id 'com.diffplug.spotless' version '5.6.1'
+    id 'org.springframework.boot' version '2.4.2'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+    id 'jacoco'
+}
+
+group = 'it.sweven.blockcovid'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '14'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Spring dependencies
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-hateoas'
+    implementation 'org.springdoc:springdoc-openapi-ui:1.5.4'
+
+    // MongoDB Drivers
+    implementation 'org.mongodb:mongodb-driver-sync'
+
+    // reactivex reactive streams
+    implementation 'io.reactivex.rxjava2:rxjava'
+    implementation 'io.reactivex:rxjava-reactive-streams'
+
+    // lombok
+    compileOnly 'org.projectlombok:lombok:1.18.16'
+    annotationProcessor 'org.projectlombok:lombok:1.18.16'
+
+    // OpenAPI docs
+    implementation 'org.springdoc:springdoc-openapi-ui:1.5.4'
+
+    // TESTS
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'io.projectreactor:reactor-test'
+    testImplementation 'org.mockito:mockito-core:3.8.0'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+spotless {
+    ratchetFrom 'origin/develop'
+    java {
+        toggleOffOn()
+
+        importOrder()
+        removeUnusedImports()
+
+        googleJavaFormat()
+  }
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled = true
+    }
+}

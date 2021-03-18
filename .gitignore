@@ -1,0 +1,16 @@
+build
+log*
+db
+.gradle
+*.pem
+*.p12
+.idea
+bin/*
+.settings/*
+.classpath
+.project
+.vscode
+reports
+src/main/resources/application.properties
+src/main/resources/keystore/*
+*.orig
