@@ -134,6 +134,18 @@ class AdminRouterTest {
   }
 
   @Test
+  void register_requestNotMadeByAdmin() {
+    User user = mock(User.class);
+    when(user.getAuthorities()).thenReturn(Set.of(Authority.USER, Authority.CLEANER));
+    when(authenticationService.authenticateByToken("auth")).thenReturn(user);
+    ResponseStatusException thrown =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> router.register(mock(CredentialsWithAuthorities.class), "auth"));
+    assertEquals(HttpStatus.FORBIDDEN, thrown.getStatus());
+  }
+
+  @Test
   void modifyUser_validRequest() {
     User admin = new User("admin", "password", Set.of(Authority.ADMIN));
     User oldUser = new User("user", "password", Collections.emptySet());
