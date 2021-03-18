@@ -1,11 +1,13 @@
 package it.sweven.blockcovid.entities.user;
 
+import java.util.Collections;
 import java.util.Set;
+import org.springframework.security.authentication.BadCredentialsException;
 
 public class UserBuilder {
   private String username;
   private String password;
-  private Set<Authority> authorities;
+  private Set<Authority> authorities = Collections.emptySet();
 
   public UserBuilder setUsername(String username) {
     this.username = username;
@@ -23,6 +25,7 @@ public class UserBuilder {
   }
 
   public User createUser() {
-    return new User(username, password, authorities);
+    if (username != null && password != null) return new User(username, password, authorities);
+    else throw new BadCredentialsException("username and password must both be setted");
   }
 }
