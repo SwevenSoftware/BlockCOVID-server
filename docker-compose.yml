@@ -16,24 +16,12 @@ services:
   blockcovid:
     build:
       context: .
-    environment:
-      - "ACCOUNT=0xb43436657ed0d6b922f3e7fab75dc32c610796d374daa6d7f1878669ff79d0e5"
-      - "CONTRACT_ADDRESS=${CONTRACT_ADDRESS}"
-      - "NETWORK=http://ganache:8545"
     ports:
       - "8091:8091"
     links:
       - mongo
-      - ganache
     depends_on:
       - mongo
-      - ganache
     networks:
       - db-net  
-      - blockchain-net  
-
-  ganache:
-    image: trufflesuite/ganache-cli:latest
-    networks:
       - blockchain-net
-    command: --account "0xb43436657ed0d6b922f3e7fab75dc32c610796d374daa6d7f1878669ff79d0e5,1000000000000000000000000000000000000000"
