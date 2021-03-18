@@ -175,4 +175,36 @@ public class UserServiceTest {
     when(repository.deleteUserByUsername("user")).thenReturn(Optional.empty());
     assertThrows(UsernameNotFoundException.class, () -> service.deleteByUsername("user"));
   }
+
+  @Test
+  void initDB_emptyDB_createDefaultAdmin() {
+    when(repository.findAll()).thenReturn(Collections.emptyList());
+    AtomicBoolean adminSaved = new AtomicBoolean(false);
+    when(repository.save(any()))
+        .thenAnswer(
+            invocation -> {
+              User admin = invocation.getArgument(0, User.class);
+              if (admin.getUsername().equals("admin")
+                  && admin.getPassword().equals("password")
+                  && admin.getAuthorities().contains(Authority.ADMIN)) adminSaved.set(true);
+              return admin;
+            });
+    service = new UserService(repository, encoder);
+    assertTrue(adminSaved.get());
+  }
+
+  @Test
+  void initDB_nonEmptyDB() {
+    when(repository.findAll())
+        .thenReturn(List.of(mock(User.class), mock(User.class), mock(User.class)));
+    AtomicBoolean userSaved = new AtomicBoolean(false);
+    when(repository.save(any()))
+        .thenAnswer(
+            invocation -> {
+              userSaved.set(true);
+              return invocation.getArgument(0);
+            });
+    service = new UserService(repository, encoder);
+    assertFalse(userSaved.get());
+  }
 }
