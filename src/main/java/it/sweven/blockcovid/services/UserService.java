@@ -6,7 +6,6 @@ import it.sweven.blockcovid.entities.user.UserBuilder;
 import it.sweven.blockcovid.repositories.UserRepository;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,6 +23,7 @@ public class UserService implements UserDetailsService {
   UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
+    initDB();
   }
 
   public User save(User user) {
@@ -60,7 +60,6 @@ public class UserService implements UserDetailsService {
     save(user.setAuthorities(newAuthorities));
   }
 
-  @PostConstruct
   private void initDB() {
     if (userRepository.findAll().isEmpty()) {
       UserBuilder builder = new UserBuilder();
