@@ -24,7 +24,7 @@ sudo docker-compose build
 ```
 
 ## Start test unit
-Starts three containers, one with the database daemon `mongod`, one with `ganache-cli` in order to simulate a blockchain network, one with our application server which implements api calls
+Starts two containers, one with the database daemon `mongod`, one with our application server which implements api calls
 ```sh
 sudo docker-compose up
 ```
