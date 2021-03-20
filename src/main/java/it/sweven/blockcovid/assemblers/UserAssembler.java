@@ -39,6 +39,9 @@ public class UserAssembler implements RepresentationModelAssembler<User, EntityM
           linkTo(methodOn(AdminRouter.class).modifyUser(null, entity.getUsername(), null))
               .withRel("modify_user"));
       userModel.add(linkTo(methodOn(AdminRouter.class).listUsers(null)).withRel("list_users"));
+      userModel.add(linkTo(methodOn(AdminRouter.class).delete("", "")).withRel("delete_user"));
+      userModel.add(
+          linkTo(methodOn(AdminRouter.class).register(null, "")).withRel("register_user"));
     }
     clearAuthorities();
     return userModel;
