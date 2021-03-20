@@ -19,7 +19,6 @@ public class BlockchainService {
   Credentials account;
   ContractGasProvider gasProvider;
   Web3j connection;
-
   Logger log = LoggerFactory.getLogger(BlockchainService.class);
 
   @Autowired
