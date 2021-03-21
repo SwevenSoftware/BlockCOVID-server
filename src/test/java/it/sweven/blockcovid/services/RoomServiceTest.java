@@ -14,6 +14,7 @@ import java.time.LocalTime;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.management.BadAttributeValueExpException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -95,5 +96,18 @@ class RoomServiceTest {
     RoomInfo info =
         new RoomInfo("", LocalTime.now(), LocalTime.now(), Collections.emptySet(), 0, null);
     assertThrows(BadAttributeValueExpException.class, () -> service.createRoom(info));
+  }
+
+  @Test
+  void getAllRooms() {
+    AtomicBoolean repoCalled = new AtomicBoolean(false);
+    when(repository.findAll())
+        .thenAnswer(
+            invocation -> {
+              repoCalled.set(true);
+              return Collections.emptyList();
+            });
+    service.getAllRooms();
+    assertTrue(repoCalled.get());
   }
 }

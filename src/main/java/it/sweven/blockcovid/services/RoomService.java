@@ -4,6 +4,7 @@ import it.sweven.blockcovid.dto.RoomInfo;
 import it.sweven.blockcovid.entities.room.Room;
 import it.sweven.blockcovid.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.repositories.RoomRepository;
+import java.util.List;
 import javax.management.BadAttributeValueExpException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,5 +45,9 @@ public class RoomService {
             newRoom.getWidth(),
             newRoom.getHeight());
     return roomRepository.save(toCreate);
+  }
+
+  public List<Room> getAllRooms() {
+    return roomRepository.findAll();
   }
 }
