@@ -8,8 +8,12 @@ import it.sweven.blockcovid.entities.user.Authority;
 import it.sweven.blockcovid.routers.AdminRouter;
 import it.sweven.blockcovid.routers.RoomRouter;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
@@ -33,8 +37,19 @@ public class RoomAssembler implements RepresentationModelAssembler<Room, EntityM
         EntityModel.of(
             entity,
             linkTo(methodOn(RoomRouter.class).viewRoom(entity.getName(), "")).withSelfRel(),
-            linkTo(methodOn(AdminRouter.class).newRoom("", null)).withRel("new_room"));
+            linkTo(methodOn(AdminRouter.class).newRoom("", null)).withRel("new_room"),
+            linkTo(methodOn(RoomRouter.class).listRooms("")).withRel("list_rooms"));
     clearAuthorities();
     return roomModel;
+  }
+
+  @Override
+  public CollectionModel<EntityModel<Room>> toCollectionModel(Iterable<? extends Room> entities) {
+    List<EntityModel<Room>> entityModels =
+        StreamSupport.stream(entities.spliterator(), true)
+            .map(this::toModel)
+            .collect(Collectors.toList());
+    return CollectionModel.of(
+        entityModels, linkTo(methodOn(RoomRouter.class).listRooms("")).withSelfRel());
   }
 }
