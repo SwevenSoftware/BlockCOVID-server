@@ -7,16 +7,21 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import it.sweven.blockcovid.assemblers.RoomAssembler;
 import it.sweven.blockcovid.assemblers.UserAssembler;
 import it.sweven.blockcovid.dto.CredentialsWithAuthorities;
+import it.sweven.blockcovid.dto.RoomInfo;
+import it.sweven.blockcovid.entities.room.Room;
 import it.sweven.blockcovid.entities.user.Authority;
 import it.sweven.blockcovid.entities.user.User;
+import it.sweven.blockcovid.services.RoomService;
 import it.sweven.blockcovid.services.UserAuthenticationService;
 import it.sweven.blockcovid.services.UserRegistrationService;
 import it.sweven.blockcovid.services.UserService;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.management.BadAttributeValueExpException;
 import javax.security.auth.login.CredentialException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
@@ -31,19 +36,25 @@ import org.springframework.web.server.ResponseStatusException;
 public class AdminRouter {
   private final UserAuthenticationService authenticationService;
   private final UserRegistrationService registrationService;
-  private final UserAssembler assembler;
+  private final RoomService roomService;
+  private final UserAssembler userAssembler;
+  private final RoomAssembler roomAssembler;
   private final UserService userService;
 
   @Autowired
   AdminRouter(
       UserAuthenticationService authenticationService,
       UserRegistrationService registrationService,
-      UserAssembler assembler,
-      UserService userService) {
+      UserAssembler userAssembler,
+      UserService userService,
+      RoomAssembler roomAssembler,
+      RoomService roomService) {
     this.authenticationService = authenticationService;
     this.registrationService = registrationService;
-    this.assembler = assembler;
+    this.userAssembler = userAssembler;
     this.userService = userService;
+    this.roomAssembler = roomAssembler;
+    this.roomService = roomService;
   }
 
   @PostMapping(value = "user/new", consumes = "application/json", produces = "application/json")
@@ -79,7 +90,7 @@ public class AdminRouter {
     if (submitter.getAuthorities().contains(Authority.ADMIN)) {
       try {
         User registeredUser = registrationService.register(credentials);
-        return assembler.setAuthorities(submitter.getAuthorities()).toModel(registeredUser);
+        return userAssembler.setAuthorities(submitter.getAuthorities()).toModel(registeredUser);
       } catch (CredentialException exception) {
         throw new ResponseStatusException(HttpStatus.CONFLICT, exception.getMessage());
       } catch (NullPointerException exception) {
@@ -138,7 +149,7 @@ public class AdminRouter {
         .ifPresent(pwd -> userService.setPassword(user, pwd));
     Optional.ofNullable(newCredentials.getAuthorities())
         .ifPresent(auth -> userService.updateAuthorities(user, auth));
-    return assembler.setAuthorities(admin.getAuthorities()).toModel(user);
+    return userAssembler.setAuthorities(admin.getAuthorities()).toModel(user);
   }
 
   @GetMapping(value = "/users", consumes = "application/json", produces = "application/json")
@@ -156,7 +167,7 @@ public class AdminRouter {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Method not allowed");
     List<EntityModel<User>> users =
         userService.getAllUsers().stream()
-            .map(u -> assembler.setAuthorities(admin.getAuthorities()).toModel(u))
+            .map(u -> userAssembler.setAuthorities(admin.getAuthorities()).toModel(u))
             .collect(Collectors.toList());
     return CollectionModel.of(
         users, linkTo(methodOn(AdminRouter.class).listUsers(null)).withSelfRel());
@@ -182,9 +193,35 @@ public class AdminRouter {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Method not allowed");
     try {
       User deletedUser = userService.deleteByUsername(username);
-      return assembler.toModel(deletedUser);
+      return userAssembler.toModel(deletedUser);
     } catch (UsernameNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Username not found");
+    }
+  }
+
+  @PostMapping(value = "rooms/new", consumes = "application/json", produces = "application/json")
+  @ResponseBody
+  @ApiResponses({
+    @ApiResponse(
+        responseCode = "403",
+        description = "Method not allowed",
+        content = @Content(schema = @Schema(implementation = ResponseStatusException.class))),
+    @ApiResponse(
+        responseCode = "400",
+        description = "Missing or wrong-formatted arguments",
+        content = @Content(schema = @Schema(implementation = ResponseStatusException.class)))
+  })
+  public EntityModel<Room> newRoom(
+      @RequestHeader String Authorization, @RequestBody RoomInfo newRoom) {
+    User submitter = authenticationService.authenticateByToken(Authorization);
+    if (!submitter.getAuthorities().contains(Authority.ADMIN))
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Method not allowed");
+    try {
+      Room createdRoom = roomService.createRoom(newRoom);
+      return roomAssembler.toModel(createdRoom);
+    } catch (BadAttributeValueExpException exception) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "Missing or wrong-formatted arguments");
     }
   }
 }

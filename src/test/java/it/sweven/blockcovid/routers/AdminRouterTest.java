@@ -4,17 +4,24 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import it.sweven.blockcovid.assemblers.RoomAssembler;
 import it.sweven.blockcovid.assemblers.UserAssembler;
 import it.sweven.blockcovid.dto.CredentialsWithAuthorities;
+import it.sweven.blockcovid.dto.RoomInfo;
+import it.sweven.blockcovid.entities.room.Room;
 import it.sweven.blockcovid.entities.user.Authority;
 import it.sweven.blockcovid.entities.user.User;
+import it.sweven.blockcovid.services.RoomService;
 import it.sweven.blockcovid.services.UserAuthenticationService;
 import it.sweven.blockcovid.services.UserRegistrationService;
 import it.sweven.blockcovid.services.UserService;
+import java.time.DayOfWeek;
+import java.time.LocalTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.management.BadAttributeValueExpException;
 import javax.security.auth.login.CredentialException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,6 +38,8 @@ class AdminRouterTest {
   private UserRegistrationService registrationService;
   private UserAssembler userAssembler;
   private UserService userService;
+  private RoomAssembler roomAssembler;
+  private RoomService roomService;
 
   @BeforeEach
   void setUp() {
@@ -84,9 +93,18 @@ class AdminRouterTest {
         .when(userService)
         .setPassword(any(), any());
 
+    roomAssembler = mock(RoomAssembler.class);
+    roomService = mock(RoomService.class);
+
     // Instantiation UserRoute
     router =
-        new AdminRouter(authenticationService, registrationService, userAssembler, userService);
+        new AdminRouter(
+            authenticationService,
+            registrationService,
+            userAssembler,
+            userService,
+            roomAssembler,
+            roomService);
   }
 
   @Test
@@ -264,5 +282,48 @@ class AdminRouterTest {
     ResponseStatusException thrown =
         assertThrows(ResponseStatusException.class, () -> router.delete("user", "auth"));
     assertEquals(HttpStatus.NOT_FOUND, thrown.getStatus());
+  }
+
+  @Test
+  void newRoom_requestWithValidRoomInfo() throws BadAttributeValueExpException {
+    RoomInfo roomInfo =
+        new RoomInfo(
+            "testRoom", LocalTime.of(8, 0), LocalTime.of(20, 0), Set.of(DayOfWeek.MONDAY), 10, 10);
+
+    Room fakeRoom = mock(Room.class);
+    EntityModel fakeModel = mock(EntityModel.class);
+    when(authenticationService.authenticateByToken("auth"))
+        .thenReturn(new User("", "", Set.of(Authority.ADMIN)));
+    when(roomService.createRoom(any())).thenReturn(fakeRoom);
+    when(roomAssembler.toModel(any())).thenReturn(fakeModel);
+    assertEquals(fakeModel, router.newRoom("auth", roomInfo));
+  }
+
+  @Test
+  void newRoom_requestWithInvalidRoomInfo() throws BadAttributeValueExpException {
+    RoomInfo roomInfo =
+        new RoomInfo(
+            null, LocalTime.of(8, 0), LocalTime.of(20, 0), Set.of(DayOfWeek.MONDAY), 10, 10);
+
+    Room fakeRoom = mock(Room.class);
+    EntityModel fakeModel = mock(EntityModel.class);
+    when(authenticationService.authenticateByToken("auth"))
+        .thenReturn(new User("", "", Set.of(Authority.ADMIN)));
+    when(roomService.createRoom(any())).thenThrow(new BadAttributeValueExpException(null));
+    when(roomAssembler.toModel(any())).thenReturn(fakeModel);
+    ResponseStatusException thrown =
+        assertThrows(ResponseStatusException.class, () -> router.newRoom("auth", roomInfo));
+    assertEquals(HttpStatus.BAD_REQUEST, thrown.getStatus());
+  }
+
+  @Test
+  void newRoom_requestNotMadeByAdmin() {
+    User fakeUser = mock(User.class);
+    RoomInfo fakeInfo = mock(RoomInfo.class);
+    when(fakeUser.getAuthorities()).thenReturn(Set.of(Authority.USER));
+    when(authenticationService.authenticateByToken("auth")).thenReturn(fakeUser);
+    ResponseStatusException thrown =
+        assertThrows(ResponseStatusException.class, () -> router.newRoom("auth", fakeInfo));
+    assertEquals(thrown.getStatus(), HttpStatus.FORBIDDEN);
   }
 }
