@@ -8,14 +8,21 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor(onConstructor_ = @PersistenceConstructor)
 @EqualsAndHashCode
 @ToString
 @Document
 public class Desk {
-  private @Id Long id;
+  private @Id Integer id;
   private int x, y;
   private String roomId;
+
+  @PersistenceConstructor
+  public Desk(Integer id, int x, int y, String roomId) {
+    this.id = id;
+    setX(x);
+    setY(y);
+    this.roomId = roomId;
+  }
 
   public void setX(int x) {
     if (x <= 0) throw new IllegalArgumentException("x must be a positive value");

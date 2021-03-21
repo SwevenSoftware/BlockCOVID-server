@@ -27,4 +27,9 @@ class DeskTest {
     assertThrows(IllegalArgumentException.class, () -> desk.setY(0));
     assertThrows(IllegalArgumentException.class, () -> desk.setY(-10));
   }
+
+  @Test
+  void persistentConstructor() {
+    new Desk(1123, 4, 20, "idRoom");
+  }
 }
