@@ -3,7 +3,7 @@ package it.sweven.blockcovid.assemblers;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-import it.sweven.blockcovid.entities.room.Room;
+import it.sweven.blockcovid.dto.RoomWithDesks;
 import it.sweven.blockcovid.entities.user.Authority;
 import it.sweven.blockcovid.routers.AdminRouter;
 import it.sweven.blockcovid.routers.RoomRouter;
@@ -19,7 +19,8 @@ import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RoomAssembler implements RepresentationModelAssembler<Room, EntityModel<Room>> {
+public class RoomAssembler
+    implements RepresentationModelAssembler<RoomWithDesks, EntityModel<RoomWithDesks>> {
   private Set<Authority> authorities = Collections.emptySet();
 
   public RoomAssembler setAuthorities(Set<Authority> authorities) {
@@ -32,11 +33,12 @@ public class RoomAssembler implements RepresentationModelAssembler<Room, EntityM
   }
 
   @Override
-  public EntityModel<Room> toModel(Room entity) {
-    EntityModel<Room> roomModel =
+  public EntityModel<RoomWithDesks> toModel(RoomWithDesks entity) {
+    EntityModel<RoomWithDesks> roomModel =
         EntityModel.of(
             entity,
-            linkTo(methodOn(RoomRouter.class).viewRoom(entity.getName(), "")).withSelfRel(),
+            linkTo(methodOn(RoomRouter.class).viewRoom(entity.getRoom().getName(), ""))
+                .withSelfRel(),
             linkTo(methodOn(AdminRouter.class).newRoom("", null)).withRel("new_room"),
             linkTo(methodOn(RoomRouter.class).listRooms("")).withRel("list_rooms"));
     clearAuthorities();
@@ -44,8 +46,9 @@ public class RoomAssembler implements RepresentationModelAssembler<Room, EntityM
   }
 
   @Override
-  public CollectionModel<EntityModel<Room>> toCollectionModel(Iterable<? extends Room> entities) {
-    List<EntityModel<Room>> entityModels =
+  public CollectionModel<EntityModel<RoomWithDesks>> toCollectionModel(
+      Iterable<? extends RoomWithDesks> entities) {
+    List<EntityModel<RoomWithDesks>> entityModels =
         StreamSupport.stream(entities.spliterator(), true)
             .map(this::toModel)
             .collect(Collectors.toList());

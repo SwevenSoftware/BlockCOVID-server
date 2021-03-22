@@ -10,10 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.sweven.blockcovid.assemblers.DeskAssembler;
 import it.sweven.blockcovid.assemblers.RoomAssembler;
 import it.sweven.blockcovid.assemblers.UserAssembler;
-import it.sweven.blockcovid.dto.CredentialsWithAuthorities;
-import it.sweven.blockcovid.dto.DeskInfo;
-import it.sweven.blockcovid.dto.DeskWithRoomName;
-import it.sweven.blockcovid.dto.RoomInfo;
+import it.sweven.blockcovid.dto.*;
 import it.sweven.blockcovid.entities.room.Room;
 import it.sweven.blockcovid.entities.user.Authority;
 import it.sweven.blockcovid.entities.user.User;
@@ -220,14 +217,18 @@ public class AdminRouter {
         description = "Missing or wrong-formatted arguments",
         content = @Content(schema = @Schema(implementation = ResponseStatusException.class)))
   })
-  public EntityModel<Room> newRoom(
+  public EntityModel<RoomWithDesks> newRoom(
       @RequestHeader String Authorization, @RequestBody RoomInfo newRoom) {
     User submitter = authenticationService.authenticateByToken(Authorization);
     if (!submitter.getAuthorities().contains(Authority.ADMIN))
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Method not allowed");
     try {
       Room createdRoom = roomService.createRoom(newRoom);
-      return roomAssembler.toModel(createdRoom);
+      List<DeskInfo> associatedDesks =
+          deskService.getDesksByRoom(createdRoom.getName()).stream()
+              .map(d -> new DeskInfo(d.getId(), d.getX(), d.getY()))
+              .collect(Collectors.toList());
+      return roomAssembler.toModel(new RoomWithDesks(createdRoom, associatedDesks));
     } catch (BadAttributeValueExpException exception) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST, "Missing or wrong-formatted arguments");

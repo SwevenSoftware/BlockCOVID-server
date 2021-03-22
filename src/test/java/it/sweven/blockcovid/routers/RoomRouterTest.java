@@ -1,13 +1,18 @@
 package it.sweven.blockcovid.routers;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import it.sweven.blockcovid.assemblers.RoomAssembler;
+import it.sweven.blockcovid.dto.DeskInfo;
+import it.sweven.blockcovid.dto.RoomWithDesks;
+import it.sweven.blockcovid.entities.room.Desk;
 import it.sweven.blockcovid.entities.room.Room;
 import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.exceptions.RoomNotFoundException;
+import it.sweven.blockcovid.services.DeskService;
 import it.sweven.blockcovid.services.RoomService;
 import it.sweven.blockcovid.services.UserAuthenticationService;
 import java.util.List;
@@ -22,6 +27,7 @@ import org.springframework.web.server.ResponseStatusException;
 class RoomRouterTest {
 
   private RoomService roomService;
+  private DeskService deskService;
   private UserAuthenticationService authenticationService;
   private RoomAssembler assembler;
   private RoomRouter router;
@@ -29,18 +35,31 @@ class RoomRouterTest {
   @BeforeEach
   void setUp() {
     roomService = mock(RoomService.class);
+    deskService = mock(DeskService.class);
     authenticationService = mock(UserAuthenticationService.class);
     when(authenticationService.authenticateByToken("auth")).thenReturn(mock(User.class));
     assembler = mock(RoomAssembler.class);
-    router = new RoomRouter(roomService, authenticationService, assembler);
+    router = new RoomRouter(roomService, deskService, authenticationService, assembler);
   }
 
   @Test
   void viewRoom_existingRoom() {
     Room expectedRoom = mock(Room.class);
-    EntityModel<Room> expectedEntityModel = EntityModel.of(expectedRoom);
     when(roomService.getByName("roomName")).thenReturn(expectedRoom);
-    when(assembler.toModel(expectedRoom)).thenReturn(expectedEntityModel);
+    List<Desk> expectedDesks =
+        List.of(
+            new Desk(123, 3, 45, "roomId"),
+            new Desk(15, 20, 11, "roomId"),
+            new Desk(30, 1, 10, "roomId"));
+    when(deskService.getDesksByRoom("roomName")).thenReturn(expectedDesks);
+    RoomWithDesks expectedRoomWithRoom =
+        new RoomWithDesks(
+            expectedRoom,
+            expectedDesks.stream()
+                .map(d -> new DeskInfo(d.getId(), d.getX(), d.getY()))
+                .collect(Collectors.toList()));
+    EntityModel<RoomWithDesks> expectedEntityModel = EntityModel.of(expectedRoomWithRoom);
+    when(assembler.toModel(any())).thenReturn(expectedEntityModel);
     assertEquals(expectedEntityModel, router.viewRoom("roomName", "auth"));
   }
 
@@ -54,11 +73,13 @@ class RoomRouterTest {
 
   @Test
   void listRooms() {
-    List<Room> rooms = List.of(mock(Room.class), mock(Room.class), mock(Room.class));
-    when(roomService.getAllRooms()).thenReturn(rooms);
-    CollectionModel<EntityModel<Room>> expectedCollection =
-        CollectionModel.of(rooms.stream().map(EntityModel::of).collect(Collectors.toList()));
-    when(assembler.toCollectionModel(rooms)).thenReturn(expectedCollection);
+    when(roomService.getAllRooms()).thenReturn(List.of(mock(Room.class), mock(Room.class)));
+    List<RoomWithDesks> roomsWithDesks =
+        List.of(mock(RoomWithDesks.class), mock(RoomWithDesks.class));
+    CollectionModel<EntityModel<RoomWithDesks>> expectedCollection =
+        CollectionModel.of(
+            roomsWithDesks.stream().map(EntityModel::of).collect(Collectors.toList()));
+    when(assembler.toCollectionModel(any())).thenReturn(expectedCollection);
     assertEquals(expectedCollection, router.listRooms("auth"));
   }
 }

@@ -6,6 +6,7 @@ import it.sweven.blockcovid.entities.room.Room;
 import it.sweven.blockcovid.exceptions.DeskNotAvailable;
 import it.sweven.blockcovid.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.repositories.DeskRepository;
+import java.util.List;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -31,5 +32,10 @@ public class DeskService {
     }
     return deskRepository.save(
         new Desk(desk.getId(), desk.getX(), desk.getY(), associatedRoom.getId()));
+  }
+
+  public List<Desk> getDesksByRoom(String roomName) {
+    String roomId = roomService.getByName(roomName).getId();
+    return deskRepository.findAllByRoomId(roomId);
   }
 }
