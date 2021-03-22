@@ -22,6 +22,7 @@ import it.sweven.blockcovid.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.services.*;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.management.BadAttributeValueExpException;
 import javax.security.auth.login.CredentialException;
@@ -247,38 +248,43 @@ public class AdminRouter {
     @ApiResponse(
         responseCode = "401",
         description = "Invalid authentication token",
-        content = @Content(schema = @Schema(implementation = void.class))),
+        content = @Content(schema = @Schema(implementation = ResponseStatusException.class))),
     @ApiResponse(
         responseCode = "403",
         description = "Method not allowed",
         content = @Content(schema = @Schema(implementation = ResponseStatusException.class))),
     @ApiResponse(
         responseCode = "404",
-        description = "requested room doesn't exist",
+        description = "Requested room doesn't exist",
         content = @Content(schema = @Schema(implementation = ResponseStatusException.class))),
     @ApiResponse(
         responseCode = "409",
         description = "Desk already exist (with the same id or position)",
         content = @Content(schema = @Schema(implementation = ResponseStatusException.class)))
   })
-  public EntityModel<DeskWithRoomName> addDesk(
+  public CollectionModel<EntityModel<DeskWithRoomName>> addDesk(
       @PathVariable String nameRoom,
       @RequestHeader String Authorization,
-      @RequestBody DeskInfo newDesk) {
+      @RequestBody Set<DeskInfo> newDesks) {
     User suppliedUser = authenticationService.authenticateByToken(Authorization);
     if (!suppliedUser.getAuthorities().contains(Authority.ADMIN))
       throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-    try {
-      deskService.addDesk(newDesk, nameRoom);
-    } catch (DeskNotAvailable e) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT);
-    } catch (RoomNotFoundException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-    } catch (IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+    for (DeskInfo desk : newDesks) {
+      try {
+        deskService.addDesk(desk, nameRoom);
+      } catch (DeskNotAvailable e) {
+        throw new ResponseStatusException(HttpStatus.CONFLICT);
+      } catch (RoomNotFoundException e) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+      } catch (IllegalArgumentException e) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+      }
     }
     return deskAssembler
         .setAuthorities(suppliedUser.getAuthorities())
-        .toModel(new DeskWithRoomName(newDesk.getId(), nameRoom, newDesk.getX(), newDesk.getY()));
+        .toCollectionModel(
+            newDesks.stream()
+                .map(d -> new DeskWithRoomName(d.getId(), nameRoom, d.getX(), d.getY()))
+                .collect(Collectors.toList()));
   }
 }

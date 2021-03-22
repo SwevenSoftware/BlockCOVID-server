@@ -28,6 +28,7 @@ import javax.management.BadAttributeValueExpException;
 import javax.security.auth.login.CredentialException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
@@ -343,16 +344,26 @@ class AdminRouterTest {
     User admin = mock(User.class);
     when(admin.getAuthorities()).thenReturn(Set.of(Authority.ADMIN));
     when(authenticationService.authenticateByToken("auth")).thenReturn(admin);
-    DeskInfo providedDesk = mock(DeskInfo.class);
-    when(providedDesk.getId()).thenReturn(1234);
-    when(providedDesk.getX()).thenReturn(5);
-    when(providedDesk.getY()).thenReturn(10);
-    when(deskService.addDesk(providedDesk, "roomName")).thenReturn(mock(Desk.class));
-    when(deskAssembler.toModel(any()))
-        .thenAnswer(invocation -> EntityModel.of(invocation.getArgument(0)));
+    Set<DeskInfo> providedDesks =
+        Set.of(new DeskInfo(1234, 5, 10), new DeskInfo(3, 11, 40), new DeskInfo(22, 1, 1));
+    for (DeskInfo desk : providedDesks) {
+      when(deskService.addDesk(desk, "roomName")).thenReturn(mock(Desk.class));
+    }
+    List<DeskWithRoomName> expectedList =
+        List.of(
+            new DeskWithRoomName(1234, "roomName", 5, 10),
+            new DeskWithRoomName(3, "roomName", 11, 40),
+            new DeskWithRoomName(22, "roomName", 1, 1));
+    when(deskAssembler.toCollectionModel(any()))
+        .thenAnswer(
+            invocation ->
+                CollectionModel.of(
+                    expectedList.stream().map(EntityModel::of).collect(Collectors.toList())));
     assertEquals(
-        new DeskWithRoomName(1234, "roomName", 5, 10),
-        router.addDesk("roomName", "auth", providedDesk).getContent());
+        expectedList,
+        router.addDesk("roomName", "auth", providedDesks).getContent().stream()
+            .map(EntityModel::getContent)
+            .collect(Collectors.toList()));
   }
 
   @Test
@@ -362,7 +373,8 @@ class AdminRouterTest {
     when(authenticationService.authenticateByToken("auth")).thenReturn(authUser);
     ResponseStatusException thrown =
         assertThrows(
-            ResponseStatusException.class, () -> router.addDesk("", "auth", mock(DeskInfo.class)));
+            ResponseStatusException.class,
+            () -> router.addDesk("", "auth", Set.of(mock(DeskInfo.class), mock(DeskInfo.class))));
     assertEquals(thrown.getStatus(), HttpStatus.FORBIDDEN);
   }
 
@@ -371,11 +383,13 @@ class AdminRouterTest {
     User admin = mock(User.class);
     when(admin.getAuthorities()).thenReturn(Set.of(Authority.ADMIN));
     when(authenticationService.authenticateByToken("auth")).thenReturn(admin);
-    DeskInfo providedDesk = mock(DeskInfo.class);
-    when(deskService.addDesk(providedDesk, "roomName")).thenThrow(new DeskNotAvailable());
+    when(deskService.addDesk(any(), eq("roomName"))).thenReturn(mock(Desk.class));
+    DeskInfo faultyDesk = mock(DeskInfo.class);
+    Set<DeskInfo> providedDesks = Set.of(mock(DeskInfo.class), faultyDesk, mock(DeskInfo.class));
+    when(deskService.addDesk(faultyDesk, "roomName")).thenThrow(new DeskNotAvailable());
     ResponseStatusException thrown =
         assertThrows(
-            ResponseStatusException.class, () -> router.addDesk("roomName", "auth", providedDesk));
+            ResponseStatusException.class, () -> router.addDesk("roomName", "auth", providedDesks));
     assertEquals(thrown.getStatus(), HttpStatus.CONFLICT);
   }
 
@@ -384,11 +398,13 @@ class AdminRouterTest {
     User admin = mock(User.class);
     when(admin.getAuthorities()).thenReturn(Set.of(Authority.ADMIN));
     when(authenticationService.authenticateByToken("auth")).thenReturn(admin);
-    DeskInfo providedDesk = mock(DeskInfo.class);
-    when(deskService.addDesk(providedDesk, "roomName")).thenThrow(new RoomNotFoundException());
+    when(deskService.addDesk(any(), eq("roomName"))).thenThrow(new RoomNotFoundException());
     ResponseStatusException thrown =
         assertThrows(
-            ResponseStatusException.class, () -> router.addDesk("roomName", "auth", providedDesk));
+            ResponseStatusException.class,
+            () ->
+                router.addDesk(
+                    "roomName", "auth", Set.of(mock(DeskInfo.class), mock(DeskInfo.class))));
     assertEquals(thrown.getStatus(), HttpStatus.NOT_FOUND);
   }
 
@@ -397,11 +413,13 @@ class AdminRouterTest {
     User admin = mock(User.class);
     when(admin.getAuthorities()).thenReturn(Set.of(Authority.ADMIN));
     when(authenticationService.authenticateByToken("auth")).thenReturn(admin);
-    DeskInfo providedDesk = mock(DeskInfo.class);
-    when(deskService.addDesk(providedDesk, "roomName")).thenThrow(new IllegalArgumentException());
+    when(deskService.addDesk(any(), eq("roomName"))).thenReturn(mock(Desk.class));
+    DeskInfo faultyDesk = mock(DeskInfo.class);
+    Set<DeskInfo> providedDesks = Set.of(mock(DeskInfo.class), faultyDesk, mock(DeskInfo.class));
+    when(deskService.addDesk(faultyDesk, "roomName")).thenThrow(new IllegalArgumentException());
     ResponseStatusException thrown =
         assertThrows(
-            ResponseStatusException.class, () -> router.addDesk("roomName", "auth", providedDesk));
+            ResponseStatusException.class, () -> router.addDesk("roomName", "auth", providedDesks));
     assertEquals(thrown.getStatus(), HttpStatus.BAD_REQUEST);
   }
 }
