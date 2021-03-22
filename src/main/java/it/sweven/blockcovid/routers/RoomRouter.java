@@ -5,10 +5,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.sweven.blockcovid.assemblers.RoomAssembler;
+import it.sweven.blockcovid.dto.DeskInfo;
+import it.sweven.blockcovid.dto.RoomWithDesks;
 import it.sweven.blockcovid.entities.room.Room;
 import it.sweven.blockcovid.exceptions.RoomNotFoundException;
+import it.sweven.blockcovid.services.DeskService;
 import it.sweven.blockcovid.services.RoomService;
 import it.sweven.blockcovid.services.UserAuthenticationService;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -20,16 +26,19 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("api/rooms")
 public class RoomRouter {
 
-  private final RoomService service;
+  private final RoomService roomService;
+  private final DeskService deskService;
   private final UserAuthenticationService authenticationService;
   private final RoomAssembler assembler;
 
   @Autowired
   public RoomRouter(
-      RoomService service,
+      RoomService roomService,
+      DeskService deskService,
       UserAuthenticationService authenticationService,
       RoomAssembler assembler) {
-    this.service = service;
+    this.roomService = roomService;
+    this.deskService = deskService;
     this.authenticationService = authenticationService;
     this.assembler = assembler;
   }
@@ -47,16 +56,20 @@ public class RoomRouter {
         description = "No room found with such name",
         content = @Content(schema = @Schema(implementation = ResponseStatusException.class)))
   })
-  public EntityModel<Room> viewRoom(
+  public EntityModel<RoomWithDesks> viewRoom(
       @PathVariable String roomName, @RequestHeader String Authorization) {
     authenticationService.authenticateByToken(Authorization);
     Room requestedRoom;
     try {
-      requestedRoom = service.getByName(roomName);
+      requestedRoom = roomService.getByName(roomName);
     } catch (RoomNotFoundException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No room named " + roomName);
     }
-    return assembler.toModel(requestedRoom);
+    List<DeskInfo> associatedDesks =
+        deskService.getDesksByRoom(roomName).stream()
+            .map(d -> new DeskInfo(d.getId(), d.getX(), d.getY()))
+            .collect(Collectors.toList());
+    return assembler.toModel(new RoomWithDesks(requestedRoom, associatedDesks));
   }
 
   @GetMapping("")
@@ -70,8 +83,18 @@ public class RoomRouter {
         description = "Invalid authentication token",
         content = @Content(schema = @Schema(implementation = ResponseStatusException.class)))
   })
-  public CollectionModel<EntityModel<Room>> listRooms(@RequestHeader String Authorization) {
+  public CollectionModel<EntityModel<RoomWithDesks>> listRooms(
+      @RequestHeader String Authorization) {
     authenticationService.authenticateByToken(Authorization);
-    return assembler.toCollectionModel(service.getAllRooms());
+    ArrayList<RoomWithDesks> requestedRooms = new ArrayList<>();
+    for (Room room : roomService.getAllRooms()) {
+      requestedRooms.add(
+          new RoomWithDesks(
+              room,
+              deskService.getDesksByRoom(room.getName()).stream()
+                  .map(d -> new DeskInfo(d.getId(), d.getX(), d.getY()))
+                  .collect(Collectors.toList())));
+    }
+    return assembler.toCollectionModel(requestedRooms);
   }
 }

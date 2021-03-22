@@ -9,7 +9,9 @@ import it.sweven.blockcovid.dto.DeskInfo;
 import it.sweven.blockcovid.entities.room.Desk;
 import it.sweven.blockcovid.entities.room.Room;
 import it.sweven.blockcovid.exceptions.DeskNotAvailable;
+import it.sweven.blockcovid.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.repositories.DeskRepository;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -87,5 +89,21 @@ class DeskServiceTest {
     when(roomService.getByName("roomName")).thenReturn(requestedRoom);
     when(repository.findByIdAndRoomId(any(), any())).thenReturn(Optional.of(mock(Desk.class)));
     assertThrows(DeskNotAvailable.class, () -> deskService.addDesk(providedDesk, "roomName"));
+  }
+
+  @Test
+  void getDesksByRoom_validRoom() {
+    Room associatedRoom = mock(Room.class);
+    when(associatedRoom.getId()).thenReturn("roomId");
+    when(roomService.getByName("roomName")).thenReturn(associatedRoom);
+    List<Desk> expectedDesks = List.of(mock(Desk.class), mock(Desk.class));
+    when(repository.findAllByRoomId("roomId")).thenReturn(expectedDesks);
+    assertEquals(expectedDesks, deskService.getDesksByRoom("roomName"));
+  }
+
+  @Test
+  void getDesksByRoom_invalidRoom_throwsRoomNotFoundException() {
+    when(roomService.getByName("roomName")).thenThrow(new RoomNotFoundException());
+    assertThrows(RoomNotFoundException.class, () -> deskService.getDesksByRoom("roomName"));
   }
 }
