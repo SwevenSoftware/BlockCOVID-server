@@ -64,7 +64,25 @@ jacoco {
 }
 
 jacocoTestReport {
+    dependsOn test
+
+    afterEvaluate {
+        getClassDirectories().setFrom(classDirectories.files.collect {
+            fileTree(dir: it,
+                    exclude: [
+                            '**/it/sweven/blockcovid/configurations/*.class',
+                            '**/it/sweven/blockcovid/Server.class'
+                    ])
+        })
+    }
+
     reports {
         xml.enabled = true
+    }
+}
+
+test {
+    jacoco {
+        excludes = ['it.sweven.blockcovid.configurations.*', 'it.sweven.blockcovid.Server']
     }
 }
