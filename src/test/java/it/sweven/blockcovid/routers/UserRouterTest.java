@@ -7,9 +7,9 @@ import static org.mockito.Mockito.*;
 
 import it.sweven.blockcovid.assemblers.UserAssembler;
 import it.sweven.blockcovid.dto.CredentialChangeRequestForm;
-import it.sweven.blockcovid.dto.CredentialsWithAuthorities;
 import it.sweven.blockcovid.entities.user.Authority;
 import it.sweven.blockcovid.entities.user.User;
+import it.sweven.blockcovid.routers.user.UserRouter;
 import it.sweven.blockcovid.services.UserAuthenticationService;
 import it.sweven.blockcovid.services.UserService;
 import java.util.Collections;
@@ -78,8 +78,7 @@ class UserRouterTest {
   @Test
   void info_existingUser() {
     User user = new User("user", "password", Collections.emptySet());
-    when(authenticationService.authenticateByToken("auth")).thenReturn(user);
-    assertEquals(user, userRouter.info("auth").getContent());
+    assertEquals(user, userRouter.info(user).getContent());
   }
 
   @Test
@@ -88,25 +87,14 @@ class UserRouterTest {
     CredentialChangeRequestForm requestForm =
         new CredentialChangeRequestForm("password", "newPassword");
     User expectedUser = new User("user", "newPassword", Collections.emptySet());
-    when(authenticationService.authenticateByToken("auth")).thenReturn(oldUser);
-    assertEquals(expectedUser, userRouter.modifyPassword("auth", requestForm).getContent());
+    assertEquals(expectedUser, userRouter.modifyPassword(oldUser, requestForm).getContent());
   }
 
   @Test
   void modifyPassword_nullCredentials() {
+    User user = new User("user", "password", Collections.emptySet());
     ResponseStatusException thrown =
-        assertThrows(ResponseStatusException.class, () -> userRouter.modifyPassword("", null));
-    assertEquals(HttpStatus.BAD_REQUEST, thrown.getStatus());
-  }
-
-  @Test
-  void modifyPassword_nullPasswordCredentials() {
-    CredentialsWithAuthorities newCredentials =
-        new CredentialsWithAuthorities("newUsername", null, Set.of(Authority.ADMIN));
-    CredentialsWithAuthorities oldCredentials =
-        new CredentialsWithAuthorities("newUsername", "oldPassword", Collections.emptySet());
-    ResponseStatusException thrown =
-        assertThrows(ResponseStatusException.class, () -> userRouter.modifyPassword("", null));
+        assertThrows(ResponseStatusException.class, () -> userRouter.modifyPassword(user, null));
     assertEquals(HttpStatus.BAD_REQUEST, thrown.getStatus());
   }
 }

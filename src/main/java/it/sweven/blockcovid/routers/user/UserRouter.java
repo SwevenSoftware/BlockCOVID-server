@@ -1,4 +1,4 @@
-package it.sweven.blockcovid.routers;
+package it.sweven.blockcovid.routers.user;
 
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -9,9 +9,11 @@ import it.sweven.blockcovid.dto.CredentialChangeRequestForm;
 import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.services.UserAuthenticationService;
 import it.sweven.blockcovid.services.UserService;
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -23,7 +25,7 @@ public class UserRouter {
   private final UserService userService;
 
   @Autowired
-  UserRouter(
+  public UserRouter(
       UserAuthenticationService authenticationService,
       UserAssembler assembler,
       UserService userService) {
@@ -41,8 +43,8 @@ public class UserRouter {
         description = "Invalid authentication token",
         content = @Content(schema = @Schema(implementation = ResponseStatusException.class)))
   })
-  public EntityModel<User> info(@RequestHeader String Authorization) {
-    User user = authenticationService.authenticateByToken(Authorization);
+  @PreAuthorize("#user.isUser()")
+  public EntityModel<User> info(@AuthenticationPrincipal User user) {
     return assembler.setAuthorities(user.getAuthorities()).toModel(user);
   }
 
@@ -68,13 +70,10 @@ public class UserRouter {
         description = "Invalid authentication token",
         content = @Content(schema = @Schema(implementation = ResponseStatusException.class)))
   })
+  @PreAuthorize("#user.isEnabled()")
   public EntityModel<User> modifyPassword(
-      @RequestHeader String Authorization, @RequestBody CredentialChangeRequestForm requestForm) {
-    if (requestForm == null
-        || requestForm.getNewPassword() == null
-        || requestForm.getOldPassword() == null)
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong or missing credentials");
-    User user = authenticationService.authenticateByToken(Authorization);
+      @AuthenticationPrincipal User user,
+      @RequestBody @Valid CredentialChangeRequestForm requestForm) {
     userService.updatePassword(user, requestForm.getOldPassword(), requestForm.getNewPassword());
     return assembler.setAuthorities(user.getAuthorities()).toModel(user);
   }

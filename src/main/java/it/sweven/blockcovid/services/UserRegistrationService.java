@@ -5,6 +5,7 @@ import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.entities.user.UserBuilder;
 import javax.security.auth.login.CredentialException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,8 @@ public class UserRegistrationService {
     this.passwordEncoder = passwordEncoder;
   }
 
-  public User register(CredentialsWithAuthorities credentials) throws CredentialException {
+  public User register(CredentialsWithAuthorities credentials)
+      throws CredentialException, BadCredentialsException {
     try {
       userService.getByUsername(credentials.getUsername());
       throw new CredentialException("Username already in use");

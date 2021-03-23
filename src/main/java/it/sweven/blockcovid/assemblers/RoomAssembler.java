@@ -5,8 +5,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import it.sweven.blockcovid.entities.room.Room;
 import it.sweven.blockcovid.entities.user.Authority;
-import it.sweven.blockcovid.routers.AdminRouter;
 import it.sweven.blockcovid.routers.RoomRouter;
+import it.sweven.blockcovid.routers.admin.AdminNewRoomRouter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -37,7 +37,7 @@ public class RoomAssembler implements RepresentationModelAssembler<Room, EntityM
         EntityModel.of(
             entity,
             linkTo(methodOn(RoomRouter.class).viewRoom(entity.getName(), "")).withSelfRel(),
-            linkTo(methodOn(AdminRouter.class).newRoom("", null)).withRel("new_room"),
+            linkTo(methodOn(AdminNewRoomRouter.class).newRoom(null, null)).withRel("new_room"),
             linkTo(methodOn(RoomRouter.class).listRooms("")).withRel("list_rooms"));
     clearAuthorities();
     return roomModel;
