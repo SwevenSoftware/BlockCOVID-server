@@ -72,6 +72,7 @@ jacocoTestReport {
             fileTree(dir: it,
                     exclude: [
                             '**/it/sweven/blockcovid/configurations/*.class',
+                            '**/it/sweven/blockcovid/dto/*.class',
                             '**/it/sweven/blockcovid/Server.class'
                     ])
         })
@@ -84,6 +85,6 @@ jacocoTestReport {
 
 test {
     jacoco {
-        excludes = ['it.sweven.blockcovid.configurations.*', 'it.sweven.blockcovid.Server']
+        excludes = ['it.sweven.blockcovid.configurations.*', 'it.sweven.blockcovid.Server', 'it.sweve.blockcovid.dto.*']
     }
 }

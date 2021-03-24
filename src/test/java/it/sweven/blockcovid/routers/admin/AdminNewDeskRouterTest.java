@@ -33,16 +33,8 @@ class AdminNewDeskRouterTest {
   @BeforeEach
   void setUp() {
     deskService = mock(DeskService.class);
-    deskAssembler =
-        spy(
-            new DeskAssembler() {
-              @Override
-              public EntityModel<DeskWithRoomName> toModel(DeskWithRoomName entity) {
-                return EntityModel.of(entity);
-              }
-            });
+    deskAssembler = mock(DeskAssembler.class);
     when(deskAssembler.setAuthorities(anySet())).thenReturn(deskAssembler);
-    ;
     admin = mock(User.class);
     when(admin.getAuthorities()).thenReturn(Set.of(Authority.ADMIN));
     router = new AdminNewDeskRouter(deskAssembler, deskService);

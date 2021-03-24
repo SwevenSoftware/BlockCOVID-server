@@ -45,6 +45,9 @@ class UserTest {
             false,
             true);
     assertFalse(testUser.isCredentialsNonExpired());
+
+    testUser = new User("user", "pass", Collections.emptySet(), null, false, true);
+    assertFalse(testUser.isCredentialsNonExpired());
   }
 
   @Test
@@ -80,5 +83,24 @@ class UserTest {
     assertTrue(testUser0.toString().contains("credentials_expDate="));
     assertTrue(testUser0.toString().contains("locked="));
     assertTrue(testUser0.toString().contains("enabled="));
+  }
+
+  @Test
+  void authorityCheckersAreWorkingCorrectly() {
+    User testUser = new User("user", "pass", Set.of(Authority.USER));
+    User testCleaner = new User("user", "pass", Set.of(Authority.CLEANER));
+    User testAdmin = new User("admin", "pass", Set.of(Authority.ADMIN));
+
+    assertFalse(testUser.isAdmin());
+    assertFalse(testCleaner.isAdmin());
+    assertTrue(testAdmin.isAdmin());
+
+    assertTrue(testUser.isUser());
+    assertFalse(testCleaner.isUser());
+    assertFalse(testAdmin.isUser());
+
+    assertFalse(testUser.isCleaner());
+    assertTrue(testCleaner.isCleaner());
+    assertFalse(testAdmin.isCleaner());
   }
 }

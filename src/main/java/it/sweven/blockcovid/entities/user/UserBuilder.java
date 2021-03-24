@@ -24,7 +24,7 @@ public class UserBuilder {
     return this;
   }
 
-  public User createUser() {
+  public User createUser() throws BadCredentialsException {
     if (username != null && password != null) return new User(username, password, authorities);
     else throw new BadCredentialsException("username and password must both be setted");
   }

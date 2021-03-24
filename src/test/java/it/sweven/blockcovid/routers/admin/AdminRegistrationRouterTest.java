@@ -16,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.server.ResponseStatusException;
 
 class AdminRegistrationRouterTest {
@@ -58,5 +59,18 @@ class AdminRegistrationRouterTest {
         assertThrows(
             ResponseStatusException.class, () -> router.register(testCredentials, adminTest));
     assertEquals(thrown.getStatus(), HttpStatus.CONFLICT);
+  }
+
+  @Test
+  void register_badCredentialsFromService_throwsResponseStatusException()
+      throws CredentialException {
+    CredentialsWithAuthorities testCredentials =
+        new CredentialsWithAuthorities("user", "password", Set.of(Authority.USER));
+    User adminTest = new User("admin", "password", Set.of(Authority.ADMIN));
+    when(registrationService.register(any())).thenThrow(new BadCredentialsException(""));
+    ResponseStatusException thrown =
+        assertThrows(
+            ResponseStatusException.class, () -> router.register(testCredentials, adminTest));
+    assertEquals(thrown.getStatus(), HttpStatus.BAD_REQUEST);
   }
 }
