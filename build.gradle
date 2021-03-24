@@ -85,6 +85,6 @@ jacocoTestReport {
 
 test {
     jacoco {
-        excludes = ['it.sweven.blockcovid.configurations.*', 'it.sweven.blockcovid.Server', 'it.sweve.blockcovid.dto.*']
+        excludes = ['it.sweven.blockcovid.configurations.*', 'it.sweven.blockcovid.Server', 'it.sweven.blockcovid.dto.*']
     }
 }
