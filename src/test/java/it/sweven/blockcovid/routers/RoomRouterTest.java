@@ -5,7 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import it.sweven.blockcovid.assemblers.RoomAssembler;
+import it.sweven.blockcovid.assemblers.RoomWithDesksAssembler;
 import it.sweven.blockcovid.dto.DeskInfo;
 import it.sweven.blockcovid.dto.RoomWithDesks;
 import it.sweven.blockcovid.entities.room.Desk;
@@ -29,7 +29,7 @@ class RoomRouterTest {
   private RoomService roomService;
   private DeskService deskService;
   private UserAuthenticationService authenticationService;
-  private RoomAssembler assembler;
+  private RoomWithDesksAssembler assembler;
   private RoomRouter router;
 
   @BeforeEach
@@ -38,7 +38,7 @@ class RoomRouterTest {
     deskService = mock(DeskService.class);
     authenticationService = mock(UserAuthenticationService.class);
     when(authenticationService.authenticateByToken("auth")).thenReturn(mock(User.class));
-    assembler = mock(RoomAssembler.class);
+    assembler = mock(RoomWithDesksAssembler.class);
     router = new RoomRouter(roomService, deskService, authenticationService, assembler);
   }
 
