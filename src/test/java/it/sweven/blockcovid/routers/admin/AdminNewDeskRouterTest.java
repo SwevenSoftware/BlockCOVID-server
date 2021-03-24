@@ -3,8 +3,7 @@ package it.sweven.blockcovid.routers.admin;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import it.sweven.blockcovid.assemblers.DeskAssembler;
 import it.sweven.blockcovid.dto.DeskInfo;
@@ -34,7 +33,16 @@ class AdminNewDeskRouterTest {
   @BeforeEach
   void setUp() {
     deskService = mock(DeskService.class);
-    deskAssembler = mock(DeskAssembler.class);
+    deskAssembler =
+        spy(
+            new DeskAssembler() {
+              @Override
+              public EntityModel<DeskWithRoomName> toModel(DeskWithRoomName entity) {
+                return EntityModel.of(entity);
+              }
+            });
+    when(deskAssembler.setAuthorities(anySet())).thenReturn(deskAssembler);
+    ;
     admin = mock(User.class);
     when(admin.getAuthorities()).thenReturn(Set.of(Authority.ADMIN));
     router = new AdminNewDeskRouter(deskAssembler, deskService);
@@ -44,9 +52,7 @@ class AdminNewDeskRouterTest {
   void addDesk_validRequest() throws DeskNotAvailable {
     Set<DeskInfo> providedDesks =
         Set.of(new DeskInfo(1234, 5, 10), new DeskInfo(3, 11, 40), new DeskInfo(22, 1, 1));
-    for (DeskInfo desk : providedDesks) {
-      when(deskService.addDesk(desk, "roomName")).thenReturn(mock(Desk.class));
-    }
+    when(deskService.addDesk(any(), eq("roomName"))).thenReturn(mock(Desk.class));
     List<DeskWithRoomName> expectedList =
         List.of(
             new DeskWithRoomName(1234, "roomName", 5, 10),
@@ -86,7 +92,7 @@ class AdminNewDeskRouterTest {
             () ->
                 router.addDesk(
                     "roomName", admin, Set.of(mock(DeskInfo.class), mock(DeskInfo.class))));
-    assertEquals(thrown.getStatus(), HttpStatus.NOT_FOUND);
+    assertEquals(HttpStatus.NOT_FOUND, thrown.getStatus());
   }
 
   @Test

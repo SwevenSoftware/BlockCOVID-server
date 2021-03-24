@@ -7,16 +7,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.sweven.blockcovid.assemblers.DeskAssembler;
 import it.sweven.blockcovid.dto.DeskInfo;
 import it.sweven.blockcovid.dto.DeskWithRoomName;
-import it.sweven.blockcovid.entities.user.Authority;
 import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.exceptions.DeskNotAvailable;
 import it.sweven.blockcovid.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.services.DeskService;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -59,12 +61,11 @@ public class AdminNewDeskRouter implements AdminRouter {
         description = "Desk already exist (with the same id or position)",
         content = @Content(schema = @Schema(implementation = ResponseStatusException.class)))
   })
+  @PreAuthorize("#submitter.isAdmin()")
   public CollectionModel<EntityModel<DeskWithRoomName>> addDesk(
       @PathVariable String nameRoom,
       @AuthenticationPrincipal User submitter,
-      @RequestBody Set<DeskInfo> newDesks) {
-    if (!submitter.getAuthorities().contains(Authority.ADMIN))
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+      @Valid @NotNull @RequestBody Set<DeskInfo> newDesks) {
     for (DeskInfo desk : newDesks) {
       try {
         deskService.addDesk(desk, nameRoom);

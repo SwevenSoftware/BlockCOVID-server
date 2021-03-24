@@ -63,14 +63,4 @@ class AdminNewRoomRouterTest {
         assertThrows(ResponseStatusException.class, () -> router.newRoom(admin, roomInfo));
     assertEquals(HttpStatus.BAD_REQUEST, thrown.getStatus());
   }
-
-  @Test
-  void newRoom_requestNotMadeByAdmin() {
-    User fakeUser = mock(User.class);
-    RoomInfo fakeInfo = mock(RoomInfo.class);
-    when(fakeUser.getAuthorities()).thenReturn(Set.of(Authority.USER));
-    ResponseStatusException thrown =
-        assertThrows(ResponseStatusException.class, () -> router.newRoom(admin, fakeInfo));
-    assertEquals(thrown.getStatus(), HttpStatus.FORBIDDEN);
-  }
 }

@@ -5,7 +5,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 import it.sweven.blockcovid.entities.user.Authority;
 import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.routers.admin.*;
-import it.sweven.blockcovid.routers.user.UserRouter;
+import it.sweven.blockcovid.routers.user.UserInfoRouter;
+import it.sweven.blockcovid.routers.user.UserModifyPasswordRouter;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
@@ -31,8 +32,8 @@ public class UserAssembler implements RepresentationModelAssembler<User, EntityM
     EntityModel<User> userModel =
         EntityModel.of(
             entity,
-            linkTo(methodOn(UserRouter.class).info(null)).withSelfRel(),
-            linkTo(methodOn(UserRouter.class).modifyPassword(null, null))
+            linkTo(methodOn(UserInfoRouter.class).info(null)).withSelfRel(),
+            linkTo(methodOn(UserModifyPasswordRouter.class).modifyPassword(null, null))
                 .withRel("change_password"));
     if (authorities.contains(Authority.ADMIN)) {
       userModel.add(

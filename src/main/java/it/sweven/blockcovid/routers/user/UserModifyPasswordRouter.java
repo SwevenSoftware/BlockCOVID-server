@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.sweven.blockcovid.assemblers.UserAssembler;
 import it.sweven.blockcovid.dto.CredentialChangeRequestForm;
 import it.sweven.blockcovid.entities.user.User;
-import it.sweven.blockcovid.services.UserAuthenticationService;
 import it.sweven.blockcovid.services.UserService;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,33 +18,14 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping(value = "api/user")
-public class UserRouter {
-  private final UserAuthenticationService authenticationService;
+public class UserModifyPasswordRouter {
   private final UserAssembler assembler;
   private final UserService userService;
 
   @Autowired
-  public UserRouter(
-      UserAuthenticationService authenticationService,
-      UserAssembler assembler,
-      UserService userService) {
-    this.authenticationService = authenticationService;
+  public UserModifyPasswordRouter(UserAssembler assembler, UserService userService) {
     this.assembler = assembler;
     this.userService = userService;
-  }
-
-  @GetMapping(value = "/info", consumes = "application/json", produces = "application/json")
-  @ResponseBody
-  @ApiResponses({
-    @ApiResponse(responseCode = "200"),
-    @ApiResponse(
-        responseCode = "401",
-        description = "Invalid authentication token",
-        content = @Content(schema = @Schema(implementation = ResponseStatusException.class)))
-  })
-  @PreAuthorize("#user.isUser()")
-  public EntityModel<User> info(@AuthenticationPrincipal User user) {
-    return assembler.setAuthorities(user.getAuthorities()).toModel(user);
   }
 
   @PutMapping(

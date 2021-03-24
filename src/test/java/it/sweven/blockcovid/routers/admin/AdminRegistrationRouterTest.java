@@ -1,57 +1,62 @@
 package it.sweven.blockcovid.routers.admin;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
+import it.sweven.blockcovid.assemblers.UserAssembler;
+import it.sweven.blockcovid.dto.CredentialsWithAuthorities;
 import it.sweven.blockcovid.entities.user.Authority;
 import it.sweven.blockcovid.entities.user.User;
+import it.sweven.blockcovid.services.UserRegistrationService;
 import java.util.Set;
+import javax.security.auth.login.CredentialException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureMockMvc
 class AdminRegistrationRouterTest {
-  private @Autowired MockMvc mockMvc;
-  protected @Autowired WebApplicationContext context;
+  private UserRegistrationService registrationService;
+  private UserAssembler userAssembler;
+  private AdminRegistrationRouter router;
 
   @BeforeEach
   void setUp() {
-    mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
+    registrationService = mock(UserRegistrationService.class);
+    userAssembler =
+        spy(
+            new UserAssembler() {
+              @Override
+              public EntityModel<User> toModel(User entity) {
+                return EntityModel.of(entity);
+              }
+            });
+    when(userAssembler.setAuthorities(anySet())).thenReturn(userAssembler);
+    router = new AdminRegistrationRouter(registrationService, userAssembler);
   }
 
   @Test
-  void validProcess() throws Exception {
-    User admin = new User("admin", "pass", Set.of(Authority.ADMIN));
-    mockMvc
-        .perform(
-            post("/api/admin/user/new")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    "{\"username\":\"user\", \"password\":\"password\", \"authorities\":[\"USER\"]}")
-                .header(HttpHeaders.AUTHORIZATION, "auth")
-                .with(user(admin)))
-        .andExpect(status().isOk());
+  void register_validRequest() throws CredentialException {
+    CredentialsWithAuthorities testCredentials =
+        new CredentialsWithAuthorities("user", "password", Set.of(Authority.USER));
+    User testUser = new User("user", "password", Set.of(Authority.USER));
+    User testAdmin = new User("admin", "password", Set.of(Authority.ADMIN));
+    when(registrationService.register(any())).thenReturn(testUser);
+    assertEquals(userAssembler.toModel(testUser), router.register(testCredentials, testAdmin));
   }
 
   @Test
-  void thisShouldFail() throws Exception {
-    mockMvc
-        .perform(
-            post("/api/admin/user/new")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    "{\"username\":\"user\", \"password\":\"password\", \"authorities\":[\"USER\"]}"))
-        .andExpect(status().isUnauthorized());
+  void register_usernameAlreadyInUse_throwsResponseStatusException() throws CredentialException {
+    CredentialsWithAuthorities testCredentials =
+        new CredentialsWithAuthorities("user", "password", Set.of(Authority.USER));
+    User adminTest = new User("admin", "password", Set.of(Authority.ADMIN));
+    when(registrationService.register(any())).thenThrow(new CredentialException());
+    ResponseStatusException thrown =
+        assertThrows(
+            ResponseStatusException.class, () -> router.register(testCredentials, adminTest));
+    assertEquals(thrown.getStatus(), HttpStatus.CONFLICT);
   }
 }
