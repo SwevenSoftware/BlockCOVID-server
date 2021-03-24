@@ -17,8 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-@RequestMapping(value = "api/user")
-public class UserModifyPasswordRouter {
+public class UserModifyPasswordRouter implements UserRouter {
   private final UserAssembler assembler;
   private final UserService userService;
 
