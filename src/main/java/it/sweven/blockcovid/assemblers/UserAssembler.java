@@ -4,8 +4,9 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import it.sweven.blockcovid.entities.user.Authority;
 import it.sweven.blockcovid.entities.user.User;
-import it.sweven.blockcovid.routers.AdminRouter;
-import it.sweven.blockcovid.routers.UserRouter;
+import it.sweven.blockcovid.routers.admin.*;
+import it.sweven.blockcovid.routers.user.UserInfoRouter;
+import it.sweven.blockcovid.routers.user.UserModifyPasswordRouter;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
@@ -31,17 +32,20 @@ public class UserAssembler implements RepresentationModelAssembler<User, EntityM
     EntityModel<User> userModel =
         EntityModel.of(
             entity,
-            linkTo(methodOn(UserRouter.class).info(null)).withSelfRel(),
-            linkTo(methodOn(UserRouter.class).modifyPassword(null, null))
+            linkTo(methodOn(UserInfoRouter.class).info(null)).withSelfRel(),
+            linkTo(methodOn(UserModifyPasswordRouter.class).modifyPassword(null, null))
                 .withRel("change_password"));
     if (authorities.contains(Authority.ADMIN)) {
       userModel.add(
-          linkTo(methodOn(AdminRouter.class).modifyUser(null, entity.getUsername(), null))
+          linkTo(methodOn(AdminModifyUserRouter.class).modifyUser(null, entity.getUsername(), null))
               .withRel("modify_user"));
-      userModel.add(linkTo(methodOn(AdminRouter.class).listUsers(null)).withRel("list_users"));
-      userModel.add(linkTo(methodOn(AdminRouter.class).delete("", "")).withRel("delete_user"));
       userModel.add(
-          linkTo(methodOn(AdminRouter.class).register(null, "")).withRel("register_user"));
+          linkTo(methodOn(AdminListUsersRouter.class).listUsers(null)).withRel("list_users"));
+      userModel.add(
+          linkTo(methodOn(AdminDeleteUserRouter.class).delete("", null)).withRel("delete_user"));
+      userModel.add(
+          linkTo(methodOn(AdminRegistrationRouter.class).register(null, null))
+              .withRel("register_user"));
     }
     clearAuthorities();
     return userModel;

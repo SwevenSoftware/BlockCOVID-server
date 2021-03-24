@@ -7,33 +7,24 @@ import static org.mockito.Mockito.*;
 
 import it.sweven.blockcovid.assemblers.UserAssembler;
 import it.sweven.blockcovid.dto.CredentialChangeRequestForm;
-import it.sweven.blockcovid.dto.CredentialsWithAuthorities;
 import it.sweven.blockcovid.entities.user.Authority;
 import it.sweven.blockcovid.entities.user.User;
-import it.sweven.blockcovid.services.UserAuthenticationService;
+import it.sweven.blockcovid.routers.user.UserModifyPasswordRouter;
 import it.sweven.blockcovid.services.UserService;
 import java.util.Collections;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.web.server.ResponseStatusException;
 
-class UserRouterTest {
-  private UserAuthenticationService authenticationService;
+class UserModifyPasswordRouterTest {
   private UserAssembler assembler;
   private UserService userService;
-  private UserRouter userRouter;
+  private UserModifyPasswordRouter userModifyPasswordRouter;
 
   @BeforeEach
   void setUp() {
-    // Mock AuthenticationService
-    authenticationService = mock(UserAuthenticationService.class);
-    // Basic mock AuthenticationService.authenticateByToken
-    when(authenticationService.authenticateByToken(any())).thenReturn(new User());
-
     // Mock UserAssembler
     assembler =
         spy(
@@ -72,14 +63,7 @@ class UserRouterTest {
         .updateAuthorities(any(), any());
 
     // Instantiation UserRoute
-    userRouter = new UserRouter(authenticationService, assembler, userService);
-  }
-
-  @Test
-  void info_existingUser() {
-    User user = new User("user", "password", Collections.emptySet());
-    when(authenticationService.authenticateByToken("auth")).thenReturn(user);
-    assertEquals(user, userRouter.info("auth").getContent());
+    userModifyPasswordRouter = new UserModifyPasswordRouter(assembler, userService);
   }
 
   @Test
@@ -88,25 +72,7 @@ class UserRouterTest {
     CredentialChangeRequestForm requestForm =
         new CredentialChangeRequestForm("password", "newPassword");
     User expectedUser = new User("user", "newPassword", Collections.emptySet());
-    when(authenticationService.authenticateByToken("auth")).thenReturn(oldUser);
-    assertEquals(expectedUser, userRouter.modifyPassword("auth", requestForm).getContent());
-  }
-
-  @Test
-  void modifyPassword_nullCredentials() {
-    ResponseStatusException thrown =
-        assertThrows(ResponseStatusException.class, () -> userRouter.modifyPassword("", null));
-    assertEquals(HttpStatus.BAD_REQUEST, thrown.getStatus());
-  }
-
-  @Test
-  void modifyPassword_nullPasswordCredentials() {
-    CredentialsWithAuthorities newCredentials =
-        new CredentialsWithAuthorities("newUsername", null, Set.of(Authority.ADMIN));
-    CredentialsWithAuthorities oldCredentials =
-        new CredentialsWithAuthorities("newUsername", "oldPassword", Collections.emptySet());
-    ResponseStatusException thrown =
-        assertThrows(ResponseStatusException.class, () -> userRouter.modifyPassword("", null));
-    assertEquals(HttpStatus.BAD_REQUEST, thrown.getStatus());
+    assertEquals(
+        expectedUser, userModifyPasswordRouter.modifyPassword(oldUser, requestForm).getContent());
   }
 }

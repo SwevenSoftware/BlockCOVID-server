@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import it.sweven.blockcovid.assemblers.RoomAssembler;
+import it.sweven.blockcovid.assemblers.RoomWithDesksAssembler;
 import it.sweven.blockcovid.dto.DeskInfo;
 import it.sweven.blockcovid.dto.RoomWithDesks;
 import it.sweven.blockcovid.entities.room.Room;
@@ -29,14 +29,14 @@ public class RoomRouter {
   private final RoomService roomService;
   private final DeskService deskService;
   private final UserAuthenticationService authenticationService;
-  private final RoomAssembler assembler;
+  private final RoomWithDesksAssembler assembler;
 
   @Autowired
   public RoomRouter(
       RoomService roomService,
       DeskService deskService,
       UserAuthenticationService authenticationService,
-      RoomAssembler assembler) {
+      RoomWithDesksAssembler assembler) {
     this.roomService = roomService;
     this.deskService = deskService;
     this.authenticationService = authenticationService;
