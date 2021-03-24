@@ -1,5 +1,6 @@
 package it.sweven.blockcovid.routers.user;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -33,13 +34,7 @@ public class UserModifyPasswordRouter implements UserRouter {
       produces = "application/json")
   @ResponseBody
   @ApiResponses({
-    @ApiResponse(
-        responseCode = "201",
-        description = "Password successfully updated",
-        content =
-            @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = User.class))),
+    @ApiResponse(responseCode = "200", description = "Password successfully updated"),
     @ApiResponse(
         responseCode = "400",
         description = "Wrong or missing credentials",
@@ -51,7 +46,7 @@ public class UserModifyPasswordRouter implements UserRouter {
   })
   @PreAuthorize("#user.isEnabled()")
   public EntityModel<User> modifyPassword(
-      @AuthenticationPrincipal User user,
+      @Parameter(hidden = true) @AuthenticationPrincipal User user,
       @RequestBody @Valid CredentialChangeRequestForm requestForm) {
     userService.updatePassword(user, requestForm.getOldPassword(), requestForm.getNewPassword());
     return assembler.setAuthorities(user.getAuthorities()).toModel(user);

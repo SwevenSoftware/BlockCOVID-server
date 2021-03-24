@@ -3,6 +3,7 @@ package it.sweven.blockcovid.routers.admin;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -43,7 +44,8 @@ public class AdminListUsersRouter implements AdminRouter {
         content = @Content(schema = @Schema(implementation = void.class)))
   })
   @PreAuthorize("#submitter.isAdmin()")
-  public CollectionModel<EntityModel<User>> listUsers(@AuthenticationPrincipal User submitter) {
+  public CollectionModel<EntityModel<User>> listUsers(
+      @Parameter(hidden = true) @AuthenticationPrincipal User submitter) {
     List<EntityModel<User>> users =
         userService.getAllUsers().stream()
             .map(u -> userAssembler.setAuthorities(submitter.getAuthorities()).toModel(u))

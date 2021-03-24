@@ -10,10 +10,10 @@ class CredentialsTest {
   @Test
   void credentialsWithAuthorities() {
     Credentials testCredentials = new Credentials("user", "pass");
-    CredentialsWithAuthorities derivate =
+    CredentialsWithAuthorities derive =
         testCredentials.withAuthorities(Set.of(Authority.ADMIN, Authority.USER));
-    assertEquals(testCredentials.getPassword(), derivate.getPassword());
-    assertEquals(testCredentials.getUsername(), derivate.getUsername());
-    assertEquals(derivate.getAuthorities(), Set.of(Authority.ADMIN, Authority.USER));
+    assertEquals(testCredentials.getPassword(), derive.getPassword());
+    assertEquals(testCredentials.getUsername(), derive.getUsername());
+    assertEquals(derive.getAuthorities(), Set.of(Authority.ADMIN, Authority.USER));
   }
 }

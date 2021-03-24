@@ -1,5 +1,6 @@
 package it.sweven.blockcovid.routers.admin;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -63,7 +64,7 @@ public class AdminModifyUserRouter implements AdminRouter {
   @PreAuthorize("#submitter.isAdmin()")
   public EntityModel<User> modifyUser(
       @AuthenticationPrincipal User submitter,
-      @PathVariable String username,
+      @Parameter(hidden = true) @PathVariable String username,
       @Valid @RequestBody CredentialsWithAuthorities newCredentials) {
     User user;
     try {

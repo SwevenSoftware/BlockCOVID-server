@@ -1,5 +1,6 @@
 package it.sweven.blockcovid.routers.admin;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -35,13 +36,7 @@ public class AdminRegistrationRouter implements AdminRouter {
   @PostMapping(value = "user/new", consumes = "application/json", produces = "application/json")
   @ResponseBody
   @ApiResponses({
-    @ApiResponse(
-        responseCode = "200",
-        description = "Provided user registered successfully",
-        content =
-            @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = User.class))),
+    @ApiResponse(responseCode = "200", description = "Provided user registered successfully"),
     @ApiResponse(
         responseCode = "400",
         description = "No credentials provided",
@@ -62,7 +57,7 @@ public class AdminRegistrationRouter implements AdminRouter {
   @PreAuthorize("#submitter.isAdmin()")
   public EntityModel<User> register(
       @Valid @NotNull @RequestBody CredentialsWithAuthorities credentials,
-      @AuthenticationPrincipal User submitter) {
+      @Parameter(hidden = true) @AuthenticationPrincipal User submitter) {
     try {
       User registeredUser = registrationService.register(credentials);
       return userAssembler.setAuthorities(submitter.getAuthorities()).toModel(registeredUser);

@@ -1,5 +1,6 @@
 package it.sweven.blockcovid.routers.admin;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -35,6 +36,7 @@ public class AdminNewRoomRouter implements AdminRouter {
   @PostMapping(value = "rooms/new", consumes = "application/json", produces = "application/json")
   @ResponseBody
   @ApiResponses({
+    @ApiResponse(responseCode = "200", description = "Room successfully created"),
     @ApiResponse(
         responseCode = "403",
         description = "Method not allowed",
@@ -46,7 +48,8 @@ public class AdminNewRoomRouter implements AdminRouter {
   })
   @PreAuthorize("#submitter.isAdmin()")
   public EntityModel<Room> newRoom(
-      @AuthenticationPrincipal User submitter, @RequestBody RoomInfo newRoom) {
+      @Parameter(hidden = true) @AuthenticationPrincipal User submitter,
+      @RequestBody RoomInfo newRoom) {
     try {
       Room createdRoom = roomService.createRoom(newRoom);
       return roomAssembler.toModel(createdRoom);

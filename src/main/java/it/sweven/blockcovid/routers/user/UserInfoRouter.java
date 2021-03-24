@@ -1,5 +1,6 @@
 package it.sweven.blockcovid.routers.user;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -33,7 +34,7 @@ public class UserInfoRouter implements UserRouter {
         description = "Invalid authentication token",
         content = @Content(schema = @Schema(implementation = ResponseStatusException.class)))
   })
-  public EntityModel<User> info(@AuthenticationPrincipal User user) {
+  public EntityModel<User> info(@Parameter(hidden = true) @AuthenticationPrincipal User user) {
     return assembler.setAuthorities(user.getAuthorities()).toModel(user);
   }
 }

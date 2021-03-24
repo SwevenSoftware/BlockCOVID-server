@@ -1,5 +1,6 @@
 package it.sweven.blockcovid.routers.admin;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -64,7 +65,7 @@ public class AdminNewDeskRouter implements AdminRouter {
   @PreAuthorize("#submitter.isAdmin()")
   public CollectionModel<EntityModel<DeskWithRoomName>> addDesk(
       @PathVariable String nameRoom,
-      @AuthenticationPrincipal User submitter,
+      @Parameter(hidden = true) @AuthenticationPrincipal User submitter,
       @Valid @NotNull @RequestBody Set<DeskInfo> newDesks) {
     for (DeskInfo desk : newDesks) {
       try {
