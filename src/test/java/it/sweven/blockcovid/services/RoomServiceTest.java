@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import it.sweven.blockcovid.dto.RoomInfo;
 import it.sweven.blockcovid.entities.room.Room;
 import it.sweven.blockcovid.exceptions.RoomNotFoundException;
+import it.sweven.blockcovid.repositories.DeskRepository;
 import it.sweven.blockcovid.repositories.RoomRepository;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
@@ -21,13 +22,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class RoomServiceTest {
-  RoomRepository repository;
-  RoomService service;
+  private RoomRepository repository;
+  private RoomService service;
+  private DeskRepository deskRepository;
 
   @BeforeEach
   void setUp() {
     repository = mock(RoomRepository.class);
-    service = new RoomService(repository);
+    deskRepository = mock(DeskRepository.class);
+    service = new RoomService(repository, deskRepository);
   }
 
   @Test
