@@ -15,6 +15,7 @@ public class Desk {
   private @Id Integer id;
   private int x, y;
   private String roomId;
+  private Status deskStatus;
 
   @PersistenceConstructor
   public Desk(Integer id, int x, int y, String roomId) {
