@@ -2,6 +2,7 @@ package it.sweven.blockcovid.services;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -24,9 +25,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class RoomServiceTest {
-  RoomRepository repository;
-  DeskRepository deskRepository;
-  RoomService service;
+  private RoomRepository repository;
+  private RoomService service;
+  private DeskRepository deskRepository;
 
   @BeforeEach
   void setUp() {
@@ -132,5 +133,18 @@ class RoomServiceTest {
   void setRoomStatus_invalidChange() {
     when(repository.findRoomByName(any())).thenReturn(Optional.ofNullable(null));
     assertThrows(RoomNotFoundException.class, () -> service.setStatus("room", Status.DIRTY));
+  }
+  
+  @Test
+  void deleteValidRoom() {
+    Room fakeRoom = mock(Room.class);
+    when(repository.deleteRoomByName(anyString())).thenReturn(Optional.of(fakeRoom));
+    assertEquals(fakeRoom, service.deleteRoomByName("room"));
+  }
+
+  @Test
+  void deleteInvalidRoom_throwsRoomNotFoundException() {
+    when(repository.deleteRoomByName(anyString())).thenReturn(Optional.ofNullable(null));
+    assertThrows(RoomNotFoundException.class, () -> service.deleteRoomByName("room"));
   }
 }

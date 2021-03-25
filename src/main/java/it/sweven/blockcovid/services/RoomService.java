@@ -61,4 +61,11 @@ public class RoomService {
     toChange.setRoomStatus(status);
     return roomRepository.save(toChange);
   }
+
+  public Room deleteRoomByName(String roomName) throws RoomNotFoundException {
+    Room toReturn =
+        roomRepository.deleteRoomByName(roomName).orElseThrow(RoomNotFoundException::new);
+    deskRepository.deleteAllByRoomId(toReturn.getId());
+    return toReturn;
+  }
 }
