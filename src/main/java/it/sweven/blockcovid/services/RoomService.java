@@ -50,4 +50,8 @@ public class RoomService {
   public List<Room> getAllRooms() {
     return roomRepository.findAll();
   }
+
+  public Room deleteRoomByName(String roomName) throws RoomNotFoundException {
+    return roomRepository.deleteRoomByName(roomName).orElseThrow(RoomNotFoundException::new);
+  }
 }
