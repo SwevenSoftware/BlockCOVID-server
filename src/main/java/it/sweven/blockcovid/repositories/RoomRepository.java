@@ -9,4 +9,6 @@ public interface RoomRepository extends MongoRepository<Room, String> {
   Optional<Room> findRoomByName(String name);
 
   List<Room> findAll();
+
+  Optional<Room> deleteRoomByName(String name);
 }
