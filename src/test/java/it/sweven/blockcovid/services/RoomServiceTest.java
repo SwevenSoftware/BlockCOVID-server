@@ -94,14 +94,14 @@ class RoomServiceTest {
   @Test
   void createRoom_invalidWidth() throws BadAttributeValueExpException {
     RoomInfo info =
-        new RoomInfo("", LocalTime.now(), LocalTime.now(), Collections.emptySet(), null, 0);
+        new RoomInfo("", LocalTime.now(), LocalTime.now(), Set.of(DayOfWeek.MONDAY), null, 1);
     assertThrows(BadAttributeValueExpException.class, () -> service.createRoom(info));
   }
 
   @Test
   void createRoom_invalidHeight() throws BadAttributeValueExpException {
     RoomInfo info =
-        new RoomInfo("", LocalTime.now(), LocalTime.now(), Collections.emptySet(), 0, null);
+        new RoomInfo("", LocalTime.now(), LocalTime.now(), Set.of(DayOfWeek.MONDAY), 1, null);
     assertThrows(BadAttributeValueExpException.class, () -> service.createRoom(info));
   }
 
