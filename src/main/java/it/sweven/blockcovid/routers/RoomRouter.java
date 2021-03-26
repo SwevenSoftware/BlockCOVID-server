@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import it.sweven.blockcovid.assemblers.RoomWithDesksAssembler;
 import it.sweven.blockcovid.dto.DeskInfo;
 import it.sweven.blockcovid.dto.RoomWithDesks;
@@ -24,6 +25,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("api/rooms")
+@Tag(name = "Room")
 public class RoomRouter {
 
   private final RoomService roomService;
