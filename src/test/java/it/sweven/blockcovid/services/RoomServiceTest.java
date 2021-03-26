@@ -134,7 +134,7 @@ class RoomServiceTest {
     when(repository.findRoomByName(any())).thenReturn(Optional.ofNullable(null));
     assertThrows(RoomNotFoundException.class, () -> service.setStatus("room", Status.DIRTY));
   }
-  
+
   @Test
   void deleteValidRoom() {
     Room fakeRoom = mock(Room.class);
