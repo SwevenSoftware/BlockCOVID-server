@@ -2,6 +2,7 @@ package it.sweven.blockcovid.services;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -9,6 +10,7 @@ import it.sweven.blockcovid.dto.DeskInfo;
 import it.sweven.blockcovid.entities.room.Desk;
 import it.sweven.blockcovid.entities.room.Room;
 import it.sweven.blockcovid.exceptions.DeskNotAvailable;
+import it.sweven.blockcovid.exceptions.DeskNotFoundException;
 import it.sweven.blockcovid.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.repositories.DeskRepository;
 import java.util.List;
@@ -105,5 +107,32 @@ class DeskServiceTest {
   void getDesksByRoom_invalidRoom_throwsRoomNotFoundException() {
     when(roomService.getByName("roomName")).thenThrow(new RoomNotFoundException());
     assertThrows(RoomNotFoundException.class, () -> deskService.getDesksByRoom("roomName"));
+  }
+
+  @Test
+  void deleteDeskByInfosAndRoomName_valid() {
+    Desk fakeDesk = mock(Desk.class);
+    when(roomService.getByName(anyString())).thenReturn(mock(Room.class));
+    when(repository.deleteByXAndYAndRoomId(any(), any(), any())).thenReturn(Optional.of(fakeDesk));
+    assertEquals(
+        fakeDesk, deskService.deleteDeskByInfosAndRoomName(mock(DeskInfo.class), "roomName"));
+  }
+
+  @Test
+  void deleteRoomNotFound_ThrowsRoomNotFoundException() {
+    when(roomService.getByName(anyString())).thenThrow(new RoomNotFoundException());
+    assertThrows(
+        RoomNotFoundException.class,
+        () -> deskService.deleteDeskByInfosAndRoomName(mock(DeskInfo.class), "roomName"));
+  }
+
+  @Test
+  void deleteDeskNotFound_throwsDeskNotFoundException() {
+    when(repository.deleteByXAndYAndRoomId(any(), any(), any()))
+        .thenThrow(new DeskNotFoundException());
+    when(roomService.getByName(anyString())).thenReturn(mock(Room.class));
+    assertThrows(
+        DeskNotFoundException.class,
+        () -> deskService.deleteDeskByInfosAndRoomName(mock(DeskInfo.class), "roomName"));
   }
 }
