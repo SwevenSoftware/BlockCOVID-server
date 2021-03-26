@@ -10,7 +10,6 @@ import it.sweven.blockcovid.dto.TokenWithAuthorities;
 import it.sweven.blockcovid.entities.user.Token;
 import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.services.UserAuthenticationService;
-import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
@@ -46,7 +45,7 @@ public class LoginRouter {
         description = "Invalid username or password",
         content = @Content(schema = @Schema(implementation = ResponseStatusException.class)))
   })
-  public EntityModel<TokenWithAuthorities> login(@Valid @RequestBody Credentials credentials) {
+  public EntityModel<TokenWithAuthorities> login(@RequestBody Credentials credentials) {
     try {
       Token loginToken =
           authenticationService.login(credentials.getUsername(), credentials.getPassword());

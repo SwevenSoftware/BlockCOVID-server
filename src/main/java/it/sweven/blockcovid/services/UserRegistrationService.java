@@ -23,6 +23,11 @@ public class UserRegistrationService {
 
   public User register(CredentialsWithAuthorities credentials)
       throws CredentialException, BadCredentialsException {
+    if (credentials == null
+        || credentials.getUsername() == null
+        || credentials.getPassword() == null
+        || credentials.getAuthorities() == null)
+      throw new BadCredentialsException("Null field provided");
     try {
       userService.getByUsername(credentials.getUsername());
       throw new CredentialException("Username already in use");
