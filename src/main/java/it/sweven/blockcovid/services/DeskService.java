@@ -4,6 +4,7 @@ import it.sweven.blockcovid.dto.DeskInfo;
 import it.sweven.blockcovid.entities.room.Desk;
 import it.sweven.blockcovid.entities.room.Room;
 import it.sweven.blockcovid.exceptions.DeskNotAvailable;
+import it.sweven.blockcovid.exceptions.DeskNotFoundException;
 import it.sweven.blockcovid.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.repositories.DeskRepository;
 import java.util.List;
@@ -37,5 +38,12 @@ public class DeskService {
   public List<Desk> getDesksByRoom(String roomName) {
     String roomId = roomService.getByName(roomName).getId();
     return deskRepository.findAllByRoomId(roomId);
+  }
+
+  public Desk deleteDeskByInfosAndRoomName(DeskInfo infos, String roomName)
+      throws RoomNotFoundException, DeskNotFoundException {
+    return deskRepository
+        .deleteByXAndYAndRoomId(infos.getX(), infos.getY(), roomService.getByName(roomName).getId())
+        .orElseThrow(DeskNotFoundException::new);
   }
 }
