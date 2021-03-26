@@ -11,7 +11,6 @@ import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.services.UserRegistrationService;
 import javax.security.auth.login.CredentialException;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
@@ -56,7 +55,7 @@ public class AdminRegistrationRouter implements AdminRouter {
   })
   @PreAuthorize("#submitter.isAdmin()")
   public EntityModel<User> register(
-      @Valid @NotNull @RequestBody CredentialsWithAuthorities credentials,
+      @RequestBody @Valid CredentialsWithAuthorities credentials,
       @Parameter(hidden = true) @AuthenticationPrincipal User submitter) {
     try {
       User registeredUser = registrationService.register(credentials);

@@ -10,6 +10,7 @@ import java.util.Set;
 import javax.security.auth.login.CredentialException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -43,5 +44,25 @@ class UserRegistrationServiceTest {
     User user = new User("inputUser", "inputPassword", Set.of(Authority.CLEANER));
     when(userService.getByUsername("inputUser")).thenReturn(user);
     assertThrows(CredentialException.class, () -> registrationService.register(inputCredentials));
+  }
+
+  @Test
+  void register_nullParameters_throwsBadCredentialsException() throws CredentialException {
+    assertThrows(BadCredentialsException.class, () -> registrationService.register(null));
+    assertThrows(
+        BadCredentialsException.class,
+        () ->
+            registrationService.register(
+                new CredentialsWithAuthorities(null, "validPassword", Set.of(Authority.ADMIN))));
+    assertThrows(
+        BadCredentialsException.class,
+        () ->
+            registrationService.register(
+                new CredentialsWithAuthorities("validUsername", null, Set.of(Authority.USER))));
+    assertThrows(
+        BadCredentialsException.class,
+        () ->
+            registrationService.register(
+                new CredentialsWithAuthorities("validUsername", "validPassword", null)));
   }
 }

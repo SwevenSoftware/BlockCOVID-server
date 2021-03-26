@@ -2,6 +2,7 @@ package it.sweven.blockcovid.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -14,5 +15,6 @@ public class CredentialChangeRequestForm {
 
   @JsonProperty("new_password")
   @NotNull
+  @Size(min = 8)
   private final String newPassword;
 }
