@@ -24,6 +24,7 @@ public class Room {
   private LocalTime openingTime, closingTime;
   private Set<DayOfWeek> openingDays;
   private @EqualsAndHashCode.Include int width, height;
+  private Status roomStatus;
 
   @PersistenceConstructor
   public Room(

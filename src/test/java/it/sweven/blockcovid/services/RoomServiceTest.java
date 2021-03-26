@@ -7,13 +7,16 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import it.sweven.blockcovid.dto.RoomInfo;
+import it.sweven.blockcovid.entities.room.Desk;
 import it.sweven.blockcovid.entities.room.Room;
+import it.sweven.blockcovid.entities.room.Status;
 import it.sweven.blockcovid.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.repositories.DeskRepository;
 import it.sweven.blockcovid.repositories.RoomRepository;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -113,6 +116,23 @@ class RoomServiceTest {
             });
     service.getAllRooms();
     assertTrue(repoCalled.get());
+  }
+
+  @Test
+  void setRoomStatus_validChange() {
+    Room fakeRoom = mock(Room.class);
+    Desk fakeDesk = mock(Desk.class);
+    List<Desk> fakeDeskList = List.of(fakeDesk, fakeDesk);
+    when(deskRepository.findAllByRoomId(any())).thenReturn(fakeDeskList);
+    when(repository.findRoomByName(any())).thenReturn(Optional.of(fakeRoom));
+    when(repository.save(any())).thenReturn(fakeRoom);
+    assertEquals(fakeRoom, service.setStatus("room", Status.CLEAN));
+  }
+
+  @Test
+  void setRoomStatus_invalidChange() {
+    when(repository.findRoomByName(any())).thenReturn(Optional.ofNullable(null));
+    assertThrows(RoomNotFoundException.class, () -> service.setStatus("room", Status.DIRTY));
   }
 
   @Test
