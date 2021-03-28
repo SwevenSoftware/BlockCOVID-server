@@ -8,7 +8,6 @@ import lombok.Getter;
 @Getter
 @EqualsAndHashCode
 public class DeskWithRoomName {
-  private final Integer Id;
   private final String roomName;
   private final Integer x, y;
 }

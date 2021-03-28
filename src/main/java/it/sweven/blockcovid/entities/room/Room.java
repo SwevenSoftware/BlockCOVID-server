@@ -35,7 +35,8 @@ public class Room {
       LocalTime closingTime,
       Set<DayOfWeek> openingDays,
       int width,
-      int height) {
+      int height,
+      Status roomStatus) {
     this.id = id;
     this.name = name;
     this.closed = closed;
@@ -44,21 +45,26 @@ public class Room {
     setOpeningDays(openingDays);
     setWidth(width);
     setHeight(height);
+    setRoomStatus(roomStatus);
   }
 
   public Room(
       String name,
+      boolean closed,
       LocalTime openingTime,
       LocalTime closingTime,
       Set<DayOfWeek> openingDays,
       int width,
-      int height) {
+      int height,
+      Status roomStatus) {
     this.name = name;
+    this.closed = closed;
     setOpeningTime(openingTime);
     setClosingTime(closingTime);
     setOpeningDays(openingDays);
     setWidth(width);
     setHeight(height);
+    setRoomStatus(roomStatus);
   }
 
   public void setOpeningTime(LocalTime openingTime) {

@@ -69,7 +69,7 @@ public class RoomRouter {
     }
     List<DeskInfo> associatedDesks =
         deskService.getDesksByRoom(roomName).stream()
-            .map(d -> new DeskInfo(d.getId(), d.getX(), d.getY()))
+            .map(d -> new DeskInfo(d.getX(), d.getY()))
             .collect(Collectors.toList());
     return assembler.toModel(new RoomWithDesks(requestedRoom, associatedDesks));
   }
@@ -94,7 +94,7 @@ public class RoomRouter {
           new RoomWithDesks(
               room,
               deskService.getDesksByRoom(room.getName()).stream()
-                  .map(d -> new DeskInfo(d.getId(), d.getX(), d.getY()))
+                  .map(d -> new DeskInfo(d.getX(), d.getY()))
                   .collect(Collectors.toList())));
     }
     return assembler.toCollectionModel(requestedRooms);
