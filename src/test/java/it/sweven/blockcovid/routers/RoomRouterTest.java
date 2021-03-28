@@ -47,16 +47,13 @@ class RoomRouterTest {
     Room expectedRoom = mock(Room.class);
     when(roomService.getByName("roomName")).thenReturn(expectedRoom);
     List<Desk> expectedDesks =
-        List.of(
-            new Desk(123, 3, 45, "roomId"),
-            new Desk(15, 20, 11, "roomId"),
-            new Desk(30, 1, 10, "roomId"));
+        List.of(new Desk(3, 45, "roomId"), new Desk(20, 11, "roomId"), new Desk(1, 10, "roomId"));
     when(deskService.getDesksByRoom("roomName")).thenReturn(expectedDesks);
     RoomWithDesks expectedRoomWithRoom =
         new RoomWithDesks(
             expectedRoom,
             expectedDesks.stream()
-                .map(d -> new DeskInfo(d.getId(), d.getX(), d.getY()))
+                .map(d -> new DeskInfo(d.getX(), d.getY()))
                 .collect(Collectors.toList()));
     EntityModel<RoomWithDesks> expectedEntityModel = EntityModel.of(expectedRoomWithRoom);
     when(assembler.toModel(any())).thenReturn(expectedEntityModel);

@@ -30,6 +30,6 @@ class DeskTest {
 
   @Test
   void persistentConstructor() {
-    new Desk(1123, 4, 20, "idRoom");
+    new Desk(4, 20, "idRoom");
   }
 }

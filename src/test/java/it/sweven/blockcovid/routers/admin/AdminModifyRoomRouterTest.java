@@ -6,12 +6,14 @@ import static org.mockito.Mockito.*;
 import it.sweven.blockcovid.assemblers.RoomAssembler;
 import it.sweven.blockcovid.dto.RoomInfo;
 import it.sweven.blockcovid.entities.room.Room;
+import it.sweven.blockcovid.entities.room.RoomBuilder;
 import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.services.RoomService;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.Set;
+import javax.management.BadAttributeValueExpException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.EntityModel;
@@ -36,10 +38,17 @@ class AdminModifyRoomRouterTest {
   }
 
   @Test
-  void validEdit() {
+  void validEdit() throws BadAttributeValueExpException {
     Room fakeRoom = new Room();
     Room expected =
-        new Room("name", LocalTime.MIDNIGHT, LocalTime.MIDNIGHT, Set.of(DayOfWeek.MONDAY), 10, 10);
+        new RoomBuilder()
+            .name("name")
+            .openingTime(LocalTime.MIDNIGHT)
+            .closingTime(LocalTime.MIDNIGHT)
+            .openingDays(Set.of(DayOfWeek.MONDAY))
+            .width(10)
+            .height(10)
+            .build();
     RoomInfo toChange =
         new RoomInfo(
             "name", LocalTime.MIDNIGHT, LocalTime.MIDNIGHT, Set.of(DayOfWeek.MONDAY), 10, 10);

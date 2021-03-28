@@ -36,7 +36,7 @@ class AdminDeleteDeskRouterTest {
   @Test
   void validRequest() {
     Desk fakeDesk = mock(Desk.class);
-    DeskWithRoomName expected = new DeskWithRoomName(null, "room", null, null);
+    DeskWithRoomName expected = new DeskWithRoomName("room", null, null);
     when(deskService.deleteDeskByInfosAndRoomName(any(), any())).thenReturn(fakeDesk);
     assertEquals(
         expected.getRoomName(),

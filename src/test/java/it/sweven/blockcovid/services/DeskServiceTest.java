@@ -35,7 +35,6 @@ class DeskServiceTest {
   @Test
   void addDesk_validArguments() throws DeskNotAvailable {
     DeskInfo providedDesk = mock(DeskInfo.class);
-    when(providedDesk.getId()).thenReturn(1234);
     when(providedDesk.getX()).thenReturn(10);
     when(providedDesk.getY()).thenReturn(35);
     Room requestedRoom = mock(Room.class);
@@ -44,8 +43,7 @@ class DeskServiceTest {
     when(requestedRoom.getHeight()).thenReturn(50);
     when(roomService.getByName("roomName")).thenReturn(requestedRoom);
     when(repository.findByXAndYAndRoomId(any(), any(), any())).thenReturn(Optional.empty());
-    when(repository.findByIdAndRoomId(any(), any())).thenReturn(Optional.empty());
-    assertEquals(new Desk(1234, 10, 35, "roomId"), deskService.addDesk(providedDesk, "roomName"));
+    assertEquals(new Desk(10, 35, "roomId"), deskService.addDesk(providedDesk, "roomName"));
   }
 
   @Test
@@ -77,19 +75,6 @@ class DeskServiceTest {
     when(roomService.getByName("roomName")).thenReturn(requestedRoom);
     when(repository.findByXAndYAndRoomId(any(), any(), any()))
         .thenReturn(Optional.of(mock(Desk.class)));
-    assertThrows(DeskNotAvailable.class, () -> deskService.addDesk(providedDesk, "roomName"));
-  }
-
-  @Test
-  void addDesk_idDeskAlreadyInUse_throwsDeskNotAvailable() {
-    DeskInfo providedDesk = mock(DeskInfo.class);
-    when(providedDesk.getX()).thenReturn(20);
-    when(providedDesk.getY()).thenReturn(10);
-    Room requestedRoom = mock(Room.class);
-    when(requestedRoom.getWidth()).thenReturn(30);
-    when(requestedRoom.getHeight()).thenReturn(50);
-    when(roomService.getByName("roomName")).thenReturn(requestedRoom);
-    when(repository.findByIdAndRoomId(any(), any())).thenReturn(Optional.of(mock(Desk.class)));
     assertThrows(DeskNotAvailable.class, () -> deskService.addDesk(providedDesk, "roomName"));
   }
 

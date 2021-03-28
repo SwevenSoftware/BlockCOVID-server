@@ -82,7 +82,7 @@ public class AdminNewDeskRouter implements AdminRouter {
         .setAuthorities(submitter.getAuthorities())
         .toCollectionModel(
             newDesks.stream()
-                .map(d -> new DeskWithRoomName(d.getId(), nameRoom, d.getX(), d.getY()))
+                .map(d -> new DeskWithRoomName(nameRoom, d.getX(), d.getY()))
                 .collect(Collectors.toList()));
   }
 }

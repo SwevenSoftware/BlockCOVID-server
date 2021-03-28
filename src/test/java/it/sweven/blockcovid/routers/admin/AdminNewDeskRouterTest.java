@@ -43,13 +43,13 @@ class AdminNewDeskRouterTest {
   @Test
   void addDesk_validRequest() throws DeskNotAvailable {
     Set<DeskInfo> providedDesks =
-        Set.of(new DeskInfo(1234, 5, 10), new DeskInfo(3, 11, 40), new DeskInfo(22, 1, 1));
+        Set.of(new DeskInfo(5, 10), new DeskInfo(11, 40), new DeskInfo(1, 1));
     when(deskService.addDesk(any(), eq("roomName"))).thenReturn(mock(Desk.class));
     List<DeskWithRoomName> expectedList =
         List.of(
-            new DeskWithRoomName(1234, "roomName", 5, 10),
-            new DeskWithRoomName(3, "roomName", 11, 40),
-            new DeskWithRoomName(22, "roomName", 1, 1));
+            new DeskWithRoomName("roomName", 5, 10),
+            new DeskWithRoomName("roomName", 11, 40),
+            new DeskWithRoomName("roomName", 1, 1));
     when(deskAssembler.toCollectionModel(any()))
         .thenAnswer(
             invocation ->

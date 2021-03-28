@@ -28,11 +28,7 @@ public class DeskService {
     if (deskRepository
         .findByXAndYAndRoomId(desk.getX(), desk.getY(), associatedRoom.getId())
         .isPresent()) throw new DeskNotAvailable("Position already used in this room");
-    if (deskRepository.findByIdAndRoomId(desk.getId(), associatedRoom.getId()).isPresent()) {
-      throw new DeskNotAvailable("Desk id already in use in this room");
-    }
-    return deskRepository.save(
-        new Desk(desk.getId(), desk.getX(), desk.getY(), associatedRoom.getId()));
+    return deskRepository.save(new Desk(desk.getX(), desk.getY(), associatedRoom.getId()));
   }
 
   public List<Desk> getDesksByRoom(String roomName) {

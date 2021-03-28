@@ -2,12 +2,12 @@ package it.sweven.blockcovid.services;
 
 import it.sweven.blockcovid.dto.RoomInfo;
 import it.sweven.blockcovid.entities.room.Room;
+import it.sweven.blockcovid.entities.room.RoomBuilder;
 import it.sweven.blockcovid.entities.room.Status;
 import it.sweven.blockcovid.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.repositories.DeskRepository;
 import it.sweven.blockcovid.repositories.RoomRepository;
 import java.util.List;
-import java.util.Optional;
 import javax.management.BadAttributeValueExpException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,25 +32,16 @@ public class RoomService {
   }
 
   public Room createRoom(RoomInfo roomInfo) throws BadAttributeValueExpException {
-    Room toCreate = new Room();
-    toCreate.setName(
-        Optional.ofNullable(roomInfo.getName())
-            .orElseThrow(() -> new BadAttributeValueExpException(roomInfo)));
-    toCreate.setOpeningTime(
-        Optional.ofNullable(roomInfo.getOpeningAt())
-            .orElseThrow(() -> new BadAttributeValueExpException(roomInfo)));
-    toCreate.setClosingTime(
-        Optional.ofNullable(roomInfo.getClosingAt())
-            .orElseThrow(() -> new BadAttributeValueExpException(roomInfo)));
-    toCreate.setOpeningDays(
-        Optional.ofNullable(roomInfo.getOpeningDays())
-            .orElseThrow(() -> new BadAttributeValueExpException(roomInfo)));
-    toCreate.setWidth(
-        Optional.ofNullable(roomInfo.getWidth())
-            .orElseThrow(() -> new BadAttributeValueExpException(roomInfo)));
-    toCreate.setHeight(
-        Optional.ofNullable(roomInfo.getHeight())
-            .orElseThrow(() -> new BadAttributeValueExpException(roomInfo)));
+    Room toCreate =
+        new RoomBuilder()
+            .name(roomInfo.getName())
+            .openingTime(roomInfo.getOpeningAt())
+            .closingTime(roomInfo.getClosingAt())
+            .openingDays(roomInfo.getOpeningDays())
+            .width(roomInfo.getWidth())
+            .height(roomInfo.getHeight())
+            .build();
+
     return roomRepository.save(toCreate);
   }
 
