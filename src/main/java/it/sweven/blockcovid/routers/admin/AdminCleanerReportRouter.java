@@ -12,7 +12,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import lombok.AccessLevel;
-import lombok.Generated;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -35,12 +34,10 @@ public class AdminCleanerReportRouter implements AdminRouter {
     this.roomService = roomService;
   }
 
-  @Generated
   protected void loadFileInputStream(String filename) throws FileNotFoundException {
     this.inputStream = new FileInputStream(filename);
   }
 
-  @Generated
   protected void newReport() throws IOException {
     this.report = new CleanerPdfReport();
   }
