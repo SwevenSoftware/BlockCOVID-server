@@ -62,7 +62,15 @@ class RoomTest {
     LocalTime expectedTime = LocalTime.of(18, 30);
     room =
         new Room(
-            "idRoom", "room", false, LocalTime.of(14, 0), null, Set.of(DayOfWeek.MONDAY), 100, 100);
+            "idRoom",
+            "room",
+            false,
+            LocalTime.of(14, 0),
+            null,
+            Set.of(DayOfWeek.MONDAY),
+            100,
+            100,
+            Status.DIRTY);
     room.setClosingTime(expectedTime);
     assertEquals(expectedTime, room.getClosingTime());
   }
@@ -89,5 +97,37 @@ class RoomTest {
     room.setHeight(10);
     assertThrows(IllegalArgumentException.class, () -> room.setHeight(0));
     assertThrows(IllegalArgumentException.class, () -> room.setHeight(-10));
+  }
+
+  @Test
+  void getRoomStatus_nullStatus() {
+    room =
+        new Room(
+            "idRoom",
+            "room",
+            false,
+            LocalTime.of(14, 0),
+            null,
+            Set.of(DayOfWeek.MONDAY),
+            100,
+            100,
+            null);
+    assertEquals(Status.DIRTY, room.getRoomStatus());
+  }
+
+  @Test
+  void getRoomStatus_nonNullStatus() {
+    room =
+        new Room(
+            "idRoom",
+            "room",
+            false,
+            LocalTime.of(14, 0),
+            null,
+            Set.of(DayOfWeek.MONDAY),
+            100,
+            100,
+            Status.CLEAN);
+    assertEquals(Status.CLEAN, room.getRoomStatus());
   }
 }

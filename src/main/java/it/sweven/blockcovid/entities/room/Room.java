@@ -35,7 +35,8 @@ public class Room {
       LocalTime closingTime,
       Set<DayOfWeek> openingDays,
       int width,
-      int height) {
+      int height,
+      Status roomStatus) {
     this.id = id;
     this.name = name;
     this.closed = closed;
@@ -44,6 +45,7 @@ public class Room {
     setOpeningDays(openingDays);
     setWidth(width);
     setHeight(height);
+    this.roomStatus = roomStatus;
   }
 
   public Room(
@@ -86,5 +88,10 @@ public class Room {
   public void setHeight(int height) {
     if (height <= 0) throw new IllegalArgumentException("height must be a positive value");
     this.height = height;
+  }
+
+  public Status getRoomStatus() {
+    if (roomStatus == null) return Status.DIRTY;
+    return roomStatus;
   }
 }
