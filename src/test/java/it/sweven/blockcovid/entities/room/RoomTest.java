@@ -6,6 +6,7 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.Collections;
 import java.util.Set;
+import javax.management.BadAttributeValueExpException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -19,6 +20,21 @@ class RoomTest {
   }
 
   @Test
+  void persistenceConstructor() {
+    Room test =
+        new Room(
+            "id",
+            "name",
+            false,
+            LocalTime.MIDNIGHT,
+            LocalTime.MIDNIGHT,
+            Set.of(DayOfWeek.MONDAY),
+            10,
+            10,
+            Status.CLEAN);
+  }
+
+  @Test
   void setOpeningTime_nullClosingTime_correctInput() {
     LocalTime expectedTime = LocalTime.of(14, 20);
     room.setOpeningTime(expectedTime);
@@ -26,15 +42,33 @@ class RoomTest {
   }
 
   @Test
-  void setOpeningTime_openingTimeAfterClosingTime_throwsIllegalArgumentException() {
-    room = new Room("room", null, LocalTime.of(13, 0), Set.of(DayOfWeek.MONDAY), 100, 100);
+  void setOpeningTime_openingTimeAfterClosingTime_throwsIllegalArgumentException()
+      throws BadAttributeValueExpException {
+    room =
+        new RoomBuilder()
+            .name("room")
+            .closingTime(LocalTime.of(15, 0))
+            .openingTime(LocalTime.of(13, 0))
+            .openingDays(Set.of(DayOfWeek.MONDAY))
+            .width(100)
+            .height(100)
+            .build();
     assertThrows(IllegalArgumentException.class, () -> room.setOpeningTime(LocalTime.of(16, 50)));
   }
 
   @Test
-  void setOpeningTime_nonNullClosingTime_openingTimeBeforeClosingTime() {
+  void setOpeningTime_nonNullClosingTime_openingTimeBeforeClosingTime()
+      throws BadAttributeValueExpException {
     LocalTime expectedTime = LocalTime.of(11, 20);
-    room = new Room("room", null, LocalTime.of(13, 0), Set.of(DayOfWeek.MONDAY), 100, 100);
+    room =
+        new RoomBuilder()
+            .name("room")
+            .closingTime(LocalTime.of(15, 0))
+            .openingTime(LocalTime.of(13, 0))
+            .openingDays(Set.of(DayOfWeek.MONDAY))
+            .width(100)
+            .height(100)
+            .build();
     room.setOpeningTime(expectedTime);
     assertEquals(expectedTime, room.getOpeningTime());
   }
@@ -52,25 +86,32 @@ class RoomTest {
   }
 
   @Test
-  void setClosingTime_closingTimeBeforeOpeningTime_throwsIllegalArgumentException() {
-    room = new Room("room", LocalTime.of(11, 30), null, Set.of(DayOfWeek.MONDAY), 100, 100);
+  void setClosingTime_closingTimeBeforeOpeningTime_throwsIllegalArgumentException()
+      throws BadAttributeValueExpException {
+    room =
+        new RoomBuilder()
+            .name("room")
+            .closingTime(LocalTime.of(15, 0))
+            .openingTime(LocalTime.of(13, 0))
+            .openingDays(Set.of(DayOfWeek.MONDAY))
+            .width(100)
+            .height(100)
+            .build();
     assertThrows(IllegalArgumentException.class, () -> room.setClosingTime(LocalTime.of(10, 40)));
   }
 
   @Test
-  void setClosingTime_closingTimeAfterOpeningTime() {
+  void setClosingTime_closingTimeAfterOpeningTime() throws BadAttributeValueExpException {
     LocalTime expectedTime = LocalTime.of(18, 30);
     room =
-        new Room(
-            "idRoom",
-            "room",
-            false,
-            LocalTime.of(14, 0),
-            null,
-            Set.of(DayOfWeek.MONDAY),
-            100,
-            100,
-            Status.DIRTY);
+        new RoomBuilder()
+            .name("room")
+            .openingTime(LocalTime.of(14, 0))
+            .closingTime(LocalTime.of(19, 0))
+            .openingDays(Set.of(DayOfWeek.MONDAY))
+            .width(100)
+            .height(100)
+            .build();
     room.setClosingTime(expectedTime);
     assertEquals(expectedTime, room.getClosingTime());
   }

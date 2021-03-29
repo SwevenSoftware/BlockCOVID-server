@@ -45,22 +45,26 @@ public class Room {
     setOpeningDays(openingDays);
     setWidth(width);
     setHeight(height);
-    this.roomStatus = roomStatus;
+    setRoomStatus(roomStatus);
   }
 
   public Room(
       String name,
+      boolean closed,
       LocalTime openingTime,
       LocalTime closingTime,
       Set<DayOfWeek> openingDays,
       int width,
-      int height) {
+      int height,
+      Status roomStatus) {
     this.name = name;
+    this.closed = closed;
     setOpeningTime(openingTime);
     setClosingTime(closingTime);
     setOpeningDays(openingDays);
     setWidth(width);
     setHeight(height);
+    setRoomStatus(roomStatus);
   }
 
   public void setOpeningTime(LocalTime openingTime) {

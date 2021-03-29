@@ -55,8 +55,7 @@ public class AdminDeleteDeskRouter implements AdminRouter {
       @NotNull @RequestBody DeskInfo toDelete) {
     try {
       Desk deleted = deskService.deleteDeskByInfosAndRoomName(toDelete, roomName);
-      DeskWithRoomName toReturn =
-          new DeskWithRoomName(deleted.getId(), roomName, deleted.getX(), deleted.getY());
+      DeskWithRoomName toReturn = new DeskWithRoomName(roomName, deleted.getX(), deleted.getY());
       return deskAssembler.toModel(toReturn);
     } catch (NoSuchElementException exception) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND);
