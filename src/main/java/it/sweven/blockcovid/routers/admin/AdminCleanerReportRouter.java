@@ -4,15 +4,10 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import it.sweven.blockcovid.documents.CleanerPdfReport;
 import it.sweven.blockcovid.entities.user.User;
+import it.sweven.blockcovid.services.DocumentService;
 import it.sweven.blockcovid.services.RoomService;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import lombok.AccessLevel;
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,20 +21,12 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 public class AdminCleanerReportRouter implements AdminRouter {
   private final RoomService roomService;
-  private @Getter(AccessLevel.PROTECTED) CleanerPdfReport report;
-  private @Getter(AccessLevel.PROTECTED) InputStream inputStream;
+  private final DocumentService documentService;
 
   @Autowired
-  public AdminCleanerReportRouter(RoomService roomService) {
+  public AdminCleanerReportRouter(RoomService roomService, DocumentService documentService) {
     this.roomService = roomService;
-  }
-
-  protected void loadFileInputStream(String filename) throws FileNotFoundException {
-    this.inputStream = new FileInputStream(filename);
-  }
-
-  protected void newReport() throws IOException {
-    this.report = new CleanerPdfReport();
+    this.documentService = documentService;
   }
 
   @GetMapping(value = "/report/cleaner", produces = MediaType.APPLICATION_PDF_VALUE)
@@ -58,25 +45,10 @@ public class AdminCleanerReportRouter implements AdminRouter {
   @PreAuthorize("#submitter.isAdmin()")
   public byte[] report(@AuthenticationPrincipal User submitter) {
     try {
-      newReport();
+      return documentService.generateCleanerReport(roomService.getAllRooms());
     } catch (IOException e) {
       throw new ResponseStatusException(
-          HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred while creating the file");
-    }
-    roomService.getAllRooms().forEach(getReport()::addRoom);
-    String filename;
-    try {
-      filename = getReport().save();
-    } catch (IOException e) {
-      throw new ResponseStatusException(
-          HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred while saving the file");
-    }
-    try {
-      loadFileInputStream(filename);
-      return getInputStream().readAllBytes();
-    } catch (IOException e) {
-      throw new ResponseStatusException(
-          HttpStatus.INTERNAL_SERVER_ERROR, "Saved report not found in path " + filename);
+          HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred while creating the report");
     }
   }
 }

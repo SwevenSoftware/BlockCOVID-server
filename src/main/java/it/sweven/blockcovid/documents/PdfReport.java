@@ -7,82 +7,60 @@ import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import javax.management.BadAttributeValueExpException;
+import lombok.AccessLevel;
+import lombok.Getter;
 
-class PdfReport {
-  private Document document;
+public class PdfReport {
+
+  private final @Getter(AccessLevel.PROTECTED) Document document;
+  private String title;
   private LocalDateTime timestamp;
-  private String destination;
-  private Table table;
+  private List<Cell> tableHeader;
+  private final ArrayList<List<Cell>> rowsTable;
 
-  protected boolean pathExists(String path) {
-    return Files.exists(Path.of(path));
+  public PdfReport(String path) throws FileNotFoundException {
+    document = new Document(new PdfDocument(new PdfWriter(path)));
+    rowsTable = new ArrayList<>();
   }
 
-  protected void createDirectory(String path) throws IOException {
-    Files.createDirectory(Path.of(path));
+  public PdfReport setTitle(String title) {
+    this.title = title;
+    return this;
   }
 
-  protected void createNewFile(String path) throws IOException {
-    Files.createFile(Path.of(path));
+  public PdfReport setTimestamp(LocalDateTime timestamp) {
+    this.timestamp = timestamp;
+    return this;
   }
 
-  protected Document createNewDocument(String path) throws FileNotFoundException {
-    return new Document(new PdfDocument(new PdfWriter(path)));
+  public PdfReport setHeaderTable(List<String> header) {
+    tableHeader =
+        header.stream().map(h -> new Cell().add(new Paragraph(h))).collect(Collectors.toList());
+    return this;
   }
 
-  protected Paragraph createNewParagraph(String text) {
-    return new Paragraph(text);
+  public PdfReport addRowTable(List<String> row) {
+    rowsTable.add(
+        row.stream().map(r -> new Cell().add(new Paragraph(r))).collect(Collectors.toList()));
+    return this;
   }
 
-  protected Cell createNewCell() {
-    return new Cell();
-  }
-
-  protected Table createNewTable(int columns) {
-    return new Table(columns);
-  }
-
-  protected void drawHeader() {
-    document.add(createNewParagraph("BlockCOVID Report - Rooms cleaned").setBold());
-    document.add(
-        createNewParagraph(timestamp.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))));
-  }
-
-  protected Document initializeDocument(String id) throws IOException {
-    if (!pathExists("reports/")) createDirectory("reports");
-    destination = pathFile(id);
-    createNewFile(destination);
-    return createNewDocument(destination);
-  }
-
-  String save() throws IOException {
-    timestamp = LocalDateTime.now();
-    document = initializeDocument(timestamp.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
-    drawHeader();
-    if (table != null) document.add(table);
-    document.close();
-    return destination;
-  }
-
-  void setTableHeader(List<String> header) {
-    table = createNewTable(header.size());
-    header.forEach(h -> table.addCell(createNewCell().setBold().add(createNewParagraph(h))));
-  }
-
-  void addRowTable(List<String> paragraphs) {
-    if (table == null) table = createNewTable(paragraphs.size());
-    paragraphs.stream()
-        .limit(table.getNumberOfColumns())
-        .forEachOrdered(p -> table.addCell(createNewCell().add(createNewParagraph(p))));
-  }
-
-  protected static String pathFile(String id) {
-    return "reports/Report_" + id + ".pdf";
+  public void create() throws BadAttributeValueExpException {
+    if (tableHeader == null || tableHeader.isEmpty() || title == null || title.isBlank())
+      throw new BadAttributeValueExpException(null);
+    getDocument().add(new Paragraph("BlockCOVID - " + title).setBold());
+    getDocument()
+        .add(new Paragraph(timestamp.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
+    Table table = new Table(tableHeader.size());
+    rowsTable.forEach(
+        r -> r.stream().limit(table.getNumberOfColumns()).forEachOrdered(table::addCell));
+    getDocument().add(table);
+    getDocument().close();
   }
 }

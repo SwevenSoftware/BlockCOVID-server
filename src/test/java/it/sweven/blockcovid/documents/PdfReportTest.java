@@ -3,16 +3,7 @@ package it.sweven.blockcovid.documents;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import com.itextpdf.layout.Document;
-import com.itextpdf.layout.element.Cell;
-import com.itextpdf.layout.element.Paragraph;
-import com.itextpdf.layout.element.Table;
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 public class PdfReportTest {
 
@@ -23,7 +14,7 @@ public class PdfReportTest {
     report = mock(PdfReport.class);
   }
 
-  @Test
+  /*@Test
   void save() throws IOException {
     Document mockDocument = mock(Document.class);
     doReturn(mockDocument).when(report).initializeDocument(any());
@@ -125,5 +116,5 @@ public class PdfReportTest {
     assertEquals(mockDocument, report.initializeDocument("path"));
     assertTrue(newFileCreated.get());
     assertTrue(dirCreated.get());
-  }
+  }*/
 }
