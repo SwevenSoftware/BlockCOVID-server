@@ -5,8 +5,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import it.sweven.blockcovid.exceptions.HashNotRegistered;
+import java.io.FileInputStream;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.document.Document;
 import org.web3j.protocol.Web3j;
@@ -20,6 +25,7 @@ class BlockchainServiceTest {
   private ContractGasProvider gasProvider;
   private Web3j connection;
   private BlockchainService service;
+  private Logger log;
 
   @BeforeEach
   void init() {
@@ -27,23 +33,48 @@ class BlockchainServiceTest {
     this.account = mock(Credentials.class);
     this.gasProvider = mock(ContractGasProvider.class);
     this.connection = mock(Web3j.class);
-    this.service = new BlockchainService(contract, account, gasProvider, connection);
+    this.log = mock(Logger.class);
+    this.service = new BlockchainService(contract, account, gasProvider, connection, log);
   }
 
   @Test
-  void runTest_validRun() throws Exception {
+  void validRegistration() throws Exception {
     TransactionReceipt fakeReceipt = mock(TransactionReceipt.class);
     RemoteFunctionCall<TransactionReceipt> fakeCall = mock(RemoteFunctionCall.class);
+    RemoteFunctionCall<BigInteger> fakeVerify = mock(RemoteFunctionCall.class);
+    BigInteger fakePosition = mock(BigInteger.class);
+    FileInputStream fakeInput = mock(FileInputStream.class);
     when(contract.add(any())).thenReturn(fakeCall);
     when(fakeCall.send()).thenReturn(fakeReceipt);
-    assertDoesNotThrow(() -> service.run());
+    when(contract.verify(any())).thenReturn(fakeVerify);
+    when(fakeVerify.send()).thenReturn(fakePosition);
+    when(fakePosition.compareTo(any())).thenReturn(1);
+    when(fakeInput.readAllBytes()).thenReturn("test".getBytes(StandardCharsets.UTF_8));
+    assertEquals(fakeReceipt, service.registerReport(fakeInput));
   }
 
   @Test
-  void runTest_failedCall() throws Exception {
+  void registrationFailsToCallNetwork_throwsException() throws Exception {
     RemoteFunctionCall<TransactionReceipt> fakeCall = mock(RemoteFunctionCall.class);
+    FileInputStream fakeInput = mock(FileInputStream.class);
     when(contract.add(any())).thenReturn(fakeCall);
     when(fakeCall.send()).thenThrow(new Exception());
-    assertThrows(Exception.class, () -> service.run());
+    assertThrows(Exception.class, () -> service.registerReport(fakeInput));
+  }
+
+  @Test
+  void invalidInsertion() throws Exception {
+    TransactionReceipt fakeReceipt = mock(TransactionReceipt.class);
+    RemoteFunctionCall<TransactionReceipt> fakeCall = mock(RemoteFunctionCall.class);
+    RemoteFunctionCall<BigInteger> fakeVerify = mock(RemoteFunctionCall.class);
+    BigInteger fakePosition = mock(BigInteger.class);
+    FileInputStream fakeInput = mock(FileInputStream.class);
+    when(contract.add(any())).thenReturn(fakeCall);
+    when(fakeCall.send()).thenReturn(fakeReceipt);
+    when(contract.verify(any())).thenReturn(fakeVerify);
+    when(fakeVerify.send()).thenReturn(fakePosition);
+    when(fakePosition.compareTo(any())).thenReturn(0);
+    when(fakeInput.readAllBytes()).thenReturn("test".getBytes(StandardCharsets.UTF_8));
+    assertThrows(HashNotRegistered.class, () -> service.registerReport(fakeInput));
   }
 }

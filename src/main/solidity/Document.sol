@@ -1,4 +1,5 @@
 pragma solidity >=0.5.16;
+// SPDX-License-Identifier: MIT
 
 contract Document {
     mapping (string => uint256) documents;

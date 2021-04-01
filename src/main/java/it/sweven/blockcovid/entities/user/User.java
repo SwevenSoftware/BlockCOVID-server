@@ -103,6 +103,21 @@ public class User implements UserDetails {
     return enabled;
   }
 
+  @JsonIgnore
+  public boolean isAdmin() {
+    return getAuthorities().contains(Authority.ADMIN);
+  }
+
+  @JsonIgnore
+  public boolean isUser() {
+    return getAuthorities().contains(Authority.USER);
+  }
+
+  @JsonIgnore
+  public boolean isCleaner() {
+    return getAuthorities().contains(Authority.CLEANER);
+  }
+
   public User lock() {
     this.locked = true;
     return this;

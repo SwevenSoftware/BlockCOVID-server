@@ -35,4 +35,9 @@ public class MongoConfiguration extends AbstractMongoClientConfiguration {
   public Collection getMappingBasePackages() {
     return Collections.singleton("it.sweven.blockcovid.entities");
   }
+
+  @Override
+  protected boolean autoIndexCreation() {
+    return true;
+  }
 }
