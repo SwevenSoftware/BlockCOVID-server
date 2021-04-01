@@ -93,4 +93,9 @@ public class Room {
     if (height <= 0) throw new IllegalArgumentException("height must be a positive value");
     this.height = height;
   }
+
+  public Status getRoomStatus() {
+    if (roomStatus == null) return Status.DIRTY;
+    return roomStatus;
+  }
 }

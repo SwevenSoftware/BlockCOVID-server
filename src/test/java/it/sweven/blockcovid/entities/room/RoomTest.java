@@ -139,4 +139,36 @@ class RoomTest {
     assertThrows(IllegalArgumentException.class, () -> room.setHeight(0));
     assertThrows(IllegalArgumentException.class, () -> room.setHeight(-10));
   }
+
+  @Test
+  void getRoomStatus_nullStatus() {
+    room =
+        new Room(
+            "idRoom",
+            "room",
+            false,
+            LocalTime.of(14, 0),
+            null,
+            Set.of(DayOfWeek.MONDAY),
+            100,
+            100,
+            null);
+    assertEquals(Status.DIRTY, room.getRoomStatus());
+  }
+
+  @Test
+  void getRoomStatus_nonNullStatus() {
+    room =
+        new Room(
+            "idRoom",
+            "room",
+            false,
+            LocalTime.of(14, 0),
+            null,
+            Set.of(DayOfWeek.MONDAY),
+            100,
+            100,
+            Status.CLEAN);
+    assertEquals(Status.CLEAN, room.getRoomStatus());
+  }
 }
