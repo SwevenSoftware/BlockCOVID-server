@@ -18,12 +18,12 @@ public class BlockchainConfiguration {
   private String contract;
 
   public BlockchainConfiguration(
-      @Value("it.sweven.blockcovid.blockchain.contract") String contract) {
+      @Value("${it.sweven.blockcovid.blockchain.contract}") String contract) {
     this.contract = contract;
   }
 
   @Bean
-  public Web3j connection(@Value("it.sweven.blockcovid.blockchain.network") String network) {
+  public Web3j connection(@Value("${it.sweven.blockcovid.blockchain.network}") String network) {
     return Web3j.build(
         new HttpService(Optional.ofNullable(network).orElse("http://127.0.0.1:8545")));
   }
@@ -35,7 +35,7 @@ public class BlockchainConfiguration {
 
   @Bean
   public Credentials accountCredentials(
-      @Value("it.sweven.blockcovid.blockchain.account") String account)
+      @Value("${it.sweven.blockcovid.blockchain.account}") String account)
       throws BlockchainAccountNotFound {
     return Credentials.create(
         Optional.ofNullable(account).orElseThrow(BlockchainAccountNotFound::new));
@@ -43,17 +43,14 @@ public class BlockchainConfiguration {
 
   @Bean
   public Document document(
-      @Value("it.sweven.blockcovid.blockchain.network") String network,
-      @Value("it.sweven.blockcovid.blockchain.account") String account)
+      Web3j connection, Credentials credentials, ContractGasProvider gasProvider)
       throws Exception, BlockchainAccountNotFound {
-    if (contract == null) {
-      Document deployed =
-          Document.deploy(connection(network), accountCredentials(account), gasProvider()).send();
+    if (contract.equals("")) {
+      Document deployed = Document.deploy(connection, credentials, gasProvider).send();
       contract = deployed.getContractAddress();
       return deployed;
     } else {
-      return Document.load(
-          contract, connection(network), accountCredentials(account), gasProvider());
+      return Document.load(contract, connection, credentials, gasProvider);
     }
   }
 }
