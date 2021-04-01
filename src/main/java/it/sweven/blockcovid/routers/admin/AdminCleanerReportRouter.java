@@ -45,7 +45,8 @@ public class AdminCleanerReportRouter implements AdminRouter {
   @PreAuthorize("#submitter.isAdmin()")
   public byte[] report(@AuthenticationPrincipal User submitter) {
     try {
-      return documentService.generateCleanerReport(roomService.getAllRooms());
+      String path = documentService.generateCleanerReport(roomService.getAllRooms());
+      return documentService.readReport(path);
     } catch (IOException e) {
       throw new ResponseStatusException(
           HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred while creating the report");

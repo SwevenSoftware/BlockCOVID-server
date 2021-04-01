@@ -33,14 +33,23 @@ class AdminCleanerReportRouterTest {
   void report_successfulReturnNewReport() throws IOException {
     List<Room> mockRooms = List.of(mock(Room.class), mock(Room.class));
     when(roomService.getAllRooms()).thenReturn(mockRooms);
+    when(documentService.generateCleanerReport(mockRooms)).thenReturn("reportPath");
     byte[] expectedBytes = "correct result".getBytes();
-    when(documentService.generateCleanerReport(mockRooms)).thenReturn(expectedBytes);
+    when(documentService.readReport("reportPath")).thenReturn(expectedBytes);
     assertEquals(expectedBytes, router.report(mock(User.class)));
   }
 
   @Test
   void report_errorWhileCreatingReport() throws IOException {
     when(documentService.generateCleanerReport(any())).thenThrow(new IOException());
+    ResponseStatusException thrown =
+        assertThrows(ResponseStatusException.class, () -> router.report(mock(User.class)));
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, thrown.getStatus());
+  }
+
+  @Test
+  void report_errorWhileReadingReport() throws IOException {
+    when(documentService.readReport(any())).thenThrow(new IOException());
     ResponseStatusException thrown =
         assertThrows(ResponseStatusException.class, () -> router.report(mock(User.class)));
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, thrown.getStatus());

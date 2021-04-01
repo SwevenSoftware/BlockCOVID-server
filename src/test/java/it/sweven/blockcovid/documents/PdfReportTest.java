@@ -3,7 +3,19 @@ package it.sweven.blockcovid.documents;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.IBlockElement;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import java.io.FileNotFoundException;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import javax.management.BadAttributeValueExpException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class PdfReportTest {
 
@@ -11,110 +23,109 @@ public class PdfReportTest {
 
   @BeforeEach
   void setUp() {
-    report = mock(PdfReport.class);
-  }
-
-  /*@Test
-  void save() throws IOException {
-    Document mockDocument = mock(Document.class);
-    doReturn(mockDocument).when(report).initializeDocument(any());
-    doNothing().when(report).drawHeader();
-    AtomicBoolean documentClosed = new AtomicBoolean(false);
-    doAnswer(
-            invocation -> {
-              documentClosed.set(true);
-              return null;
-            })
-        .when(report)
-        .save();
-    when(report.save()).thenCallRealMethod();
-    report.save();
-    assertTrue(documentClosed.get());
+    report = spy(new PdfReport());
   }
 
   @Test
   void setTableHeader() {
-    List<String> providedList = List.of("Header1", "Header2", "Header3");
-    Table mockTable = mock(Table.class);
-    doReturn(mockTable).when(report).createNewTable(providedList.size());
-    AtomicInteger cellsAdded = new AtomicInteger(0);
-    doAnswer(
-            invocation -> {
-              cellsAdded.getAndAdd(1);
-              return null;
-            })
-        .when(mockTable)
-        .addCell(any(Cell.class));
-    Cell mockCell = mock(Cell.class);
-    doReturn(mockCell).when(report).createNewCell();
-    when(mockCell.setBold()).thenReturn(mockCell);
-    when(mockCell.add(any(Paragraph.class))).thenReturn(mockCell);
-    doAnswer(
-            invocation -> {
-              assertTrue(providedList.contains(invocation.getArgument(0, String.class)));
-              return mock(Paragraph.class);
-            })
-        .when(report)
-        .createNewParagraph(any());
-    doCallRealMethod().when(report).setTableHeader(anyList());
-    report.setTableHeader(providedList);
-    assertEquals(providedList.size(), cellsAdded.get());
+    List<String> providedList = List.of("Header1", "Header2");
+    Cell mockCell1 = mock(Cell.class);
+    doReturn(mockCell1).when(mockCell1).add(any(IBlockElement.class));
+    doReturn(mockCell1).when(report).createNewCell();
+    List<Cell> expectedList = List.of(mockCell1, mockCell1);
+    Paragraph mockParagraph = mock(Paragraph.class);
+    when(mockParagraph.setBold()).thenReturn(mockParagraph);
+    doReturn(mockParagraph).when(report).createNewParagraph(any());
+    assertEquals(expectedList, report.setHeaderTable(providedList).getTableHeader());
   }
 
   @Test
   void addRowTable() {
-    List<String> providedList = List.of("Paragraph1", "Paragraph2", "Paragraph3", "Paragraph4");
-    Table mockTable = mock(Table.class);
-    doReturn(mockTable).when(report).createNewTable(providedList.size());
-    when(mockTable.getNumberOfColumns()).thenReturn(providedList.size());
-    AtomicInteger cellsAdded = new AtomicInteger(0);
+    List<String> providedList = List.of("Row1", "Row2");
+    Cell mockCell1 = mock(Cell.class);
+    doReturn(mockCell1).when(mockCell1).add(any(IBlockElement.class));
+    doReturn(mockCell1).when(report).createNewCell();
+    List<Cell> expectedList = List.of(mockCell1, mockCell1);
+    Paragraph mockParagraph = mock(Paragraph.class);
+    when(mockParagraph.setBold()).thenReturn(mockParagraph);
+    doReturn(mockParagraph).when(report).createNewParagraph(any());
+    assertEquals(expectedList, report.addRowTable(providedList).getRowsTable().get(0));
+  }
+
+  @Test
+  void addTitle() {
+    report.setTitle("Title");
     doAnswer(
             invocation -> {
-              cellsAdded.getAndAdd(1);
-              return null;
-            })
-        .when(mockTable)
-        .addCell(any(Cell.class));
-    Cell mockCell = mock(Cell.class);
-    doReturn(mockCell).when(report).createNewCell();
-    when(mockCell.add(any(Paragraph.class))).thenReturn(mockCell);
-    doAnswer(
-            invocation -> {
-              assertTrue(providedList.contains(invocation.getArgument(0, String.class)));
+              assertTrue(invocation.getArgument(0, String.class).contains("Title"));
               return mock(Paragraph.class);
             })
         .when(report)
         .createNewParagraph(any());
-    doCallRealMethod().when(report).addRowTable(anyList());
-    report.addRowTable(providedList);
-    assertEquals(providedList.size(), cellsAdded.get());
+    report.addTitle(mock(Document.class));
   }
 
   @Test
-  void initializeDocument() throws IOException {
-    doReturn(false).when(report).pathExists(any());
-    AtomicBoolean dirCreated = new AtomicBoolean(false);
+  void addTimestamp() {
+    report.setTimestamp(LocalDateTime.of(2021, 4, 10, 20, 10, 50));
     doAnswer(
             invocation -> {
-              dirCreated.set(true);
-              return null;
+              assertTrue(invocation.getArgument(0, String.class).contains("2021-04-10 20:10:50"));
+              return mock(Paragraph.class);
             })
         .when(report)
-        .createDirectory(any());
-    String expectedPath = PdfReport.pathFile("path");
-    AtomicBoolean newFileCreated = new AtomicBoolean(false);
+        .createNewParagraph(any());
+    report.addTimestamp(mock(Document.class));
+  }
+
+  @Test
+  void addTable_invalidHeader_throwsBadAttributeValueExpException() {
+    assertThrows(BadAttributeValueExpException.class, () -> report.addTable(mock(Document.class)));
+    report.setHeaderTable(Collections.emptyList());
+    assertThrows(BadAttributeValueExpException.class, () -> report.addTable(mock(Document.class)));
+  }
+
+  @Test
+  void addTable_validHeader() throws BadAttributeValueExpException {
+    List<String> providedHeader = List.of("Header1", "Header2");
+    Table mockTable = mock(Table.class);
+    report.setHeaderTable(providedHeader);
     doAnswer(
             invocation -> {
-              newFileCreated.set(true);
-              return null;
+              assertEquals(providedHeader.size(), invocation.getArgument(0, Integer.class));
+              return mockTable;
             })
         .when(report)
-        .createNewFile(expectedPath);
+        .createNewTable(any(Integer.class));
+    when(mockTable.getNumberOfColumns()).thenReturn(providedHeader.size());
     Document mockDocument = mock(Document.class);
-    when(report.createNewDocument(expectedPath)).thenReturn(mockDocument);
-    doCallRealMethod().when(report).initializeDocument(any());
-    assertEquals(mockDocument, report.initializeDocument("path"));
-    assertTrue(newFileCreated.get());
-    assertTrue(dirCreated.get());
-  }*/
+    AtomicBoolean tableAdded = new AtomicBoolean(false);
+    when(mockDocument.add(mockTable))
+        .thenAnswer(
+            invocation -> {
+              tableAdded.set(true);
+              return null;
+            });
+    report.addTable(mockDocument);
+    assertTrue(tableAdded.get());
+  }
+
+  @Test
+  void create() throws FileNotFoundException, BadAttributeValueExpException {
+    Document mockDocument = mock(Document.class);
+    doReturn(mockDocument).when(report).createNewDocument("path");
+    doNothing().when(report).addTitle(any());
+    doNothing().when(report).addTimestamp(any());
+    doNothing().when(report).addTable(any());
+    AtomicBoolean closeCalled = new AtomicBoolean(false);
+    doAnswer(
+            invocation -> {
+              closeCalled.set(true);
+              return null;
+            })
+        .when(mockDocument)
+        .close();
+    report.create("path");
+    assertTrue(closeCalled.get());
+  }
 }

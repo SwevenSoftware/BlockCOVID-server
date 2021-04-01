@@ -12,35 +12,59 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import javax.management.BadAttributeValueExpException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.DigestUtils;
 
 @Service
 public class DocumentService {
   private final String DESTINATION_DIR = "reports";
 
-  public byte[] generateCleanerReport(List<Room> rooms) throws IOException {
+  public String generateCleanerReport(List<Room> rooms) throws IOException {
     LocalDateTime timestamp = LocalDateTime.now();
     String destination = initializeReport(timestamp);
-    PdfReport report = new PdfReport(destination);
+    PdfReport report = createNewReport();
     report
         .setTitle("Cleaner Report")
         .setTimestamp(timestamp)
         .setHeaderTable(List.of("Room name", "Status"));
     rooms.forEach(r -> report.addRowTable(List.of(r.getName(), r.getRoomStatus().toString())));
     try {
-      report.create();
+      report.create(destination);
     } catch (BadAttributeValueExpException e) {
       throw new IOException();
     }
-    InputStream inputStream = new FileInputStream(destination);
+    return destination;
+  }
+
+  protected PdfReport createNewReport() {
+    return new PdfReport();
+  }
+
+  public byte[] readReport(String path) throws IOException {
+    InputStream inputStream = new FileInputStream(path);
     return inputStream.readAllBytes();
+  }
+
+  public String hashReport(String path) throws IOException {
+    return DigestUtils.md5DigestAsHex(readReport(path));
+  }
+
+  protected boolean fileExists(String path) {
+    return Files.exists(Path.of(path));
+  }
+
+  protected void createDirectory(String path) throws IOException {
+    Files.createDirectory(Path.of(path));
+  }
+
+  protected void createFile(String path) throws IOException {
+    Files.createFile(Path.of(path));
   }
 
   protected String initializeReport(LocalDateTime timestamp) throws IOException {
     String destination =
         pathReport(timestamp.format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")));
-    if (!Files.exists(Path.of(DESTINATION_DIR + "/")))
-      Files.createDirectory(Path.of(DESTINATION_DIR));
-    Files.createFile(Path.of(destination));
+    if (!fileExists(DESTINATION_DIR + "/")) createDirectory(DESTINATION_DIR);
+    createFile(destination);
     return destination;
   }
 
