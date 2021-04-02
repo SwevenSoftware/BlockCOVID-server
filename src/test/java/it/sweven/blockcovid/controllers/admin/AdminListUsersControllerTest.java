@@ -17,7 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.EntityModel;
 
-class AdminListUsersRouterTest {
+class AdminListUsersControllerTest {
 
   private UserService userService;
   private UserAssembler userAssembler;

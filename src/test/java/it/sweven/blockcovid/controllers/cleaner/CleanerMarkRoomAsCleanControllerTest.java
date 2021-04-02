@@ -17,7 +17,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-class CleanerMarkRoomAsCleanRouterTest {
+class CleanerMarkRoomAsCleanControllerTest {
   private RoomAssembler roomAssembler;
   private RoomService roomService;
   private CleanerMarkRoomAsCleanController router;

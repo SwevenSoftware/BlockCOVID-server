@@ -64,10 +64,7 @@ public class AdminCleanerReportController implements AdminController {
       String path = documentService.generateCleanerReport(roomService.getAllRooms());
       DocumentContract contract =
           documentContractService.getContractByAccount(blockchainCredentials);
-      try {
-        blockchainService.registerReport(contract, new FileInputStream(path));
-      } catch (Exception ignored) {
-      }
+      blockchainService.registerReport(contract, new FileInputStream(path));
       return documentService.readReport(path);
     } catch (IOException e) {
       throw new ResponseStatusException(

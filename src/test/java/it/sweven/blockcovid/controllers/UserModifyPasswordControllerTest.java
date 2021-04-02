@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.authentication.BadCredentialsException;
 
-class UserModifyPasswordRouterTest {
+class UserModifyPasswordControllerTest {
   private UserAssembler assembler;
   private UserService userService;
   private UserModifyPasswordController userModifyPasswordRouter;

@@ -10,6 +10,8 @@ import it.sweven.blockcovid.services.DocumentContractService;
 import it.sweven.blockcovid.services.DocumentService;
 import it.sweven.blockcovid.services.RoomService;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import org.web3j.crypto.Credentials;
 
-class AdminCleanerReportRouterTest {
+class AdminCleanerReportControllerTest {
 
   private RoomService roomService;
   private DocumentService documentService;
@@ -51,7 +53,9 @@ class AdminCleanerReportRouterTest {
     when(documentService.generateCleanerReport(mockRooms)).thenReturn("reportPath");
     byte[] expectedBytes = "correct result".getBytes();
     when(documentService.readReport("reportPath")).thenReturn(expectedBytes);
+    Files.createFile(Path.of("reportPath"));
     assertEquals(expectedBytes, router.report(mock(User.class)));
+    Files.deleteIfExists(Path.of("reportPath"));
   }
 
   @Test
@@ -65,6 +69,28 @@ class AdminCleanerReportRouterTest {
   @Test
   void report_errorWhileReadingReport() throws IOException {
     when(documentService.readReport(any())).thenThrow(new IOException());
+    ResponseStatusException thrown =
+        assertThrows(ResponseStatusException.class, () -> router.report(mock(User.class)));
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, thrown.getStatus());
+  }
+
+  @Test
+  void report_errorWhileRegisteringReport() throws Exception {
+    List<Room> mockRooms = List.of(mock(Room.class), mock(Room.class));
+    when(roomService.getAllRooms()).thenReturn(mockRooms);
+    when(documentService.generateCleanerReport(mockRooms)).thenReturn("reportPath");
+    when(blockchainService.registerReport(any(), any())).thenThrow(new Exception());
+    ResponseStatusException thrown =
+        assertThrows(ResponseStatusException.class, () -> router.report(mock(User.class)));
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, thrown.getStatus());
+  }
+
+  @Test
+  void report_errorWhileRetrievingContract() throws Exception {
+    List<Room> mockRooms = List.of(mock(Room.class), mock(Room.class));
+    when(roomService.getAllRooms()).thenReturn(mockRooms);
+    when(documentService.generateCleanerReport(mockRooms)).thenReturn("reportPath");
+    when(documentContractService.getContractByAccount(any())).thenThrow(new Exception());
     ResponseStatusException thrown =
         assertThrows(ResponseStatusException.class, () -> router.report(mock(User.class)));
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, thrown.getStatus());

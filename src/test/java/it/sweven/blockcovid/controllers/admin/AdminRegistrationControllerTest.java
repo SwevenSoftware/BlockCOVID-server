@@ -19,7 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.server.ResponseStatusException;
 
-class AdminRegistrationRouterTest {
+class AdminRegistrationControllerTest {
   private UserRegistrationService registrationService;
   private UserAssembler userAssembler;
   private AdminRegistrationController router;

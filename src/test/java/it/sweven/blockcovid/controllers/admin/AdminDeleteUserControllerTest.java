@@ -16,7 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.server.ResponseStatusException;
 
-class AdminDeleteUserRouterTest {
+class AdminDeleteUserControllerTest {
   private UserAssembler userAssembler;
   private UserService userService;
   private AdminDeleteUserController router;

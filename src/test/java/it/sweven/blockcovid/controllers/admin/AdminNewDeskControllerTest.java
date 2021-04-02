@@ -24,7 +24,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-class AdminNewDeskRouterTest {
+class AdminNewDeskControllerTest {
   private DeskService deskService;
   private DeskAssembler deskAssembler;
   private AdminNewDeskController router;
