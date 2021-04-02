@@ -11,30 +11,18 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.web3j.crypto.Credentials;
-import org.web3j.document.Document;
-import org.web3j.protocol.Web3j;
+import org.web3j.documentcontract.DocumentContract;
 import org.web3j.protocol.core.RemoteFunctionCall;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.tx.gas.ContractGasProvider;
 
 class BlockchainServiceTest {
-  private Document contract;
-  private Credentials account;
-  private ContractGasProvider gasProvider;
-  private Web3j connection;
+  private DocumentContract contract;
   private BlockchainService service;
-  private Logger log;
 
   @BeforeEach
   void init() {
-    this.contract = mock(Document.class);
-    this.account = mock(Credentials.class);
-    this.gasProvider = mock(ContractGasProvider.class);
-    this.connection = mock(Web3j.class);
-    this.log = mock(Logger.class);
-    this.service = new BlockchainService(contract, account, gasProvider, connection, log);
+    this.contract = mock(DocumentContract.class);
+    this.service = new BlockchainService();
   }
 
   @Test
@@ -44,22 +32,24 @@ class BlockchainServiceTest {
     RemoteFunctionCall<BigInteger> fakeVerify = mock(RemoteFunctionCall.class);
     BigInteger fakePosition = mock(BigInteger.class);
     FileInputStream fakeInput = mock(FileInputStream.class);
+    DocumentContract fakeContract = mock(DocumentContract.class);
     when(contract.add(any())).thenReturn(fakeCall);
     when(fakeCall.send()).thenReturn(fakeReceipt);
     when(contract.verify(any())).thenReturn(fakeVerify);
     when(fakeVerify.send()).thenReturn(fakePosition);
     when(fakePosition.compareTo(any())).thenReturn(1);
     when(fakeInput.readAllBytes()).thenReturn("test".getBytes(StandardCharsets.UTF_8));
-    assertEquals(fakeReceipt, service.registerReport(fakeInput));
+    assertEquals(fakeReceipt, service.registerReport(fakeContract, fakeInput));
   }
 
   @Test
   void registrationFailsToCallNetwork_throwsException() throws Exception {
     RemoteFunctionCall<TransactionReceipt> fakeCall = mock(RemoteFunctionCall.class);
     FileInputStream fakeInput = mock(FileInputStream.class);
+    DocumentContract fakeContract = mock(DocumentContract.class);
     when(contract.add(any())).thenReturn(fakeCall);
     when(fakeCall.send()).thenThrow(new Exception());
-    assertThrows(Exception.class, () -> service.registerReport(fakeInput));
+    assertThrows(Exception.class, () -> service.registerReport(fakeContract, fakeInput));
   }
 
   @Test
@@ -69,12 +59,13 @@ class BlockchainServiceTest {
     RemoteFunctionCall<BigInteger> fakeVerify = mock(RemoteFunctionCall.class);
     BigInteger fakePosition = mock(BigInteger.class);
     FileInputStream fakeInput = mock(FileInputStream.class);
+    DocumentContract fakeContract = mock(DocumentContract.class);
     when(contract.add(any())).thenReturn(fakeCall);
     when(fakeCall.send()).thenReturn(fakeReceipt);
     when(contract.verify(any())).thenReturn(fakeVerify);
     when(fakeVerify.send()).thenReturn(fakePosition);
     when(fakePosition.compareTo(any())).thenReturn(0);
     when(fakeInput.readAllBytes()).thenReturn("test".getBytes(StandardCharsets.UTF_8));
-    assertThrows(HashNotRegistered.class, () -> service.registerReport(fakeInput));
+    assertThrows(HashNotRegistered.class, () -> service.registerReport(fakeContract, fakeInput));
   }
 }

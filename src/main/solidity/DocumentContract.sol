@@ -1,7 +1,7 @@
 pragma solidity >=0.5.16;
 // SPDX-License-Identifier: MIT
 
-contract Document {
+contract DocumentContract {
     mapping (string => uint256) documents;
     address contractOwner = msg.sender;
 

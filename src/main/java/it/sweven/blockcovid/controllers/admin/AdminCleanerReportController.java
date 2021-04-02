@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.sweven.blockcovid.entities.user.User;
+import it.sweven.blockcovid.services.BlockchainDeploymentInformationsService;
 import it.sweven.blockcovid.services.BlockchainService;
 import it.sweven.blockcovid.services.DocumentService;
 import it.sweven.blockcovid.services.RoomService;
@@ -19,21 +20,29 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import org.web3j.crypto.Credentials;
+import org.web3j.documentcontract.DocumentContract;
 
 @RestController
 public class AdminCleanerReportController implements AdminController {
   private final RoomService roomService;
   private final DocumentService documentService;
   private final BlockchainService blockchainService;
+  private final BlockchainDeploymentInformationsService blockchainDeploymentInformationsService;
+  private final Credentials blockchainCredentials;
 
   @Autowired
   public AdminCleanerReportController(
       RoomService roomService,
       DocumentService documentService,
-      BlockchainService blockchainService) {
+      BlockchainService blockchainService,
+      BlockchainDeploymentInformationsService blockchainDeploymentInformationsService,
+      Credentials blockchainCredentials) {
     this.roomService = roomService;
     this.documentService = documentService;
     this.blockchainService = blockchainService;
+    this.blockchainDeploymentInformationsService = blockchainDeploymentInformationsService;
+    this.blockchainCredentials = blockchainCredentials;
   }
 
   @GetMapping(value = "/report/cleaner", produces = MediaType.APPLICATION_PDF_VALUE)
@@ -53,14 +62,20 @@ public class AdminCleanerReportController implements AdminController {
   public byte[] report(@AuthenticationPrincipal User submitter) {
     try {
       String path = documentService.generateCleanerReport(roomService.getAllRooms());
+      DocumentContract contract =
+          blockchainDeploymentInformationsService.getContractByAccount(blockchainCredentials);
       try {
-        blockchainService.registerReport(new FileInputStream(path));
+        blockchainService.registerReport(contract, new FileInputStream(path));
       } catch (Exception ignored) {
       }
       return documentService.readReport(path);
     } catch (IOException e) {
       throw new ResponseStatusException(
           HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred while creating the report");
+    } catch (Exception e) {
+      throw new ResponseStatusException(
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          "An error occurred while registering the document on the provided blockchain");
     }
   }
 }

@@ -29,7 +29,14 @@ class AdminCleanerReportRouterTest {
     documentService = mock(DocumentService.class);
     blockchainService = mock(BlockchainService.class);
     when(roomService.getAllRooms()).thenReturn(Collections.emptyList());
-    router = spy(new AdminCleanerReportController(roomService, documentService, blockchainService));
+    router =
+        spy(
+            new AdminCleanerReportController(
+                roomService,
+                documentService,
+                blockchainService,
+                blockchainDeploymentInformationsService,
+                blockchainCredentials));
   }
 
   @Test

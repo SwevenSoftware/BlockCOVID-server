@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.web3j.crypto.Credentials;
-import org.web3j.document.Document;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.gas.ContractGasProvider;
@@ -39,18 +38,5 @@ public class BlockchainConfiguration {
       throws BlockchainAccountNotFound {
     return Credentials.create(
         Optional.ofNullable(account).orElseThrow(BlockchainAccountNotFound::new));
-  }
-
-  @Bean
-  public Document document(
-      Web3j connection, Credentials credentials, ContractGasProvider gasProvider)
-      throws Exception, BlockchainAccountNotFound {
-    if (contract.equals("")) {
-      Document deployed = Document.deploy(connection, credentials, gasProvider).send();
-      contract = deployed.getContractAddress();
-      return deployed;
-    } else {
-      return Document.load(contract, connection, credentials, gasProvider);
-    }
   }
 }
