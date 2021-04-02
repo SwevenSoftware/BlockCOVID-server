@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import it.sweven.blockcovid.entities.room.Room;
 import it.sweven.blockcovid.entities.user.User;
 import it.sweven.blockcovid.services.BlockchainService;
+import it.sweven.blockcovid.services.DocumentContractService;
 import it.sweven.blockcovid.services.DocumentService;
 import it.sweven.blockcovid.services.RoomService;
 import java.io.IOException;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import org.web3j.crypto.Credentials;
 
 class AdminCleanerReportRouterTest {
 
@@ -22,12 +24,15 @@ class AdminCleanerReportRouterTest {
   private DocumentService documentService;
   private AdminCleanerReportController router;
   private BlockchainService blockchainService;
+  private DocumentContractService documentContractService;
 
   @BeforeEach
   void setUp() {
     roomService = mock(RoomService.class);
     documentService = mock(DocumentService.class);
     blockchainService = mock(BlockchainService.class);
+    documentContractService = mock(DocumentContractService.class);
+    Credentials credentials = mock(Credentials.class);
     when(roomService.getAllRooms()).thenReturn(Collections.emptyList());
     router =
         spy(
@@ -35,8 +40,8 @@ class AdminCleanerReportRouterTest {
                 roomService,
                 documentService,
                 blockchainService,
-                blockchainDeploymentInformationsService,
-                blockchainCredentials));
+                documentContractService,
+                credentials));
   }
 
   @Test

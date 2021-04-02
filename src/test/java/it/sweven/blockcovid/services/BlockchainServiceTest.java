@@ -28,18 +28,17 @@ class BlockchainServiceTest {
   @Test
   void validRegistration() throws Exception {
     TransactionReceipt fakeReceipt = mock(TransactionReceipt.class);
-    RemoteFunctionCall<TransactionReceipt> fakeCall = mock(RemoteFunctionCall.class);
+    RemoteFunctionCall fakeCall = mock(RemoteFunctionCall.class);
     RemoteFunctionCall<BigInteger> fakeVerify = mock(RemoteFunctionCall.class);
     BigInteger fakePosition = mock(BigInteger.class);
     FileInputStream fakeInput = mock(FileInputStream.class);
-    DocumentContract fakeContract = mock(DocumentContract.class);
     when(contract.add(any())).thenReturn(fakeCall);
-    when(fakeCall.send()).thenReturn(fakeReceipt);
     when(contract.verify(any())).thenReturn(fakeVerify);
+    when(fakeCall.send()).thenReturn(fakeReceipt);
     when(fakeVerify.send()).thenReturn(fakePosition);
     when(fakePosition.compareTo(any())).thenReturn(1);
     when(fakeInput.readAllBytes()).thenReturn("test".getBytes(StandardCharsets.UTF_8));
-    assertEquals(fakeReceipt, service.registerReport(fakeContract, fakeInput));
+    assertEquals(fakeReceipt, service.registerReport(contract, fakeInput));
   }
 
   @Test
@@ -59,13 +58,12 @@ class BlockchainServiceTest {
     RemoteFunctionCall<BigInteger> fakeVerify = mock(RemoteFunctionCall.class);
     BigInteger fakePosition = mock(BigInteger.class);
     FileInputStream fakeInput = mock(FileInputStream.class);
-    DocumentContract fakeContract = mock(DocumentContract.class);
     when(contract.add(any())).thenReturn(fakeCall);
     when(fakeCall.send()).thenReturn(fakeReceipt);
     when(contract.verify(any())).thenReturn(fakeVerify);
     when(fakeVerify.send()).thenReturn(fakePosition);
     when(fakePosition.compareTo(any())).thenReturn(0);
     when(fakeInput.readAllBytes()).thenReturn("test".getBytes(StandardCharsets.UTF_8));
-    assertThrows(HashNotRegistered.class, () -> service.registerReport(fakeContract, fakeInput));
+    assertThrows(HashNotRegistered.class, () -> service.registerReport(contract, fakeInput));
   }
 }

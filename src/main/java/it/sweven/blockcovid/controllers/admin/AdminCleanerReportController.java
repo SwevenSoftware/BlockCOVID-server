@@ -5,8 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.sweven.blockcovid.entities.user.User;
-import it.sweven.blockcovid.services.BlockchainDeploymentInformationsService;
 import it.sweven.blockcovid.services.BlockchainService;
+import it.sweven.blockcovid.services.DocumentContractService;
 import it.sweven.blockcovid.services.DocumentService;
 import it.sweven.blockcovid.services.RoomService;
 import java.io.FileInputStream;
@@ -28,7 +28,7 @@ public class AdminCleanerReportController implements AdminController {
   private final RoomService roomService;
   private final DocumentService documentService;
   private final BlockchainService blockchainService;
-  private final BlockchainDeploymentInformationsService blockchainDeploymentInformationsService;
+  private final DocumentContractService documentContractService;
   private final Credentials blockchainCredentials;
 
   @Autowired
@@ -36,12 +36,12 @@ public class AdminCleanerReportController implements AdminController {
       RoomService roomService,
       DocumentService documentService,
       BlockchainService blockchainService,
-      BlockchainDeploymentInformationsService blockchainDeploymentInformationsService,
+      DocumentContractService documentContractService,
       Credentials blockchainCredentials) {
     this.roomService = roomService;
     this.documentService = documentService;
     this.blockchainService = blockchainService;
-    this.blockchainDeploymentInformationsService = blockchainDeploymentInformationsService;
+    this.documentContractService = documentContractService;
     this.blockchainCredentials = blockchainCredentials;
   }
 
@@ -63,7 +63,7 @@ public class AdminCleanerReportController implements AdminController {
     try {
       String path = documentService.generateCleanerReport(roomService.getAllRooms());
       DocumentContract contract =
-          blockchainDeploymentInformationsService.getContractByAccount(blockchainCredentials);
+          documentContractService.getContractByAccount(blockchainCredentials);
       try {
         blockchainService.registerReport(contract, new FileInputStream(path));
       } catch (Exception ignored) {

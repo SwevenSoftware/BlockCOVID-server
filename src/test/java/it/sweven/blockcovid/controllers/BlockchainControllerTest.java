@@ -7,8 +7,8 @@ import static org.mockito.Mockito.when;
 
 import ch.qos.logback.core.read.ListAppender;
 import it.sweven.blockcovid.controllers.blockchain.BlockchainController;
-import it.sweven.blockcovid.services.BlockchainDeploymentInformationsService;
 import it.sweven.blockcovid.services.BlockchainService;
+import it.sweven.blockcovid.services.DocumentContractService;
 import it.sweven.blockcovid.services.DocumentService;
 import it.sweven.blockcovid.services.RoomService;
 import java.io.IOException;
@@ -25,7 +25,7 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 class BlockchainControllerTest {
   private BlockchainService blockchainService;
-  private BlockchainDeploymentInformationsService blockchainDeploymentInformationsService;
+  private DocumentContractService documentContractService;
   private Credentials accountCredentials;
   private DocumentService documentService;
   private RoomService roomService;
@@ -38,14 +38,14 @@ class BlockchainControllerTest {
     blockchainService = mock(BlockchainService.class);
     documentService = mock(DocumentService.class);
     roomService = mock(RoomService.class);
-    blockchainDeploymentInformationsService = mock(BlockchainDeploymentInformationsService.class);
+    documentContractService = mock(DocumentContractService.class);
     accountCredentials = mock(Credentials.class);
     listAppender = new ListAppender<>();
     listAppender.start();
     controller =
         new BlockchainController(
             blockchainService,
-            blockchainDeploymentInformationsService,
+            documentContractService,
             documentService,
             roomService,
             accountCredentials);

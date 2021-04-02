@@ -5,7 +5,7 @@ import java.util.Optional;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.web3j.crypto.Credentials;
 
-public interface BlockchainDeploymentInformationsRepository
+public interface DocumentContractRepository
     extends MongoRepository<BlockchainDeploymentInformations, String> {
-  Optional<BlockchainDeploymentInformations> findContractByAccount(Credentials accountCredentials);
+  Optional<BlockchainDeploymentInformations> findByAccount(Credentials accountCredentials);
 }

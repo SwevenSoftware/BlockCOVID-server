@@ -1,7 +1,7 @@
 package it.sweven.blockcovid.controllers.blockchain;
 
-import it.sweven.blockcovid.services.BlockchainDeploymentInformationsService;
 import it.sweven.blockcovid.services.BlockchainService;
+import it.sweven.blockcovid.services.DocumentContractService;
 import it.sweven.blockcovid.services.DocumentService;
 import it.sweven.blockcovid.services.RoomService;
 import java.io.FileInputStream;
@@ -17,7 +17,7 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt;
 @Controller
 public class BlockchainController {
   private final BlockchainService blockchainService;
-  private final BlockchainDeploymentInformationsService blockchainDeploymentInformationsService;
+  private final DocumentContractService documentContractService;
   private final DocumentService documentService;
   private final RoomService roomService;
   private final Credentials accountCredentials;
@@ -26,12 +26,12 @@ public class BlockchainController {
   @Autowired
   public BlockchainController(
       BlockchainService blockchainService,
-      BlockchainDeploymentInformationsService blockchainDeploymentInformationsService,
+      DocumentContractService documentContractService,
       DocumentService documentService,
       RoomService roomService,
       Credentials accountCredentials) {
     this.blockchainService = blockchainService;
-    this.blockchainDeploymentInformationsService = blockchainDeploymentInformationsService;
+    this.documentContractService = documentContractService;
     this.documentService = documentService;
     this.roomService = roomService;
     this.accountCredentials = accountCredentials;
@@ -40,8 +40,7 @@ public class BlockchainController {
   @Scheduled(cron = "0 0 0 * * *")
   public void run() throws Exception {
     String savedPath = documentService.generateCleanerReport(roomService.getAllRooms());
-    DocumentContract contract =
-        blockchainDeploymentInformationsService.getContractByAccount(accountCredentials);
+    DocumentContract contract = documentContractService.getContractByAccount(accountCredentials);
     TransactionReceipt transactionReceipt =
         blockchainService.registerReport(contract, new FileInputStream(savedPath));
     logger.info("saved report at " + savedPath + " on block " + transactionReceipt.getBlockHash());
