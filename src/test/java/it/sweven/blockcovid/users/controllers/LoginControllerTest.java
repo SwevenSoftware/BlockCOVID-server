@@ -24,7 +24,7 @@ class LoginControllerTest {
 
   private UserAuthenticationService service;
   private UserAssembler assembler;
-  private LoginController router;
+  private LoginController controller;
 
   @BeforeEach
   void setUp() {
@@ -33,7 +33,7 @@ class LoginControllerTest {
     when(assembler.setAuthorities(any())).thenAnswer(invocation -> assembler);
     when(assembler.toModel(any()))
         .thenAnswer(invocation -> EntityModel.of(invocation.getArgument(0)));
-    router = new LoginController(service, assembler);
+    controller = new LoginController(service, assembler);
   }
 
   @Test
@@ -44,7 +44,7 @@ class LoginControllerTest {
     when(service.authenticateByToken(any())).thenReturn(expectedUser);
     when(expectedUser.getAuthorities()).thenReturn(Set.of(Authority.USER));
     TokenWithAuthorities expected = new TokenWithAuthorities(expectedToken, Set.of(Authority.USER));
-    assertEquals(expected, router.login(new Credentials("user", "password")).getContent());
+    assertEquals(expected, controller.login(new Credentials("user", "password")).getContent());
   }
 
   @Test
@@ -52,7 +52,8 @@ class LoginControllerTest {
     when(service.login("user", "password")).thenThrow(BadCredentialsException.class);
     ResponseStatusException thrown =
         assertThrows(
-            ResponseStatusException.class, () -> router.login(new Credentials("user", "password")));
+            ResponseStatusException.class,
+            () -> controller.login(new Credentials("user", "password")));
     assertEquals(HttpStatus.BAD_REQUEST, thrown.getStatus());
   }
 }

@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import it.sweven.blockcovid.AdminController;
 import it.sweven.blockcovid.rooms.assemblers.RoomAssembler;
 import it.sweven.blockcovid.rooms.dto.RoomInfo;
 import it.sweven.blockcovid.rooms.entities.Room;
@@ -24,17 +23,17 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-public class AdminNewRoomController implements AdminController {
+public class NewRoomController implements RoomsController {
   private final RoomService roomService;
   private final RoomAssembler roomAssembler;
 
   @Autowired
-  public AdminNewRoomController(RoomAssembler roomAssembler, RoomService roomService) {
+  public NewRoomController(RoomAssembler roomAssembler, RoomService roomService) {
     this.roomService = roomService;
     this.roomAssembler = roomAssembler;
   }
 
-  @PostMapping(value = "rooms/new", consumes = "application/json", produces = "application/json")
+  @PostMapping(value = "", consumes = "application/json", produces = "application/json")
   @ResponseBody
   @ApiResponses({
     @ApiResponse(responseCode = "200", description = "Room successfully created"),

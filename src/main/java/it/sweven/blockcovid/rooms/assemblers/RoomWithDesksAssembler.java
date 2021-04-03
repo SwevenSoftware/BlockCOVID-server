@@ -3,8 +3,9 @@ package it.sweven.blockcovid.rooms.assemblers;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-import it.sweven.blockcovid.rooms.controllers.AdminNewRoomController;
-import it.sweven.blockcovid.rooms.controllers.RoomController;
+import it.sweven.blockcovid.rooms.controllers.ListRoomsController;
+import it.sweven.blockcovid.rooms.controllers.NewRoomController;
+import it.sweven.blockcovid.rooms.controllers.ViewRoomController;
 import it.sweven.blockcovid.rooms.dto.RoomWithDesks;
 import it.sweven.blockcovid.users.entities.Authority;
 import java.util.Collections;
@@ -37,10 +38,10 @@ public class RoomWithDesksAssembler
     EntityModel<RoomWithDesks> roomModel =
         EntityModel.of(
             entity,
-            linkTo(methodOn(RoomController.class).viewRoom(entity.getRoom().getName(), ""))
+            linkTo(methodOn(ViewRoomController.class).viewRoom(null, entity.getRoom().getName()))
                 .withSelfRel(),
-            linkTo(methodOn(AdminNewRoomController.class).newRoom(null, null)).withRel("new_room"),
-            linkTo(methodOn(RoomController.class).listRooms("")).withRel("list_rooms"));
+            linkTo(methodOn(NewRoomController.class).newRoom(null, null)).withRel("new_room"),
+            linkTo(methodOn(ListRoomsController.class).listRooms(null)).withRel("list_rooms"));
     clearAuthorities();
     return roomModel;
   }
@@ -53,6 +54,6 @@ public class RoomWithDesksAssembler
             .map(this::toModel)
             .collect(Collectors.toList());
     return CollectionModel.of(
-        entityModels, linkTo(methodOn(RoomController.class).listRooms("")).withSelfRel());
+        entityModels, linkTo(methodOn(ListRoomsController.class).listRooms(null)).withSelfRel());
   }
 }

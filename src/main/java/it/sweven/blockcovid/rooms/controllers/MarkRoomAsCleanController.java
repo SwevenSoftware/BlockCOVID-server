@@ -22,12 +22,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-public class CleanerMarkRoomAsCleanController implements CleanerController {
+public class MarkRoomAsCleanController implements RoomsController {
   private final RoomService roomService;
   private final RoomAssembler assembler;
 
   @Autowired
-  CleanerMarkRoomAsCleanController(RoomAssembler assembler, RoomService roomService) {
+  MarkRoomAsCleanController(RoomAssembler assembler, RoomService roomService) {
     this.roomService = roomService;
     this.assembler = assembler;
   }

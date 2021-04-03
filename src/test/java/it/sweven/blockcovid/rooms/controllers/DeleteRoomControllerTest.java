@@ -18,11 +18,11 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-class AdminDeleteRoomControllerTest {
+class DeleteRoomControllerTest {
   private RoomAssembler roomAssembler;
   private RoomService roomService;
   private User submitter;
-  private AdminDeleteRoomController router;
+  private DeleteRoomController controller;
 
   @BeforeEach
   void setUp() {
@@ -31,7 +31,7 @@ class AdminDeleteRoomControllerTest {
     roomService = mock(RoomService.class);
     submitter = mock(User.class);
     when(submitter.getAuthorities()).thenReturn(Set.of(Authority.ADMIN));
-    router = new AdminDeleteRoomController(roomService, roomAssembler);
+    controller = new DeleteRoomController(roomService, roomAssembler);
   }
 
   @Test
@@ -40,14 +40,14 @@ class AdminDeleteRoomControllerTest {
     when(roomService.deleteRoomByName(anyString())).thenReturn(fakeDeleted);
     when(roomService.getByName(anyString())).thenReturn(fakeDeleted);
     when(roomAssembler.toModel(any())).thenReturn(EntityModel.of(fakeDeleted));
-    assertEquals(fakeDeleted, router.delete(submitter, "room").getContent());
+    assertEquals(fakeDeleted, controller.delete(submitter, "room").getContent());
   }
 
   @Test
   void roomNotFound_throwsResponseStatusException() {
     when(roomService.deleteRoomByName(anyString())).thenThrow(new RoomNotFoundException());
     ResponseStatusException thrown =
-        assertThrows(ResponseStatusException.class, () -> router.delete(submitter, "room"));
+        assertThrows(ResponseStatusException.class, () -> controller.delete(submitter, "room"));
     assertEquals(HttpStatus.NOT_FOUND, thrown.getStatus());
   }
 }

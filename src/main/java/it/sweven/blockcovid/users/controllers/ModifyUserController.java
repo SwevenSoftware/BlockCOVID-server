@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import it.sweven.blockcovid.AdminController;
 import it.sweven.blockcovid.users.assemblers.UserAssembler;
 import it.sweven.blockcovid.users.dto.CredentialsWithAuthorities;
 import it.sweven.blockcovid.users.entities.User;
@@ -22,20 +21,17 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-public class AdminModifyUserController implements AdminController {
+public class ModifyUserController implements UsersController {
   private final UserAssembler userAssembler;
   private final UserService userService;
 
   @Autowired
-  public AdminModifyUserController(UserAssembler userAssembler, UserService userService) {
+  public ModifyUserController(UserAssembler userAssembler, UserService userService) {
     this.userAssembler = userAssembler;
     this.userService = userService;
   }
 
-  @PutMapping(
-      value = "/user/{username}/modify",
-      consumes = "application/json",
-      produces = "application/json")
+  @PutMapping(value = "/{username}", consumes = "application/json", produces = "application/json")
   @ResponseBody
   @ApiResponses({
     @ApiResponse(

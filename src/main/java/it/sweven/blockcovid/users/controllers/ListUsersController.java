@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import it.sweven.blockcovid.AdminController;
 import it.sweven.blockcovid.users.assemblers.UserAssembler;
 import it.sweven.blockcovid.users.entities.User;
 import it.sweven.blockcovid.users.services.UserService;
@@ -24,18 +23,18 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class AdminListUsersController implements AdminController {
+public class ListUsersController implements UsersController {
 
   private final UserService userService;
   private final UserAssembler userAssembler;
 
   @Autowired
-  public AdminListUsersController(UserService userService, UserAssembler userAssembler) {
+  public ListUsersController(UserService userService, UserAssembler userAssembler) {
     this.userService = userService;
     this.userAssembler = userAssembler;
   }
 
-  @GetMapping(value = "/users", consumes = "application/json", produces = "application/json")
+  @GetMapping(value = "", consumes = "application/json", produces = "application/json")
   @ResponseBody
   @ApiResponses({
     @ApiResponse(responseCode = "200", description = "List of existing users"),
@@ -52,6 +51,6 @@ public class AdminListUsersController implements AdminController {
             .map(u -> userAssembler.setAuthorities(submitter.getAuthorities()).toModel(u))
             .collect(Collectors.toList());
     return CollectionModel.of(
-        users, linkTo(methodOn(AdminListUsersController.class).listUsers(null)).withSelfRel());
+        users, linkTo(methodOn(ListUsersController.class).listUsers(null)).withSelfRel());
   }
 }

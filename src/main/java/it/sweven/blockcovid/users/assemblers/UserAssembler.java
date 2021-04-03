@@ -30,22 +30,19 @@ public class UserAssembler implements RepresentationModelAssembler<User, EntityM
     EntityModel<User> userModel =
         EntityModel.of(
             entity,
-            linkTo(methodOn(UserInfoController.class).info(null)).withSelfRel(),
-            linkTo(methodOn(UserModifyPasswordController.class).modifyPassword(null, null))
+            linkTo(methodOn(AccountInfoController.class).info(null)).withSelfRel(),
+            linkTo(methodOn(ModifyPasswordController.class).modifyPassword(null, null))
                 .withRel("change_password"));
     if (authorities.contains(Authority.ADMIN)) {
       userModel.add(
-          linkTo(
-                  methodOn(AdminModifyUserController.class)
-                      .modifyUser(null, entity.getUsername(), null))
+          linkTo(methodOn(ModifyUserController.class).modifyUser(null, entity.getUsername(), null))
               .withRel("modify_user"));
       userModel.add(
-          linkTo(methodOn(AdminListUsersController.class).listUsers(null)).withRel("list_users"));
+          linkTo(methodOn(ListUsersController.class).listUsers(null)).withRel("list_users"));
       userModel.add(
-          linkTo(methodOn(AdminDeleteUserController.class).delete("", null))
-              .withRel("delete_user"));
+          linkTo(methodOn(DeleteUserController.class).delete("", null)).withRel("delete_user"));
       userModel.add(
-          linkTo(methodOn(AdminRegistrationController.class).register(null, null))
+          linkTo(methodOn(RegistrationController.class).register(null, null))
               .withRel("register_user"));
     }
     clearAuthorities();

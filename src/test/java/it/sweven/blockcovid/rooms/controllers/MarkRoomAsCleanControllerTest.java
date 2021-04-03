@@ -17,17 +17,17 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-class CleanerMarkRoomAsCleanControllerTest {
+class MarkRoomAsCleanControllerTest {
   private RoomAssembler roomAssembler;
   private RoomService roomService;
-  private CleanerMarkRoomAsCleanController router;
+  private MarkRoomAsCleanController controller;
 
   @BeforeEach
   void setUp() {
     roomAssembler = mock(RoomAssembler.class);
     when(roomAssembler.setAuthorities(any())).thenReturn(roomAssembler);
     roomService = mock(RoomService.class);
-    router = new CleanerMarkRoomAsCleanController(roomAssembler, roomService);
+    controller = new MarkRoomAsCleanController(roomAssembler, roomService);
   }
 
   @Test
@@ -37,7 +37,7 @@ class CleanerMarkRoomAsCleanControllerTest {
     when(roomService.getByName("room")).thenReturn(room);
     when(roomService.save(any())).thenReturn(room);
     when(roomAssembler.toModel(any())).thenReturn(EntityModel.of(room));
-    assertEquals(room, router.markAsClean(cleaner, "room").getContent());
+    assertEquals(room, controller.markAsClean(cleaner, "room").getContent());
   }
 
   @Test
@@ -45,7 +45,7 @@ class CleanerMarkRoomAsCleanControllerTest {
     when(roomService.setStatus("room", Status.CLEAN)).thenThrow(new RoomNotFoundException());
     ResponseStatusException thrown =
         assertThrows(
-            ResponseStatusException.class, () -> router.markAsClean(mock(User.class), "room"));
+            ResponseStatusException.class, () -> controller.markAsClean(mock(User.class), "room"));
     assertEquals(HttpStatus.NOT_FOUND, thrown.getStatus());
   }
 }

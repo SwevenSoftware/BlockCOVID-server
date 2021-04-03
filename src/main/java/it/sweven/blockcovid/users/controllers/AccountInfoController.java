@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-public class UserInfoController implements UserController {
+public class AccountInfoController implements AccountController {
 
   private final UserAssembler assembler;
 
   @Autowired
-  UserInfoController(UserAssembler userAssembler) {
+  AccountInfoController(UserAssembler userAssembler) {
     assembler = userAssembler;
   }
 

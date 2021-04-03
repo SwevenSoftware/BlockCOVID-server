@@ -12,14 +12,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.EntityModel;
 
-class UserInfoRouterTest {
+class AccountInfoRouterTest {
 
-  private UserInfoController router;
-  private UserAssembler assembler;
+  private AccountInfoController controller;
 
   @BeforeEach
   void setUp() {
-    assembler =
+    UserAssembler assembler =
         spy(
             new UserAssembler() {
               @Override
@@ -28,12 +27,12 @@ class UserInfoRouterTest {
               }
             });
     when(assembler.setAuthorities(anySet())).thenReturn(assembler);
-    router = new UserInfoController(assembler);
+    controller = new AccountInfoController(assembler);
   }
 
   @Test
   void info_existingUser() {
     User user = new User("user", "password", Collections.emptySet());
-    assertEquals(user, router.info(user).getContent());
+    assertEquals(user, controller.info(user).getContent());
   }
 }

@@ -17,15 +17,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.server.ResponseStatusException;
 
-class AdminModifyUserControllerTest {
+class ModifyUsersControllerTest {
 
-  private UserAssembler userAssembler;
   private UserService userService;
-  private AdminModifyUserController router;
+  private ModifyUserController controller;
 
   @BeforeEach
   void setUp() {
-    userAssembler =
+    UserAssembler userAssembler =
         spy(
             new UserAssembler() {
               @Override
@@ -66,7 +65,7 @@ class AdminModifyUserControllerTest {
         .when(userService)
         .setPassword(any(), any());
 
-    router = new AdminModifyUserController(userAssembler, userService);
+    controller = new ModifyUserController(userAssembler, userService);
   }
 
   @Test
@@ -80,7 +79,8 @@ class AdminModifyUserControllerTest {
             oldUser.getUsername(), newCredentials.getPassword(), newCredentials.getAuthorities());
     when(userService.getByUsername(oldUser.getUsername())).thenReturn(oldUser);
     assertEquals(
-        expectedUser, router.modifyUser(admin, oldUser.getUsername(), newCredentials).getContent());
+        expectedUser,
+        controller.modifyUser(admin, oldUser.getUsername(), newCredentials).getContent());
   }
 
   @Test
@@ -94,7 +94,7 @@ class AdminModifyUserControllerTest {
     ResponseStatusException thrown =
         assertThrows(
             ResponseStatusException.class,
-            () -> router.modifyUser(admin, oldUser.getUsername(), newCredentials));
+            () -> controller.modifyUser(admin, oldUser.getUsername(), newCredentials));
     assertEquals(HttpStatus.NOT_FOUND, thrown.getStatus());
   }
 }

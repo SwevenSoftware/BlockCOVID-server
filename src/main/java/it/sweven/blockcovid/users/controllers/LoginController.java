@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import it.sweven.blockcovid.users.assemblers.UserAssembler;
 import it.sweven.blockcovid.users.dto.Credentials;
 import it.sweven.blockcovid.users.dto.TokenWithAuthorities;
@@ -19,9 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-@RequestMapping("api")
-@Tag(name = "Login")
-public class LoginController {
+public class LoginController implements AccountController {
 
   private final UserAuthenticationService authenticationService;
   private final UserAssembler assembler;

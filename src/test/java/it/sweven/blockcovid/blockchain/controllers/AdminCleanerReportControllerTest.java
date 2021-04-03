@@ -24,7 +24,7 @@ class AdminCleanerReportControllerTest {
 
   private RoomService roomService;
   private DocumentService documentService;
-  private AdminCleanerReportController router;
+  private AdminCleanerReportController controller;
   private BlockchainService blockchainService;
   private DocumentContractService documentContractService;
 
@@ -36,7 +36,7 @@ class AdminCleanerReportControllerTest {
     documentContractService = mock(DocumentContractService.class);
     Credentials credentials = mock(Credentials.class);
     when(roomService.getAllRooms()).thenReturn(Collections.emptyList());
-    router =
+    controller =
         spy(
             new AdminCleanerReportController(
                 roomService,
@@ -54,7 +54,7 @@ class AdminCleanerReportControllerTest {
     byte[] expectedBytes = "correct result".getBytes();
     when(documentService.readReport("reportPath")).thenReturn(expectedBytes);
     Files.createFile(Path.of("reportPath"));
-    assertEquals(expectedBytes, router.report(mock(User.class)));
+    assertEquals(expectedBytes, controller.report(mock(User.class)));
     Files.deleteIfExists(Path.of("reportPath"));
   }
 
@@ -62,7 +62,7 @@ class AdminCleanerReportControllerTest {
   void report_errorWhileCreatingReport() throws IOException {
     when(documentService.generateCleanerReport(any())).thenThrow(new IOException());
     ResponseStatusException thrown =
-        assertThrows(ResponseStatusException.class, () -> router.report(mock(User.class)));
+        assertThrows(ResponseStatusException.class, () -> controller.report(mock(User.class)));
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, thrown.getStatus());
   }
 
@@ -70,7 +70,7 @@ class AdminCleanerReportControllerTest {
   void report_errorWhileReadingReport() throws IOException {
     when(documentService.readReport(any())).thenThrow(new IOException());
     ResponseStatusException thrown =
-        assertThrows(ResponseStatusException.class, () -> router.report(mock(User.class)));
+        assertThrows(ResponseStatusException.class, () -> controller.report(mock(User.class)));
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, thrown.getStatus());
   }
 
@@ -81,7 +81,7 @@ class AdminCleanerReportControllerTest {
     when(documentService.generateCleanerReport(mockRooms)).thenReturn("reportPath");
     when(blockchainService.registerReport(any(), any())).thenThrow(new Exception());
     ResponseStatusException thrown =
-        assertThrows(ResponseStatusException.class, () -> router.report(mock(User.class)));
+        assertThrows(ResponseStatusException.class, () -> controller.report(mock(User.class)));
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, thrown.getStatus());
   }
 
@@ -92,7 +92,7 @@ class AdminCleanerReportControllerTest {
     when(documentService.generateCleanerReport(mockRooms)).thenReturn("reportPath");
     when(documentContractService.getContractByAccount(any())).thenThrow(new Exception());
     ResponseStatusException thrown =
-        assertThrows(ResponseStatusException.class, () -> router.report(mock(User.class)));
+        assertThrows(ResponseStatusException.class, () -> controller.report(mock(User.class)));
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, thrown.getStatus());
   }
 }

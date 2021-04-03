@@ -20,21 +20,20 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-class AdminModifyRoomControllerTest {
+class ModifyRoomControllerTest {
 
   private RoomService roomService;
-  private RoomAssembler roomAssembler;
-  private AdminModifyRoomController router;
+  private ModifyRoomController controller;
 
   @BeforeEach
   void setUp() {
     roomService = mock(RoomService.class);
     doAnswer(invocation -> invocation.getArgument(0)).when(roomService).save(any());
-    roomAssembler = mock(RoomAssembler.class);
+    RoomAssembler roomAssembler = mock(RoomAssembler.class);
     doAnswer(invocation -> EntityModel.of(invocation.getArgument(0)))
         .when(roomAssembler)
         .toModel(any());
-    router = new AdminModifyRoomController(roomService, roomAssembler);
+    controller = new ModifyRoomController(roomService, roomAssembler);
   }
 
   @Test
@@ -53,7 +52,7 @@ class AdminModifyRoomControllerTest {
         new RoomInfo(
             "name", LocalTime.MIDNIGHT, LocalTime.MIDNIGHT, Set.of(DayOfWeek.MONDAY), 10, 10);
     when(roomService.getByName(anyString())).thenReturn(fakeRoom);
-    assertEquals(expected, router.modifyRoom(mock(User.class), "room", toChange).getContent());
+    assertEquals(expected, controller.modifyRoom(mock(User.class), "room", toChange).getContent());
   }
 
   @Test
@@ -62,7 +61,7 @@ class AdminModifyRoomControllerTest {
     ResponseStatusException thrown =
         assertThrows(
             ResponseStatusException.class,
-            () -> router.modifyRoom(mock(User.class), "room", mock(RoomInfo.class)));
+            () -> controller.modifyRoom(mock(User.class), "room", mock(RoomInfo.class)));
     assertEquals(HttpStatus.NOT_FOUND, thrown.getStatus());
   }
 }

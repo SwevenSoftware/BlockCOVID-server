@@ -24,10 +24,10 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-class AdminNewDeskControllerTest {
+class NewDeskControllerTest {
   private DeskService deskService;
   private DeskAssembler deskAssembler;
-  private AdminNewDeskController router;
+  private NewDeskController controller;
   private User admin;
 
   @BeforeEach
@@ -37,7 +37,7 @@ class AdminNewDeskControllerTest {
     when(deskAssembler.setAuthorities(anySet())).thenReturn(deskAssembler);
     admin = mock(User.class);
     when(admin.getAuthorities()).thenReturn(Set.of(Authority.ADMIN));
-    router = new AdminNewDeskController(deskAssembler, deskService);
+    controller = new NewDeskController(deskAssembler, deskService);
   }
 
   @Test
@@ -57,7 +57,7 @@ class AdminNewDeskControllerTest {
                     expectedList.stream().map(EntityModel::of).collect(Collectors.toList())));
     assertEquals(
         expectedList,
-        router.addDesk("roomName", admin, providedDesks).getContent().stream()
+        controller.addDesk("roomName", admin, providedDesks).getContent().stream()
             .map(EntityModel::getContent)
             .collect(Collectors.toList()));
   }
@@ -70,7 +70,8 @@ class AdminNewDeskControllerTest {
     when(deskService.addDesk(faultyDesk, "roomName")).thenThrow(new DeskNotAvailable());
     ResponseStatusException thrown =
         assertThrows(
-            ResponseStatusException.class, () -> router.addDesk("roomName", admin, providedDesks));
+            ResponseStatusException.class,
+            () -> controller.addDesk("roomName", admin, providedDesks));
     assertEquals(thrown.getStatus(), HttpStatus.CONFLICT);
   }
 
@@ -82,7 +83,7 @@ class AdminNewDeskControllerTest {
         assertThrows(
             ResponseStatusException.class,
             () ->
-                router.addDesk(
+                controller.addDesk(
                     "roomName", admin, Set.of(mock(DeskInfo.class), mock(DeskInfo.class))));
     assertEquals(HttpStatus.NOT_FOUND, thrown.getStatus());
   }
@@ -95,7 +96,8 @@ class AdminNewDeskControllerTest {
     when(deskService.addDesk(faultyDesk, "roomName")).thenThrow(new IllegalArgumentException());
     ResponseStatusException thrown =
         assertThrows(
-            ResponseStatusException.class, () -> router.addDesk("roomName", admin, providedDesks));
+            ResponseStatusException.class,
+            () -> controller.addDesk("roomName", admin, providedDesks));
     assertEquals(thrown.getStatus(), HttpStatus.BAD_REQUEST);
   }
 }

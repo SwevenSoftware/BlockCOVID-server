@@ -12,7 +12,7 @@ import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 @Configuration
-@EnableMongoRepositories(basePackages = "it.sweven.blockcovid.repositories")
+@EnableMongoRepositories(basePackages = "it.sweven.blockcovid.*.repositories")
 public class MongoConfiguration extends AbstractMongoClientConfiguration {
   @Value("${spring.data.mongodb.uri}")
   private String mongodbUri;

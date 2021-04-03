@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import it.sweven.blockcovid.AdminController;
 import it.sweven.blockcovid.users.assemblers.UserAssembler;
 import it.sweven.blockcovid.users.dto.CredentialsWithAuthorities;
 import it.sweven.blockcovid.users.entities.User;
@@ -22,18 +21,17 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-public class AdminRegistrationController implements AdminController {
+public class RegistrationController implements UsersController {
   private final UserRegistrationService registrationService;
   private final UserAssembler userAssembler;
 
   @Autowired
-  AdminRegistrationController(
-      UserRegistrationService registrationService, UserAssembler userAssembler) {
+  RegistrationController(UserRegistrationService registrationService, UserAssembler userAssembler) {
     this.registrationService = registrationService;
     this.userAssembler = userAssembler;
   }
 
-  @PostMapping(value = "user/new", consumes = "application/json", produces = "application/json")
+  @PostMapping(value = "", consumes = "application/json", produces = "application/json")
   @ResponseBody
   @ApiResponses({
     @ApiResponse(responseCode = "200", description = "Provided user registered successfully"),

@@ -33,7 +33,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
   private static final RequestMatcher PROTECTED_URLS = new AntPathRequestMatcher("/api/**");
   private static final RequestMatcher PUBLIC_URLS =
       new OrRequestMatcher(
-          new NegatedRequestMatcher(PROTECTED_URLS), new AntPathRequestMatcher("/api/login"));
+          new NegatedRequestMatcher(PROTECTED_URLS),
+          new AntPathRequestMatcher("/api/account/login"));
 
   private final TokenAuthenticationProvider authenticationProvider;
   private final TokenService tokenService;

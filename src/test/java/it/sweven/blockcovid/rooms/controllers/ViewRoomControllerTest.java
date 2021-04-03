@@ -14,32 +14,26 @@ import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.rooms.services.DeskService;
 import it.sweven.blockcovid.rooms.services.RoomService;
 import it.sweven.blockcovid.users.entities.User;
-import it.sweven.blockcovid.users.services.UserAuthenticationService;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-class RoomControllerTest {
-
+class ViewRoomControllerTest {
   private RoomService roomService;
   private DeskService deskService;
-  private UserAuthenticationService authenticationService;
   private RoomWithDesksAssembler assembler;
-  private RoomController router;
+  private ViewRoomController controller;
 
   @BeforeEach
   void setUp() {
     roomService = mock(RoomService.class);
     deskService = mock(DeskService.class);
-    authenticationService = mock(UserAuthenticationService.class);
-    when(authenticationService.authenticateByToken("auth")).thenReturn(mock(User.class));
     assembler = mock(RoomWithDesksAssembler.class);
-    router = new RoomController(roomService, deskService, authenticationService, assembler);
+    controller = new ViewRoomController(roomService, deskService, assembler);
   }
 
   @Test
@@ -57,26 +51,15 @@ class RoomControllerTest {
                 .collect(Collectors.toList()));
     EntityModel<RoomWithDesks> expectedEntityModel = EntityModel.of(expectedRoomWithRoom);
     when(assembler.toModel(any())).thenReturn(expectedEntityModel);
-    assertEquals(expectedEntityModel, router.viewRoom("roomName", "auth"));
+    assertEquals(expectedEntityModel, controller.viewRoom(mock(User.class), "roomName"));
   }
 
   @Test
   void viewRoom_nonExistingRoom_throwsRoomNotFoundException() {
     when(roomService.getByName("roomName")).thenThrow(new RoomNotFoundException());
     ResponseStatusException thrown =
-        assertThrows(ResponseStatusException.class, () -> router.viewRoom("roomName", "auth"));
+        assertThrows(
+            ResponseStatusException.class, () -> controller.viewRoom(mock(User.class), "roomName"));
     assertEquals(thrown.getStatus(), HttpStatus.NOT_FOUND);
-  }
-
-  @Test
-  void listRooms() {
-    when(roomService.getAllRooms()).thenReturn(List.of(mock(Room.class), mock(Room.class)));
-    List<RoomWithDesks> roomsWithDesks =
-        List.of(mock(RoomWithDesks.class), mock(RoomWithDesks.class));
-    CollectionModel<EntityModel<RoomWithDesks>> expectedCollection =
-        CollectionModel.of(
-            roomsWithDesks.stream().map(EntityModel::of).collect(Collectors.toList()));
-    when(assembler.toCollectionModel(any())).thenReturn(expectedCollection);
-    assertEquals(expectedCollection, router.listRooms("auth"));
   }
 }

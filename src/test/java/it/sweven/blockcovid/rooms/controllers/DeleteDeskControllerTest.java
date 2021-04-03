@@ -18,10 +18,10 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-class AdminDeleteDeskControllerTest {
+class DeleteDeskControllerTest {
   private DeskAssembler deskAssembler;
   private DeskService deskService;
-  private AdminDeleteDeskController router;
+  private DeleteDeskController controller;
 
   @BeforeEach
   void setUp() {
@@ -30,7 +30,7 @@ class AdminDeleteDeskControllerTest {
         .when(deskAssembler)
         .toModel(any());
     deskService = mock(DeskService.class);
-    router = new AdminDeleteDeskController(deskService, deskAssembler);
+    controller = new DeleteDeskController(deskService, deskAssembler);
   }
 
   @Test
@@ -40,7 +40,10 @@ class AdminDeleteDeskControllerTest {
     when(deskService.deleteDeskByInfosAndRoomName(any(), any())).thenReturn(fakeDesk);
     assertEquals(
         expected.getRoomName(),
-        router.delete(mock(User.class), "room", mock(DeskInfo.class)).getContent().getRoomName());
+        controller
+            .delete(mock(User.class), "room", mock(DeskInfo.class))
+            .getContent()
+            .getRoomName());
   }
 
   @Test
@@ -50,7 +53,7 @@ class AdminDeleteDeskControllerTest {
     ResponseStatusException thrown =
         assertThrows(
             ResponseStatusException.class,
-            () -> router.delete(mock(User.class), "room", mock(DeskInfo.class)));
+            () -> controller.delete(mock(User.class), "room", mock(DeskInfo.class)));
     assertEquals(HttpStatus.NOT_FOUND, thrown.getStatus());
   }
 
@@ -61,7 +64,7 @@ class AdminDeleteDeskControllerTest {
     ResponseStatusException thrown =
         assertThrows(
             ResponseStatusException.class,
-            () -> router.delete(mock(User.class), "room", mock(DeskInfo.class)));
+            () -> controller.delete(mock(User.class), "room", mock(DeskInfo.class)));
     assertEquals(HttpStatus.NOT_FOUND, thrown.getStatus());
   }
 }

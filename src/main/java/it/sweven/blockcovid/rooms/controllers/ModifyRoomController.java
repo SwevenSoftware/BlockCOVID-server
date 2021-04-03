@@ -3,7 +3,6 @@ package it.sweven.blockcovid.rooms.controllers;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import it.sweven.blockcovid.AdminController;
 import it.sweven.blockcovid.rooms.assemblers.RoomAssembler;
 import it.sweven.blockcovid.rooms.dto.RoomInfo;
 import it.sweven.blockcovid.rooms.entities.Room;
@@ -24,18 +23,18 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-public class AdminModifyRoomController implements AdminController {
+public class ModifyRoomController implements RoomsController {
 
   private final RoomService roomService;
   private final RoomAssembler roomAssembler;
 
   @Autowired
-  public AdminModifyRoomController(RoomService roomService, RoomAssembler roomAssembler) {
+  public ModifyRoomController(RoomService roomService, RoomAssembler roomAssembler) {
     this.roomService = roomService;
     this.roomAssembler = roomAssembler;
   }
 
-  @PutMapping("room/{roomName}")
+  @PutMapping("/{roomName}")
   @ApiResponses({
     @ApiResponse(responseCode = "200", description = "Room successfully updated"),
     @ApiResponse(responseCode = "404", description = "No room found with given name"),

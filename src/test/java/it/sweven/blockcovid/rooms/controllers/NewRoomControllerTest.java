@@ -21,17 +21,17 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-class AdminNewRoomControllerTest {
+class NewRoomControllerTest {
   private RoomService roomService;
   private RoomAssembler roomAssembler;
-  private AdminNewRoomController router;
+  private NewRoomController controller;
   private User admin;
 
   @BeforeEach
   void setUp() {
     roomService = mock(RoomService.class);
     roomAssembler = mock(RoomAssembler.class);
-    router = new AdminNewRoomController(roomAssembler, roomService);
+    controller = new NewRoomController(roomAssembler, roomService);
     admin = mock(User.class);
     when(admin.getAuthorities()).thenReturn(Set.of(Authority.ADMIN));
   }
@@ -46,7 +46,7 @@ class AdminNewRoomControllerTest {
     EntityModel fakeModel = mock(EntityModel.class);
     when(roomService.createRoom(any())).thenReturn(fakeRoom);
     when(roomAssembler.toModel(any())).thenReturn(fakeModel);
-    assertEquals(fakeModel, router.newRoom(admin, roomInfo));
+    assertEquals(fakeModel, controller.newRoom(admin, roomInfo));
   }
 
   @Test
@@ -60,7 +60,7 @@ class AdminNewRoomControllerTest {
     when(roomService.createRoom(any())).thenThrow(new BadAttributeValueExpException(null));
     when(roomAssembler.toModel(any())).thenReturn(fakeModel);
     ResponseStatusException thrown =
-        assertThrows(ResponseStatusException.class, () -> router.newRoom(admin, roomInfo));
+        assertThrows(ResponseStatusException.class, () -> controller.newRoom(admin, roomInfo));
     assertEquals(HttpStatus.BAD_REQUEST, thrown.getStatus());
   }
 }

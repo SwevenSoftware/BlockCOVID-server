@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import it.sweven.blockcovid.AdminController;
 import it.sweven.blockcovid.rooms.assemblers.DeskAssembler;
 import it.sweven.blockcovid.rooms.dto.DeskInfo;
 import it.sweven.blockcovid.rooms.dto.DeskWithRoomName;
@@ -26,18 +25,18 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-public class AdminDeleteDeskController implements AdminController {
+public class DeleteDeskController implements RoomsController {
 
   private final DeskService deskService;
   private final DeskAssembler deskAssembler;
 
   @Autowired
-  public AdminDeleteDeskController(DeskService deskService, DeskAssembler deskAssembler) {
+  public DeleteDeskController(DeskService deskService, DeskAssembler deskAssembler) {
     this.deskService = deskService;
     this.deskAssembler = deskAssembler;
   }
 
-  @DeleteMapping("room/{roomName}/desks/delete")
+  @DeleteMapping("/{roomName}/desks")
   @ApiResponses({
     @ApiResponse(responseCode = "200", description = "Desk successfully deleted"),
     @ApiResponse(

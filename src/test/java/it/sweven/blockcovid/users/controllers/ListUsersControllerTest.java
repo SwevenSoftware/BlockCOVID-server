@@ -17,11 +17,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.EntityModel;
 
-class AdminListUsersControllerTest {
+class ListUsersControllerTest {
 
   private UserService userService;
-  private UserAssembler userAssembler;
-  private AdminListUsersController router;
+  private ListUsersController controller;
 
   @BeforeEach
   void setUp() {
@@ -55,7 +54,7 @@ class AdminListUsersControllerTest {
         .when(userService)
         .setPassword(any(), any());
 
-    userAssembler =
+    UserAssembler userAssembler =
         spy(
             new UserAssembler() {
               @Override
@@ -65,7 +64,7 @@ class AdminListUsersControllerTest {
             });
     when(userAssembler.setAuthorities(anySet())).thenReturn(userAssembler);
 
-    router = new AdminListUsersController(userService, userAssembler);
+    controller = new ListUsersController(userService, userAssembler);
   }
 
   @Test
@@ -79,7 +78,7 @@ class AdminListUsersControllerTest {
     when(userService.getAllUsers()).thenReturn(expectedList);
     assertEquals(
         expectedList,
-        router.listUsers(admin).getContent().stream()
+        controller.listUsers(admin).getContent().stream()
             .map(EntityModel::getContent)
             .collect(Collectors.toList()));
   }

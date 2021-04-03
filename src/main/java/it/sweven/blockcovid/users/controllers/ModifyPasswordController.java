@@ -18,12 +18,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-public class UserModifyPasswordController implements UserController {
+public class ModifyPasswordController implements AccountController {
   private final UserAssembler assembler;
   private final UserService userService;
 
   @Autowired
-  public UserModifyPasswordController(UserAssembler assembler, UserService userService) {
+  public ModifyPasswordController(UserAssembler assembler, UserService userService) {
     this.assembler = assembler;
     this.userService = userService;
   }

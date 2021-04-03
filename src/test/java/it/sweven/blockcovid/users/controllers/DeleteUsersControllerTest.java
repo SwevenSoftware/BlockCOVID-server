@@ -16,14 +16,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.server.ResponseStatusException;
 
-class AdminDeleteUserControllerTest {
-  private UserAssembler userAssembler;
+class DeleteUsersControllerTest {
   private UserService userService;
-  private AdminDeleteUserController router;
+  private DeleteUserController controller;
 
   @BeforeEach
   void setUp() {
-    userAssembler =
+    UserAssembler userAssembler =
         spy(
             new UserAssembler() {
               @Override
@@ -34,7 +33,7 @@ class AdminDeleteUserControllerTest {
     when(userAssembler.setAuthorities(anySet())).thenReturn(userAssembler);
 
     userService = mock(UserService.class);
-    router = new AdminDeleteUserController(userAssembler, userService);
+    controller = new DeleteUserController(userAssembler, userService);
   }
 
   @Test
@@ -42,7 +41,7 @@ class AdminDeleteUserControllerTest {
     User userToDelete = new User("user", "password", Set.of(Authority.USER));
     User admin = new User("admin", "password", Set.of(Authority.ADMIN));
     when(userService.deleteByUsername("user")).thenReturn(userToDelete);
-    assertEquals(userToDelete, router.delete("user", admin).getContent());
+    assertEquals(userToDelete, controller.delete("user", admin).getContent());
   }
 
   @Test
@@ -51,7 +50,7 @@ class AdminDeleteUserControllerTest {
     when(userService.deleteByUsername("user"))
         .thenThrow(new UsernameNotFoundException("username user not found"));
     ResponseStatusException thrown =
-        assertThrows(ResponseStatusException.class, () -> router.delete("user", admin));
+        assertThrows(ResponseStatusException.class, () -> controller.delete("user", admin));
     assertEquals(HttpStatus.NOT_FOUND, thrown.getStatus());
   }
 }

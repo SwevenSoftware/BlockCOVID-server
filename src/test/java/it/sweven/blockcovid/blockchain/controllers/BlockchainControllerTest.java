@@ -24,21 +24,17 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 class BlockchainControllerTest {
   private BlockchainService blockchainService;
-  private DocumentContractService documentContractService;
-  private Credentials accountCredentials;
   private DocumentService documentService;
-  private RoomService roomService;
   private BlockchainController controller;
-  private Logger logger;
   ListAppender<LoggingEvent> listAppender;
 
   @BeforeEach
   void setUp() {
     blockchainService = mock(BlockchainService.class);
     documentService = mock(DocumentService.class);
-    roomService = mock(RoomService.class);
-    documentContractService = mock(DocumentContractService.class);
-    accountCredentials = mock(Credentials.class);
+    RoomService roomService = mock(RoomService.class);
+    DocumentContractService documentContractService = mock(DocumentContractService.class);
+    Credentials accountCredentials = mock(Credentials.class);
     listAppender = new ListAppender<>();
     listAppender.start();
     controller =
@@ -48,7 +44,7 @@ class BlockchainControllerTest {
             documentService,
             roomService,
             accountCredentials);
-    logger = LoggerFactory.getLogger(BlockchainController.class);
+    Logger logger = LoggerFactory.getLogger(BlockchainController.class);
     LogManager.getLogger("BlockchainController");
   }
 

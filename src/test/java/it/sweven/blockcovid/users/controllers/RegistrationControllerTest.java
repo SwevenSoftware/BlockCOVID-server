@@ -19,10 +19,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.server.ResponseStatusException;
 
-class AdminRegistrationControllerTest {
+class RegistrationControllerTest {
   private UserRegistrationService registrationService;
   private UserAssembler userAssembler;
-  private AdminRegistrationController router;
+  private RegistrationController controller;
 
   @BeforeEach
   void setUp() {
@@ -36,7 +36,7 @@ class AdminRegistrationControllerTest {
               }
             });
     when(userAssembler.setAuthorities(anySet())).thenReturn(userAssembler);
-    router = new AdminRegistrationController(registrationService, userAssembler);
+    controller = new RegistrationController(registrationService, userAssembler);
   }
 
   @Test
@@ -46,7 +46,7 @@ class AdminRegistrationControllerTest {
     User testUser = new User("user", "password", Set.of(Authority.USER));
     User testAdmin = new User("admin", "password", Set.of(Authority.ADMIN));
     when(registrationService.register(any())).thenReturn(testUser);
-    assertEquals(userAssembler.toModel(testUser), router.register(testCredentials, testAdmin));
+    assertEquals(userAssembler.toModel(testUser), controller.register(testCredentials, testAdmin));
   }
 
   @Test
@@ -57,7 +57,7 @@ class AdminRegistrationControllerTest {
     when(registrationService.register(any())).thenThrow(new CredentialException());
     ResponseStatusException thrown =
         assertThrows(
-            ResponseStatusException.class, () -> router.register(testCredentials, adminTest));
+            ResponseStatusException.class, () -> controller.register(testCredentials, adminTest));
     assertEquals(thrown.getStatus(), HttpStatus.CONFLICT);
   }
 
@@ -70,7 +70,7 @@ class AdminRegistrationControllerTest {
     when(registrationService.register(any())).thenThrow(new BadCredentialsException(""));
     ResponseStatusException thrown =
         assertThrows(
-            ResponseStatusException.class, () -> router.register(testCredentials, adminTest));
+            ResponseStatusException.class, () -> controller.register(testCredentials, adminTest));
     assertEquals(thrown.getStatus(), HttpStatus.BAD_REQUEST);
   }
 }

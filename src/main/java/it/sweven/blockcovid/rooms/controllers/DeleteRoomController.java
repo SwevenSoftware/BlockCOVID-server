@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import it.sweven.blockcovid.AdminController;
 import it.sweven.blockcovid.rooms.assemblers.RoomAssembler;
 import it.sweven.blockcovid.rooms.entities.Room;
 import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
@@ -22,17 +21,17 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-public class AdminDeleteRoomController implements AdminController {
+public class DeleteRoomController implements RoomsController {
   private final RoomService roomService;
   private final RoomAssembler roomAssembler;
 
   @Autowired
-  public AdminDeleteRoomController(RoomService roomService, RoomAssembler roomAssembler) {
+  public DeleteRoomController(RoomService roomService, RoomAssembler roomAssembler) {
     this.roomService = roomService;
     this.roomAssembler = roomAssembler;
   }
 
-  @DeleteMapping("room/{roomName}")
+  @DeleteMapping("/{roomName}")
   @ApiResponses({
     @ApiResponse(responseCode = "200", description = "Room successfully deleted"),
     @ApiResponse(

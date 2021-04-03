@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import it.sweven.blockcovid.AdminController;
 import it.sweven.blockcovid.rooms.assemblers.DeskAssembler;
 import it.sweven.blockcovid.rooms.dto.DeskInfo;
 import it.sweven.blockcovid.rooms.dto.DeskWithRoomName;
@@ -26,17 +25,17 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-public class AdminNewDeskController implements AdminController {
+public class NewDeskController implements RoomsController {
   private DeskAssembler deskAssembler;
   private DeskService deskService;
 
-  public AdminNewDeskController(DeskAssembler deskAssembler, DeskService deskService) {
+  public NewDeskController(DeskAssembler deskAssembler, DeskService deskService) {
     this.deskAssembler = deskAssembler;
     this.deskService = deskService;
   }
 
   @PostMapping(
-      value = "rooms/{nameRoom}/desks/new",
+      value = "{nameRoom}/desks",
       consumes = "application/json",
       produces = "application/json")
   @ResponseBody

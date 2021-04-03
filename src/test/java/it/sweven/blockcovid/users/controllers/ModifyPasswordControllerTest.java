@@ -17,15 +17,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.authentication.BadCredentialsException;
 
-class UserModifyPasswordControllerTest {
-  private UserAssembler assembler;
-  private UserService userService;
-  private UserModifyPasswordController userModifyPasswordRouter;
+class ModifyPasswordControllerTest {
+  private ModifyPasswordController controller;
 
   @BeforeEach
   void setUp() {
     // Mock UserAssembler
-    assembler =
+    UserAssembler assembler =
         spy(
             new UserAssembler() {
               @Override
@@ -36,7 +34,7 @@ class UserModifyPasswordControllerTest {
     when(assembler.setAuthorities(anySet())).thenReturn(assembler);
 
     // Mock UserService
-    userService = mock(UserService.class);
+    UserService userService = mock(UserService.class);
     // Mock UserService.updatePassword
     doAnswer(
             invocation -> {
@@ -62,7 +60,7 @@ class UserModifyPasswordControllerTest {
         .updateAuthorities(any(), any());
 
     // Instantiation UserRoute
-    userModifyPasswordRouter = new UserModifyPasswordController(assembler, userService);
+    controller = new ModifyPasswordController(assembler, userService);
   }
 
   @Test
@@ -71,7 +69,6 @@ class UserModifyPasswordControllerTest {
     CredentialChangeRequestForm requestForm =
         new CredentialChangeRequestForm("password", "newPassword");
     User expectedUser = new User("user", "newPassword", Collections.emptySet());
-    assertEquals(
-        expectedUser, userModifyPasswordRouter.modifyPassword(oldUser, requestForm).getContent());
+    assertEquals(expectedUser, controller.modifyPassword(oldUser, requestForm).getContent());
   }
 }

@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import it.sweven.blockcovid.AdminController;
 import it.sweven.blockcovid.blockchain.services.BlockchainService;
 import it.sweven.blockcovid.blockchain.services.DocumentContractService;
 import it.sweven.blockcovid.blockchain.services.DocumentService;
@@ -25,7 +24,7 @@ import org.web3j.crypto.Credentials;
 import org.web3j.documentcontract.DocumentContract;
 
 @RestController
-public class AdminCleanerReportController implements AdminController {
+public class AdminCleanerReportController implements ReportsController {
   private final RoomService roomService;
   private final DocumentService documentService;
   private final BlockchainService blockchainService;
@@ -46,7 +45,7 @@ public class AdminCleanerReportController implements AdminController {
     this.blockchainCredentials = blockchainCredentials;
   }
 
-  @GetMapping(value = "report/cleaner", produces = MediaType.APPLICATION_PDF_VALUE)
+  @GetMapping(value = "/cleaner", produces = MediaType.APPLICATION_PDF_VALUE)
   @ResponseBody
   @ApiResponses({
     @ApiResponse(responseCode = "200", description = "Report listing rooms' cleaning status"),
