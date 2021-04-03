@@ -4,9 +4,9 @@ package it.sweven.blockcovid.configurations;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
-import it.sweven.blockcovid.security.TokenAuthenticationFilter;
-import it.sweven.blockcovid.security.TokenAuthenticationProvider;
-import it.sweven.blockcovid.services.TokenService;
+import it.sweven.blockcovid.users.security.TokenAuthenticationFilter;
+import it.sweven.blockcovid.users.security.TokenAuthenticationProvider;
+import it.sweven.blockcovid.users.services.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -33,7 +33,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
   private static final RequestMatcher PROTECTED_URLS = new AntPathRequestMatcher("/api/**");
   private static final RequestMatcher PUBLIC_URLS =
       new OrRequestMatcher(
-          new NegatedRequestMatcher(PROTECTED_URLS), new AntPathRequestMatcher("/api/login"));
+          new NegatedRequestMatcher(PROTECTED_URLS),
+          new AntPathRequestMatcher("/api/account/login"));
 
   private final TokenAuthenticationProvider authenticationProvider;
   private final TokenService tokenService;
