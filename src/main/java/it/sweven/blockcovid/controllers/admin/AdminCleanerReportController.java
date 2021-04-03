@@ -45,7 +45,7 @@ public class AdminCleanerReportController implements AdminController {
     this.blockchainCredentials = blockchainCredentials;
   }
 
-  @GetMapping(value = "/report/cleaner", produces = MediaType.APPLICATION_PDF_VALUE)
+  @GetMapping(value = "report/cleaner", produces = MediaType.APPLICATION_PDF_VALUE)
   @ResponseBody
   @ApiResponses({
     @ApiResponse(responseCode = "200", description = "Report listing rooms' cleaning status"),
