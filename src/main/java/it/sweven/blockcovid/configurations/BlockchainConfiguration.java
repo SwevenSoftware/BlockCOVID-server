@@ -1,6 +1,6 @@
 package it.sweven.blockcovid.configurations;
 
-import it.sweven.blockcovid.exceptions.BlockchainAccountNotFound;
+import it.sweven.blockcovid.blockchain.exceptions.BlockchainAccountNotFound;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
