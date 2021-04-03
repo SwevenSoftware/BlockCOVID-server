@@ -12,7 +12,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import javax.management.BadAttributeValueExpException;
 import org.springframework.stereotype.Service;
-import org.springframework.util.DigestUtils;
 
 @Service
 public class DocumentService {
@@ -42,10 +41,6 @@ public class DocumentService {
   public byte[] readReport(String path) throws IOException {
     InputStream inputStream = new FileInputStream(path);
     return inputStream.readAllBytes();
-  }
-
-  public String hashReport(String path) throws IOException {
-    return DigestUtils.md5DigestAsHex(readReport(path));
   }
 
   protected boolean fileExists(String path) {

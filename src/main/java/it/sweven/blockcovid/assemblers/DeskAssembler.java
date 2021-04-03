@@ -3,9 +3,9 @@ package it.sweven.blockcovid.assemblers;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+import it.sweven.blockcovid.controllers.admin.AdminNewDeskController;
 import it.sweven.blockcovid.dto.DeskWithRoomName;
 import it.sweven.blockcovid.entities.user.Authority;
-import it.sweven.blockcovid.routers.admin.AdminNewDeskRouter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -36,7 +36,8 @@ public class DeskAssembler
     EntityModel<DeskWithRoomName> deskModel = EntityModel.of(entity);
     if (authorities.contains(Authority.ADMIN))
       deskModel.add(
-          linkTo(methodOn(AdminNewDeskRouter.class).addDesk("", null, null)).withRel("add_desk"));
+          linkTo(methodOn(AdminNewDeskController.class).addDesk("", null, null))
+              .withRel("add_desk"));
     clearAuthorities();
     return deskModel;
   }

@@ -4,6 +4,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
     id 'jacoco'
+    id 'org.web3j' version '4.8.4'
 }
 
 group = 'it.sweven.blockcovid'
@@ -38,8 +39,13 @@ dependencies {
     // OpenAPI docs
     implementation 'org.springdoc:springdoc-openapi-ui:1.5.4'
 
+
+    // Blockchain interaction
+    implementation 'org.web3j:core:4.5.6'
+
     // iText PDF
     implementation 'com.itextpdf:itext7-core:7.1.10'
+
 
     // TESTS
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -76,7 +82,8 @@ jacocoTestReport {
             fileTree(dir: it,
                     exclude: [
                             '**/it/sweven/blockcovid/configurations/*.class',
-                            '**/it/sweven/blockcovid/Server.class'
+                            '**/it/sweven/blockcovid/Server.class',
+                            '**/org/web3j/**'
                     ])
         })
     }
@@ -88,6 +95,6 @@ jacocoTestReport {
 
 test {
     jacoco {
-        excludes = ['it.sweven.blockcovid.configurations.*', 'it.sweven.blockcovid.Server']
+        excludes = ['it.sweven.blockcovid.configurations.*', 'it.sweven.blockcovid.Server', 'org.web3j.*']
     }
 }
