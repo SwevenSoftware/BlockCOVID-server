@@ -4,10 +4,9 @@ package it.sweven.blockcovid.configurations;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
-import it.sweven.blockcovid.security.TokenAuthenticationFilter;
-import it.sweven.blockcovid.security.TokenAuthenticationProvider;
-import it.sweven.blockcovid.services.TokenService;
-import it.sweven.blockcovid.services.UserService;
+import it.sweven.blockcovid.users.security.TokenAuthenticationFilter;
+import it.sweven.blockcovid.users.security.TokenAuthenticationProvider;
+import it.sweven.blockcovid.users.services.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +17,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
@@ -35,26 +33,17 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
   private static final RequestMatcher PROTECTED_URLS = new AntPathRequestMatcher("/api/**");
   private static final RequestMatcher PUBLIC_URLS =
       new OrRequestMatcher(
-          new NegatedRequestMatcher(PROTECTED_URLS), new AntPathRequestMatcher("/api/login"));
+          new NegatedRequestMatcher(PROTECTED_URLS),
+          new AntPathRequestMatcher("/api/account/login"));
 
   private final TokenAuthenticationProvider authenticationProvider;
-  private final UserService userService;
   private final TokenService tokenService;
-  private final PasswordEncoder passwordEncoder;
-  private final TokenAuthenticationProvider tokenProvider;
 
   @Autowired
   WebSecurityConfiguration(
-      TokenAuthenticationProvider authenticationProvider,
-      UserService userService,
-      TokenService tokenService,
-      PasswordEncoder passwordEncoder,
-      TokenAuthenticationProvider tokenProvider) {
+      TokenAuthenticationProvider authenticationProvider, TokenService tokenService) {
     this.authenticationProvider = authenticationProvider;
-    this.userService = userService;
     this.tokenService = tokenService;
-    this.passwordEncoder = passwordEncoder;
-    this.tokenProvider = tokenProvider;
   }
 
   @Override
@@ -80,6 +69,10 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         .authorizeRequests()
         .anyRequest()
         .authenticated()
+        .and()
+        .requiresChannel()
+        .anyRequest()
+        .requiresSecure()
         .and()
         .csrf()
         .disable()

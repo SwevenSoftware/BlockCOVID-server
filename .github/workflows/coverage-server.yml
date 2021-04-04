@@ -23,7 +23,7 @@ jobs:
           java-version: 15
 
       - name: Test coverage with Gradle
-        run: ./gradlew test jacocoTestReport
+        run: ./gradlew cleanTest test jacocoTestReport
 
       - uses: codecov/codecov-action@v1
         with:
