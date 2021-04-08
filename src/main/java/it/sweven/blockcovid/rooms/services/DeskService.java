@@ -36,10 +36,14 @@ public class DeskService {
     return deskRepository.findAllByRoomId(roomId);
   }
 
-  public Desk deleteDeskByInfosAndRoomName(DeskInfo infos, String roomName)
+  public Desk getDeskByInfoAndRoomName(DeskInfo infos, String roomName)
       throws RoomNotFoundException, DeskNotFoundException {
     return deskRepository
-        .deleteByXAndYAndRoomId(infos.getX(), infos.getY(), roomService.getByName(roomName).getId())
+        .getByXAndYAndRoomId(infos.getX(), infos.getY(), roomService.getByName(roomName).getId())
         .orElseThrow(DeskNotFoundException::new);
+  }
+
+  public Desk deleteDeskById(String id) throws DeskNotFoundException {
+    return deskRepository.deleteById(id).orElseThrow(DeskNotFoundException::new);
   }
 }

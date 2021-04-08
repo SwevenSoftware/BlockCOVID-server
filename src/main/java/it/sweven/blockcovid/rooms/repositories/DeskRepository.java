@@ -12,5 +12,7 @@ public interface DeskRepository extends MongoRepository<Desk, Long> {
 
   List<Desk> deleteAllByRoomId(String roomId);
 
-  Optional<Desk> deleteByXAndYAndRoomId(Integer X, Integer Y, String roomId);
+  Optional<Desk> getByXAndYAndRoomId(Integer X, Integer Y, String roomId);
+
+  Optional<Desk> deleteById(String id);
 }

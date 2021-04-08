@@ -95,12 +95,11 @@ class DeskServiceTest {
   }
 
   @Test
-  void deleteDeskByInfosAndRoomName_valid() {
+  void getDeskByInfosAndRoomName_valid() {
     Desk fakeDesk = mock(Desk.class);
     when(roomService.getByName(anyString())).thenReturn(mock(Room.class));
-    when(repository.deleteByXAndYAndRoomId(any(), any(), any())).thenReturn(Optional.of(fakeDesk));
-    assertEquals(
-        fakeDesk, deskService.deleteDeskByInfosAndRoomName(mock(DeskInfo.class), "roomName"));
+    when(repository.getByXAndYAndRoomId(any(), any(), any())).thenReturn(Optional.of(fakeDesk));
+    assertEquals(fakeDesk, deskService.getDeskByInfoAndRoomName(mock(DeskInfo.class), "roomName"));
   }
 
   @Test
@@ -108,16 +107,29 @@ class DeskServiceTest {
     when(roomService.getByName(anyString())).thenThrow(new RoomNotFoundException());
     assertThrows(
         RoomNotFoundException.class,
-        () -> deskService.deleteDeskByInfosAndRoomName(mock(DeskInfo.class), "roomName"));
+        () -> deskService.getDeskByInfoAndRoomName(mock(DeskInfo.class), "roomName"));
   }
 
   @Test
   void deleteDeskNotFound_throwsDeskNotFoundException() {
-    when(repository.deleteByXAndYAndRoomId(any(), any(), any()))
+    when(repository.getByXAndYAndRoomId(any(), any(), any()))
         .thenThrow(new DeskNotFoundException());
     when(roomService.getByName(anyString())).thenReturn(mock(Room.class));
     assertThrows(
         DeskNotFoundException.class,
-        () -> deskService.deleteDeskByInfosAndRoomName(mock(DeskInfo.class), "roomName"));
+        () -> deskService.getDeskByInfoAndRoomName(mock(DeskInfo.class), "roomName"));
+  }
+
+  @Test
+  void deleteDeskById_valid() {
+    Desk fakeDesk = mock(Desk.class);
+    when(repository.deleteById("idDesk")).thenReturn(Optional.of(fakeDesk));
+    assertEquals(fakeDesk, deskService.deleteDeskById("idDesk"));
+  }
+
+  @Test
+  void deleteDeskById_throwsDeskNotFoundException() {
+    when(repository.deleteById(anyString())).thenThrow(new DeskNotFoundException());
+    assertThrows(DeskNotFoundException.class, () -> deskService.deleteDeskById("idDesk"));
   }
 }
