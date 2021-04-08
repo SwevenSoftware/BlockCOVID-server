@@ -15,6 +15,7 @@ import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.rooms.repositories.DeskRepository;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -131,5 +132,27 @@ class DeskServiceTest {
   void deleteDeskById_throwsDeskNotFoundException() {
     when(repository.deleteById(anyString())).thenThrow(new DeskNotFoundException());
     assertThrows(DeskNotFoundException.class, () -> deskService.deleteDeskById("idDesk"));
+  }
+
+  @Test
+  void update_existingDesk() {
+    Desk providedDesk = mock(Desk.class);
+    when(providedDesk.getId()).thenReturn("idDesk");
+    when(repository.findById("idDesk")).thenReturn(Optional.of(providedDesk));
+    AtomicBoolean deskSaved = new AtomicBoolean(false);
+    when(repository.save(providedDesk))
+        .thenAnswer(
+            invocation -> {
+              deskSaved.set(true);
+              return invocation.getArgument(0);
+            });
+    assertEquals(providedDesk, deskService.update(providedDesk));
+    assertTrue(deskSaved.get());
+  }
+
+  @Test
+  void update_throwsDeskNotFoundException() {
+    when(repository.findById(anyString())).thenThrow(new DeskNotFoundException());
+    assertThrows(DeskNotFoundException.class, () -> deskService.update(mock(Desk.class)));
   }
 }

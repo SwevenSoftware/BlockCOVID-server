@@ -31,6 +31,11 @@ public class DeskService {
     return deskRepository.save(new Desk(desk.getX(), desk.getY(), associatedRoom.getId()));
   }
 
+  public Desk update(Desk desk) throws DeskNotFoundException {
+    deskRepository.findById(desk.getId()).orElseThrow(DeskNotFoundException::new);
+    return deskRepository.save(desk);
+  }
+
   public List<Desk> getDesksByRoom(String roomName) {
     String roomId = roomService.getByName(roomName).getId();
     return deskRepository.findAllByRoomId(roomId);
