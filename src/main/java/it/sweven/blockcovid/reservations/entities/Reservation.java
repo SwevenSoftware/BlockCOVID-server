@@ -1,7 +1,6 @@
 package it.sweven.blockcovid.reservations.entities;
 
 import java.time.LocalDateTime;
-import javax.persistence.GeneratedValue;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,7 +11,6 @@ import org.springframework.data.annotation.PersistenceConstructor;
 @Setter
 public class Reservation {
   @Id
-  @GeneratedValue
   @Setter(value = AccessLevel.NONE)
   private Long id;
 

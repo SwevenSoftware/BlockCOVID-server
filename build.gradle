@@ -45,9 +45,6 @@ dependencies {
     // iText PDF
     implementation 'com.itextpdf:itext7-core:7.1.10'
 
-    // JavaEE 6
-    compileOnly group: 'javax', name: 'javaee-api', version: '8.0'
-
     // TESTS
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
