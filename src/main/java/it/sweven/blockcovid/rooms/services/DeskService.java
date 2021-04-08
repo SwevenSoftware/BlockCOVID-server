@@ -31,15 +31,24 @@ public class DeskService {
     return deskRepository.save(new Desk(desk.getX(), desk.getY(), associatedRoom.getId()));
   }
 
+  public Desk update(Desk desk) throws DeskNotFoundException {
+    deskRepository.findById(desk.getId()).orElseThrow(DeskNotFoundException::new);
+    return deskRepository.save(desk);
+  }
+
   public List<Desk> getDesksByRoom(String roomName) {
     String roomId = roomService.getByName(roomName).getId();
     return deskRepository.findAllByRoomId(roomId);
   }
 
-  public Desk deleteDeskByInfosAndRoomName(DeskInfo infos, String roomName)
+  public Desk getDeskByInfoAndRoomName(DeskInfo infos, String roomName)
       throws RoomNotFoundException, DeskNotFoundException {
     return deskRepository
-        .deleteByXAndYAndRoomId(infos.getX(), infos.getY(), roomService.getByName(roomName).getId())
+        .getByXAndYAndRoomId(infos.getX(), infos.getY(), roomService.getByName(roomName).getId())
         .orElseThrow(DeskNotFoundException::new);
+  }
+
+  public Desk deleteDeskById(String id) throws DeskNotFoundException {
+    return deskRepository.deleteById(id).orElseThrow(DeskNotFoundException::new);
   }
 }

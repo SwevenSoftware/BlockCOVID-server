@@ -1,6 +1,7 @@
 package it.sweven.blockcovid.rooms.entities;
 
 import lombok.*;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -11,11 +12,17 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @ToString
 @Document
 public class Desk {
+  private @Id String id;
   private int x, y;
   private String roomId;
   private Status deskStatus;
 
   @PersistenceConstructor
+  public Desk(String id, int x, int y, String roomId) {
+    this(x, y, roomId);
+    this.id = id;
+  }
+
   public Desk(int x, int y, String roomId) {
     setX(x);
     setY(y);
