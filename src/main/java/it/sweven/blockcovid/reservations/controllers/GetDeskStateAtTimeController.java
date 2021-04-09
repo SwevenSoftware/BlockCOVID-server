@@ -27,7 +27,7 @@ public class GetDeskStateAtTimeController implements ReservationController {
   @PreAuthorize("#submitter.isEnabled() and #submitter.isUser() or #submitter.isAdmin()")
   public EntityModel<DeskAvailability> getDeskState(
       @AuthenticationPrincipal User submitter,
-      @PathVariable @DateTimeFormat(pattern = "YYYYMMDDThhmmss") LocalDateTime timestamp,
+      @PathVariable @DateTimeFormat(pattern = "yyyyMMdd'T'kkmm") LocalDateTime timestamp,
       @PathVariable String deskId) {
     AtomicReference<DeskAvailability> toReturn = new AtomicReference<>();
     AtomicReference<LocalDateTime> next = new AtomicReference<>();
