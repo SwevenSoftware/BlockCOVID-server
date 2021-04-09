@@ -156,4 +156,18 @@ class DeskServiceTest {
     when(repository.findById(anyString())).thenThrow(new DeskNotFoundException());
     assertThrows(DeskNotFoundException.class, () -> deskService.update(mock(Desk.class)));
   }
+
+  @Test
+  void getDeskByIdValidID() {
+    Desk fakeDesk = mock(Desk.class);
+    when(repository.findById(anyString())).thenReturn(Optional.of(fakeDesk));
+    assertEquals(fakeDesk, deskService.getDeskById("id"));
+  }
+
+  @Test
+  void nullReturn_throwsDeskNotFoundException() {
+    Desk fakeDesk = mock(Desk.class);
+    when(repository.findById(anyString())).thenReturn(Optional.empty());
+    assertThrows(DeskNotFoundException.class, () -> deskService.getDeskById("id"));
+  }
 }
