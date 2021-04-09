@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import it.sweven.blockcovid.reservations.dto.ReservationInfo;
 import it.sweven.blockcovid.reservations.entities.Reservation;
+import it.sweven.blockcovid.reservations.exceptions.NoSuchReservation;
 import it.sweven.blockcovid.reservations.exceptions.ReservationClash;
 import it.sweven.blockcovid.reservations.repositories.ReservationRepository;
 import java.time.LocalDateTime;
@@ -140,8 +141,9 @@ class ReservationServiceTest {
 
   @Test
   void findById() {
-    Optional<Reservation> expectedReservation = Optional.of(mock(Reservation.class));
-    when(repository.findReservationById("idReservation")).thenReturn(expectedReservation);
+    Reservation expectedReservation = mock(Reservation.class);
+    when(repository.findReservationById("idReservation"))
+        .thenReturn(Optional.of(expectedReservation));
     assertEquals(expectedReservation, service.findById("idReservation"));
   }
 
@@ -181,5 +183,19 @@ class ReservationServiceTest {
     when(repository.findReservationsByDeskIdAndEndIsBefore("idDesk", providedReservation.getEnd()))
         .thenReturn(Stream.of(conflictReservation));
     assertThrows(ReservationClash.class, () -> service.save(providedReservation));
+  }
+
+  @Test
+  void delete_validId() {
+    Reservation expectedReservation = mock(Reservation.class);
+    when(repository.deleteReservationById("idReservation"))
+        .thenReturn(Optional.of(expectedReservation));
+    assertEquals(expectedReservation, service.delete("idReservation"));
+  }
+
+  @Test
+  void delete_idNotFound_throwsNoSuchReservation() {
+    when(repository.deleteReservationById(anyString())).thenReturn(Optional.empty());
+    assertThrows(NoSuchReservation.class, () -> service.delete("idReservation"));
   }
 }

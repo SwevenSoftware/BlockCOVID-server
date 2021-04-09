@@ -2,6 +2,7 @@ package it.sweven.blockcovid.reservations.servicies;
 
 import it.sweven.blockcovid.reservations.dto.ReservationInfo;
 import it.sweven.blockcovid.reservations.entities.Reservation;
+import it.sweven.blockcovid.reservations.exceptions.NoSuchReservation;
 import it.sweven.blockcovid.reservations.exceptions.ReservationClash;
 import it.sweven.blockcovid.reservations.repositories.ReservationRepository;
 import java.time.LocalDateTime;
@@ -33,8 +34,8 @@ public class ReservationService {
         deskId, timestamp, timestamp);
   }
 
-  public Optional<Reservation> findById(String id) {
-    return reservationRepository.findReservationById(id);
+  public Reservation findById(String id) throws NoSuchReservation {
+    return reservationRepository.findReservationById(id).orElseThrow(NoSuchReservation::new);
   }
 
   public Reservation save(Reservation reservation) throws ReservationClash {
@@ -42,6 +43,10 @@ public class ReservationService {
         new ReservationInfo(reservation.getDeskId(), reservation.getStart(), reservation.getEnd())))
       throw new ReservationClash();
     return reservationRepository.save(reservation);
+  }
+
+  public Reservation delete(String id) throws NoSuchReservation {
+    return reservationRepository.deleteReservationById(id).orElseThrow(NoSuchReservation::new);
   }
 
   public Optional<Reservation> nextReservation(String deskId, LocalDateTime timestamp) {
