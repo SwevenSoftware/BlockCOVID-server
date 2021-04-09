@@ -38,6 +38,10 @@ public class ModifyReservationController implements ReservationController {
   @ApiResponses({
     @ApiResponse(responseCode = "200", description = "Reservation successfully modified"),
     @ApiResponse(
+        responseCode = "401",
+        description = "User not authorized",
+        content = @Content(schema = @Schema(implementation = void.class))),
+    @ApiResponse(
         responseCode = "403",
         description = "Method not allowed",
         content = @Content(schema = @Schema(implementation = void.class))),
@@ -50,7 +54,7 @@ public class ModifyReservationController implements ReservationController {
         description = "Another reservation clashes with yours",
         content = @Content(schema = @Schema(implementation = void.class)))
   })
-  @PreAuthorize("#submitter.isUser()")
+  @PreAuthorize("#submitter.isUser() or #submitter.isAdmin()")
   public EntityModel<Reservation> modifyReservation(
       @Parameter(hidden = true) @AuthenticationPrincipal User submitter,
       @PathVariable String idReservation,
@@ -59,6 +63,8 @@ public class ModifyReservationController implements ReservationController {
         service
             .findById(idReservation)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    if (submitter.isUser() && !toModify.getUsername().equals(submitter.getUsername()))
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
     Optional.ofNullable(reservationInfo.getDeskId()).ifPresent(toModify::setDeskId);
     Optional.ofNullable(reservationInfo.getStart()).ifPresent(toModify::setStart);
     Optional.ofNullable(reservationInfo.getEnd()).ifPresent(toModify::setEnd);

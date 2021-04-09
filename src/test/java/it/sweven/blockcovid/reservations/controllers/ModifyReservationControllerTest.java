@@ -34,15 +34,19 @@ class ModifyReservationControllerTest {
 
   @Test
   void modifyReservation_validRequest() throws ReservationClash {
+    User user = mock(User.class);
+    when(user.isUser()).thenReturn(true);
+    when(user.getUsername()).thenReturn("username");
     ReservationInfo providedInfo =
         new ReservationInfo(
             "idDesk", LocalDateTime.now().plusMinutes(60), LocalDateTime.now().plusMinutes(120));
     Reservation fakeReservation = mock(Reservation.class);
+    when(fakeReservation.getUsername()).thenReturn("username");
     when(service.findById("idReservation")).thenReturn(Optional.of(fakeReservation));
     when(service.save(fakeReservation)).thenReturn(fakeReservation);
     assertEquals(
         fakeReservation,
-        controller.modifyReservation(mock(User.class), "idReservation", providedInfo).getContent());
+        controller.modifyReservation(user, "idReservation", providedInfo).getContent());
     verify(fakeReservation).setDeskId(providedInfo.getDeskId());
     verify(fakeReservation).setStart(providedInfo.getStart());
     verify(fakeReservation).setEnd(providedInfo.getEnd());
@@ -72,5 +76,20 @@ class ModifyReservationControllerTest {
                 controller.modifyReservation(
                     mock(User.class), "idReservation", mock(ReservationInfo.class)));
     assertEquals(thrown.getStatus(), HttpStatus.CONFLICT);
+  }
+
+  @Test
+  void modifyReservation_usernameDoesntMatch_throwsResponseStatusException() {
+    User user = mock(User.class);
+    when(user.isUser()).thenReturn(true);
+    when(user.getUsername()).thenReturn("username");
+    Reservation fakeReservation = mock(Reservation.class);
+    when(fakeReservation.getUsername()).thenReturn("another");
+    when(service.findById(anyString())).thenReturn(Optional.of(fakeReservation));
+    ResponseStatusException thrown =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> controller.modifyReservation(user, "idReservation", mock(ReservationInfo.class)));
+    assertEquals(thrown.getStatus(), HttpStatus.UNAUTHORIZED);
   }
 }
