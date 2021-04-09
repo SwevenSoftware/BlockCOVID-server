@@ -38,11 +38,11 @@ class ModifyDeskControllerTest {
   @Test
   void modifyDesk() {
     DeskModifyInfo providedInfo = new DeskModifyInfo(new DeskInfo(5, 10), new DeskInfo(8, 7));
-    Desk savedDesk = new Desk(5, 10, "roomName");
+    Desk savedDesk = new Desk("id1", 5, 10, "roomName");
     when(service.getDeskByInfoAndRoomName(providedInfo.getOldInfo(), "roomName"))
         .thenReturn(savedDesk);
     when(service.update(savedDesk)).thenReturn(savedDesk);
-    DeskWithRoomName expectedDesk = new DeskWithRoomName("roomName", 8, 7);
+    DeskWithRoomName expectedDesk = new DeskWithRoomName("roomName", "id1", 8, 7);
     assertEquals(
         expectedDesk,
         controller.modifyDesk(mock(User.class), "roomName", providedInfo).getContent());

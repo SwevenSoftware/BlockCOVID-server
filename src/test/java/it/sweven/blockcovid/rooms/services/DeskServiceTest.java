@@ -13,6 +13,7 @@ import it.sweven.blockcovid.rooms.exceptions.DeskNotAvailable;
 import it.sweven.blockcovid.rooms.exceptions.DeskNotFoundException;
 import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.rooms.repositories.DeskRepository;
+import it.sweven.blockcovid.rooms.repositories.RoomRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -22,15 +23,15 @@ import org.junit.jupiter.api.Test;
 class DeskServiceTest {
 
   private DeskRepository repository;
-  private RoomService roomService;
+  private RoomRepository roomRepository;
   private DeskService deskService;
 
   @BeforeEach
   void setUp() {
     repository = mock(DeskRepository.class);
     when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-    roomService = mock(RoomService.class);
-    deskService = new DeskService(repository, roomService);
+    roomRepository = mock(RoomRepository.class);
+    deskService = new DeskService(repository, roomRepository);
   }
 
   @Test
@@ -42,7 +43,7 @@ class DeskServiceTest {
     when(requestedRoom.getId()).thenReturn("roomId");
     when(requestedRoom.getWidth()).thenReturn(20);
     when(requestedRoom.getHeight()).thenReturn(50);
-    when(roomService.getByName("roomName")).thenReturn(requestedRoom);
+    when(roomRepository.findByName("roomName")).thenReturn(Optional.of(requestedRoom));
     when(repository.findByXAndYAndRoomId(any(), any(), any())).thenReturn(Optional.empty());
     assertEquals(new Desk(10, 35, "roomId"), deskService.addDesk(providedDesk, "roomName"));
   }
@@ -56,7 +57,7 @@ class DeskServiceTest {
     Room requestedRoom = mock(Room.class);
     when(requestedRoom.getWidth()).thenReturn(80);
     when(requestedRoom.getHeight()).thenReturn(5);
-    when(roomService.getByName("roomName")).thenReturn(requestedRoom);
+    when(roomRepository.findByName("roomName")).thenReturn(Optional.of(requestedRoom));
     assertThrows(
         IllegalArgumentException.class, () -> deskService.addDesk(providedDesk, "roomName"));
     when(requestedRoom.getWidth()).thenReturn(30);
@@ -73,7 +74,7 @@ class DeskServiceTest {
     Room requestedRoom = mock(Room.class);
     when(requestedRoom.getWidth()).thenReturn(30);
     when(requestedRoom.getHeight()).thenReturn(50);
-    when(roomService.getByName("roomName")).thenReturn(requestedRoom);
+    when(roomRepository.findByName("roomName")).thenReturn(Optional.of(requestedRoom));
     when(repository.findByXAndYAndRoomId(any(), any(), any()))
         .thenReturn(Optional.of(mock(Desk.class)));
     assertThrows(DeskNotAvailable.class, () -> deskService.addDesk(providedDesk, "roomName"));
@@ -83,7 +84,7 @@ class DeskServiceTest {
   void getDesksByRoom_validRoom() {
     Room associatedRoom = mock(Room.class);
     when(associatedRoom.getId()).thenReturn("roomId");
-    when(roomService.getByName("roomName")).thenReturn(associatedRoom);
+    when(roomRepository.findByName("roomName")).thenReturn(Optional.of(associatedRoom));
     List<Desk> expectedDesks = List.of(mock(Desk.class), mock(Desk.class));
     when(repository.findAllByRoomId("roomId")).thenReturn(expectedDesks);
     assertEquals(expectedDesks, deskService.getDesksByRoom("roomName"));
@@ -91,21 +92,21 @@ class DeskServiceTest {
 
   @Test
   void getDesksByRoom_invalidRoom_throwsRoomNotFoundException() {
-    when(roomService.getByName("roomName")).thenThrow(new RoomNotFoundException());
+    when(roomRepository.findByName("roomName")).thenReturn(Optional.empty());
     assertThrows(RoomNotFoundException.class, () -> deskService.getDesksByRoom("roomName"));
   }
 
   @Test
   void getDeskByInfosAndRoomName_valid() {
     Desk fakeDesk = mock(Desk.class);
-    when(roomService.getByName(anyString())).thenReturn(mock(Room.class));
+    when(roomRepository.findByName(anyString())).thenReturn(Optional.of(mock(Room.class)));
     when(repository.getByXAndYAndRoomId(any(), any(), any())).thenReturn(Optional.of(fakeDesk));
     assertEquals(fakeDesk, deskService.getDeskByInfoAndRoomName(mock(DeskInfo.class), "roomName"));
   }
 
   @Test
   void deleteRoomNotFound_ThrowsRoomNotFoundException() {
-    when(roomService.getByName(anyString())).thenThrow(new RoomNotFoundException());
+    when(roomRepository.findByName(anyString())).thenReturn(Optional.empty());
     assertThrows(
         RoomNotFoundException.class,
         () -> deskService.getDeskByInfoAndRoomName(mock(DeskInfo.class), "roomName"));
@@ -115,7 +116,7 @@ class DeskServiceTest {
   void deleteDeskNotFound_throwsDeskNotFoundException() {
     when(repository.getByXAndYAndRoomId(any(), any(), any()))
         .thenThrow(new DeskNotFoundException());
-    when(roomService.getByName(anyString())).thenReturn(mock(Room.class));
+    when(roomRepository.findByName(anyString())).thenReturn(Optional.of(mock(Room.class)));
     assertThrows(
         DeskNotFoundException.class,
         () -> deskService.getDeskByInfoAndRoomName(mock(DeskInfo.class), "roomName"));

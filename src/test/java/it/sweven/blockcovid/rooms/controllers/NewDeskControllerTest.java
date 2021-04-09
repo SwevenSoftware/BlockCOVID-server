@@ -47,9 +47,9 @@ class NewDeskControllerTest {
     when(deskService.addDesk(any(), eq("roomName"))).thenReturn(mock(Desk.class));
     List<DeskWithRoomName> expectedList =
         List.of(
-            new DeskWithRoomName("roomName", 5, 10),
-            new DeskWithRoomName("roomName", 11, 40),
-            new DeskWithRoomName("roomName", 1, 1));
+            new DeskWithRoomName("roomName", "id1", 5, 10),
+            new DeskWithRoomName("roomName", "id2", 11, 40),
+            new DeskWithRoomName("roomName", "id3", 1, 1));
     when(deskAssembler.toCollectionModel(any()))
         .thenAnswer(
             invocation ->
