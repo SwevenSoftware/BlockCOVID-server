@@ -7,7 +7,9 @@ import it.sweven.blockcovid.reservations.controllers.NewReservationController;
 import it.sweven.blockcovid.reservations.entities.Reservation;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ReservationAssembler
     implements RepresentationModelAssembler<Reservation, EntityModel<Reservation>> {
   @Override

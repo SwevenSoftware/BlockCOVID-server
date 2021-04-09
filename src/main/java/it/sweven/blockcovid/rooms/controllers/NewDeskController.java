@@ -8,10 +8,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.sweven.blockcovid.rooms.assemblers.DeskAssembler;
 import it.sweven.blockcovid.rooms.dto.DeskInfo;
 import it.sweven.blockcovid.rooms.dto.DeskWithRoomName;
+import it.sweven.blockcovid.rooms.entities.Desk;
 import it.sweven.blockcovid.rooms.exceptions.DeskNotAvailable;
 import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.rooms.services.DeskService;
 import it.sweven.blockcovid.users.entities.User;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
@@ -67,9 +70,10 @@ public class NewDeskController implements RoomsController {
       @PathVariable String nameRoom,
       @Parameter(hidden = true) @AuthenticationPrincipal User submitter,
       @Valid @NotNull @RequestBody Set<DeskInfo> newDesks) {
+    List<Desk> addedDesks = new ArrayList<>();
     for (DeskInfo desk : newDesks) {
       try {
-        deskService.addDesk(desk, nameRoom);
+        addedDesks.add(deskService.addDesk(desk, nameRoom));
       } catch (DeskNotAvailable e) {
         throw new ResponseStatusException(HttpStatus.CONFLICT);
       } catch (RoomNotFoundException e) {
@@ -81,8 +85,8 @@ public class NewDeskController implements RoomsController {
     return deskAssembler
         .setAuthorities(submitter.getAuthorities())
         .toCollectionModel(
-            newDesks.stream()
-                .map(d -> new DeskWithRoomName(nameRoom, d.getX(), d.getY()))
+            addedDesks.stream()
+                .map(d -> new DeskWithRoomName(nameRoom, d.getId(), d.getX(), d.getY()))
                 .collect(Collectors.toList()));
   }
 }

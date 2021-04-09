@@ -1,5 +1,6 @@
 package it.sweven.blockcovid.reservations.controllers;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -50,7 +51,8 @@ public class NewReservationController implements ReservationController {
   })
   @PreAuthorize("#submitter.isUser()")
   public EntityModel<Reservation> book(
-      @AuthenticationPrincipal User submitter, @RequestBody ReservationInfo reservationInfo) {
+      @Parameter(hidden = true) @AuthenticationPrincipal User submitter,
+      @RequestBody ReservationInfo reservationInfo) {
     if (reservationInfo.isValid()) {
       try {
         return reservationAssembler.toModel(

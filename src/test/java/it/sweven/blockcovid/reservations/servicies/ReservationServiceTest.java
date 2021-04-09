@@ -9,6 +9,7 @@ import it.sweven.blockcovid.reservations.entities.Reservation;
 import it.sweven.blockcovid.reservations.exceptions.ReservationClash;
 import it.sweven.blockcovid.reservations.repositories.ReservationRepository;
 import java.time.LocalDateTime;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -101,5 +102,38 @@ class ReservationServiceTest {
     when(repository.findReservationsByDeskIdAndEndIsBefore(any(), any()))
         .thenReturn(reservationStream2);
     assertThrows(ReservationClash.class, () -> service.addReservation(info, username));
+  }
+
+  @Test
+  void findIfTimeFallsInto_callsRepository() {
+    AtomicBoolean repositoryCalled = new AtomicBoolean(false);
+    when(repository.findReservationsByDeskIdAndStartIsBeforeAndEndIsAfter(any(), any(), any()))
+        .thenAnswer(
+            invocation -> {
+              LocalDateTime tmp = invocation.getArgument(1);
+              LocalDateTime tmp1 = invocation.getArgument(2);
+              assertEquals(tmp, tmp1);
+              repositoryCalled.set(true);
+              return null;
+            });
+    LocalDateTime fakeTime = LocalDateTime.MIN;
+    service.findIfTimeFallsInto("id", fakeTime);
+    assertTrue(repositoryCalled.get());
+  }
+
+  @Test
+  void nextReservationSortsAccordingToReservationComparable() {
+    Reservation fake1 = mock(Reservation.class);
+    Reservation fake2 = mock(Reservation.class);
+    when(fake1.compareTo(fake2)).thenReturn(-1);
+    when(fake2.compareTo(fake1)).thenReturn(1);
+    when(repository.findReservationsByDeskIdAndStartIsAfter(any(), any()))
+        .thenAnswer(
+            invocation -> {
+              assertEquals("id", invocation.getArgument(0));
+              assertEquals(LocalDateTime.MIN, invocation.getArgument(1));
+              return Stream.of(fake2, fake1);
+            });
+    assertEquals(fake1, service.nextReservation("id", LocalDateTime.MIN).get());
   }
 }

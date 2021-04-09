@@ -37,7 +37,7 @@ class DeleteDeskControllerTest {
     Desk fakeDesk = mock(Desk.class);
     when(fakeDesk.getId()).thenReturn("idFakeDesk");
     DeskInfo providedDeskInfo = mock(DeskInfo.class);
-    DeskWithRoomName expected = new DeskWithRoomName("room", null, null);
+    DeskWithRoomName expected = new DeskWithRoomName("room", "id1", null, null);
     when(deskService.getDeskByInfoAndRoomName(providedDeskInfo, "room")).thenReturn(fakeDesk);
     when(deskService.deleteDeskById("idFakeDesk")).thenReturn(fakeDesk);
     assertEquals(

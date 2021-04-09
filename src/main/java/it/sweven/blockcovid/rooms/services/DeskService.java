@@ -7,22 +7,24 @@ import it.sweven.blockcovid.rooms.exceptions.DeskNotAvailable;
 import it.sweven.blockcovid.rooms.exceptions.DeskNotFoundException;
 import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.rooms.repositories.DeskRepository;
+import it.sweven.blockcovid.rooms.repositories.RoomRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DeskService {
   private final DeskRepository deskRepository;
-  private final RoomService roomService;
+  private final RoomRepository roomRepository;
 
-  public DeskService(DeskRepository deskRepository, RoomService roomService) {
+  public DeskService(DeskRepository deskRepository, RoomRepository roomRepository) {
     this.deskRepository = deskRepository;
-    this.roomService = roomService;
+    this.roomRepository = roomRepository;
   }
 
   public Desk addDesk(DeskInfo desk, String roomName)
       throws DeskNotAvailable, RoomNotFoundException {
-    Room associatedRoom = roomService.getByName(roomName);
+    Room associatedRoom =
+        roomRepository.findByName(roomName).orElseThrow(RoomNotFoundException::new);
     if (desk.getX() > associatedRoom.getWidth() || desk.getY() > associatedRoom.getHeight())
       throw new IllegalArgumentException("desk position greater than room size");
     if (deskRepository
@@ -36,19 +38,27 @@ public class DeskService {
     return deskRepository.save(desk);
   }
 
-  public List<Desk> getDesksByRoom(String roomName) {
-    String roomId = roomService.getByName(roomName).getId();
+  public List<Desk> getDesksByRoom(String roomName) throws RoomNotFoundException {
+    String roomId =
+        roomRepository.findByName(roomName).orElseThrow(RoomNotFoundException::new).getId();
     return deskRepository.findAllByRoomId(roomId);
   }
 
   public Desk getDeskByInfoAndRoomName(DeskInfo infos, String roomName)
       throws RoomNotFoundException, DeskNotFoundException {
     return deskRepository
-        .getByXAndYAndRoomId(infos.getX(), infos.getY(), roomService.getByName(roomName).getId())
+        .getByXAndYAndRoomId(
+            infos.getX(),
+            infos.getY(),
+            roomRepository.findByName(roomName).orElseThrow(RoomNotFoundException::new).getId())
         .orElseThrow(DeskNotFoundException::new);
   }
 
   public Desk deleteDeskById(String id) throws DeskNotFoundException {
     return deskRepository.deleteById(id).orElseThrow(DeskNotFoundException::new);
+  }
+
+  public Desk getDeskById(String deskId) throws DeskNotFoundException {
+    return deskRepository.findById(deskId).orElseThrow(DeskNotFoundException::new);
   }
 }
