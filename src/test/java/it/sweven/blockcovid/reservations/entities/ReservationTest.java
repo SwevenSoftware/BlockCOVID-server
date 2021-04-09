@@ -9,23 +9,23 @@ class ReservationTest {
   @Test
   void persistenceConstructionShouldSetTheId() {
     Reservation fakeRes =
-        new Reservation(100L, "deskId", "username", LocalDateTime.MIN, LocalDateTime.MAX);
-    assertEquals(100L, fakeRes.getId());
+        new Reservation("id1", "deskId", "username", LocalDateTime.MIN, LocalDateTime.MAX);
+    assertEquals("id1", fakeRes.getId());
   }
 
   @Test
   void comparisonIsDoneOnTheStartingTIme() {
     Reservation fakeRes1 =
         new Reservation(
-            100L, "deskId", "username", LocalDateTime.MIN.plusMinutes(5), LocalDateTime.MAX);
+            "id1", "deskId", "username", LocalDateTime.MIN.plusMinutes(5), LocalDateTime.MAX);
     Reservation fakeRes2 =
         new Reservation(
-            100L, "deskId", "username", LocalDateTime.MIN.plusMinutes(10), LocalDateTime.MAX);
+            "id1", "deskId", "username", LocalDateTime.MIN.plusMinutes(10), LocalDateTime.MAX);
     Reservation fakeRes3 =
-        new Reservation(100L, "deskId", "username", LocalDateTime.MIN, LocalDateTime.MAX);
+        new Reservation("id1", "deskId", "username", LocalDateTime.MIN, LocalDateTime.MAX);
     Reservation fakeRes4 =
         new Reservation(
-            100L,
+            "id1",
             "deskId",
             "username",
             LocalDateTime.MIN.plusMinutes(10),
