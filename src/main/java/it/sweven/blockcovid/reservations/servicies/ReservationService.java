@@ -20,18 +20,7 @@ public class ReservationService {
 
   public Reservation addReservation(ReservationInfo reservationInfo, String username)
       throws ReservationClash {
-    if (reservationRepository
-            .findReservationsByDeskIdAndStartIsAfter(
-                reservationInfo.getDeskId(), reservationInfo.getStart())
-            .parallel()
-            .anyMatch(reservation -> reservationInfo.getEnd().isAfter(reservation.getStart()))
-        || reservationRepository
-            .findReservationsByDeskIdAndEndIsBefore(
-                reservationInfo.getDeskId(), reservationInfo.getEnd())
-            .parallel()
-            .anyMatch(reservation -> reservationInfo.getStart().isBefore(reservation.getEnd())))
-      throw new ReservationClash();
-    return reservationRepository.save(
+    return save(
         new Reservation(
             reservationInfo.getDeskId(),
             username,
@@ -44,10 +33,34 @@ public class ReservationService {
         deskId, timestamp, timestamp);
   }
 
+  public Optional<Reservation> findById(String id) {
+    return reservationRepository.findReservationById(id);
+  }
+
+  public Reservation save(Reservation reservation) throws ReservationClash {
+    if (reservationConflict(
+        new ReservationInfo(reservation.getDeskId(), reservation.getStart(), reservation.getEnd())))
+      throw new ReservationClash();
+    return reservationRepository.save(reservation);
+  }
+
   public Optional<Reservation> nextReservation(String deskId, LocalDateTime timestamp) {
     return reservationRepository
         .findReservationsByDeskIdAndStartIsAfter(deskId, timestamp)
         .sorted()
         .findFirst();
+  }
+
+  private boolean reservationConflict(ReservationInfo reservationInfo) {
+    return reservationRepository
+            .findReservationsByDeskIdAndStartIsAfter(
+                reservationInfo.getDeskId(), reservationInfo.getStart())
+            .parallel()
+            .anyMatch(reservation -> reservationInfo.getEnd().isAfter(reservation.getStart()))
+        || reservationRepository
+            .findReservationsByDeskIdAndEndIsBefore(
+                reservationInfo.getDeskId(), reservationInfo.getEnd())
+            .parallel()
+            .anyMatch(reservation -> reservationInfo.getStart().isBefore(reservation.getEnd()));
   }
 }
