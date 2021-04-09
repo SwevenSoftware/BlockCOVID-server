@@ -4,6 +4,8 @@ import it.sweven.blockcovid.reservations.dto.ReservationInfo;
 import it.sweven.blockcovid.reservations.entities.Reservation;
 import it.sweven.blockcovid.reservations.exceptions.ReservationClash;
 import it.sweven.blockcovid.reservations.repositories.ReservationRepository;
+import java.time.LocalDateTime;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,5 +37,17 @@ public class ReservationService {
             username,
             reservationInfo.getStart(),
             reservationInfo.getEnd()));
+  }
+
+  public Optional<Reservation> findIfTimeFallsInto(String deskId, LocalDateTime timestamp) {
+    return reservationRepository.findReservationsByDeskIdAndStartIsBeforeAndEndIsAfter(
+        deskId, timestamp, timestamp);
+  }
+
+  public Optional<Reservation> nextReservation(String deskId, LocalDateTime timestamp) {
+    return reservationRepository
+        .findReservationsByDeskIdAndStartIsAfter(deskId, timestamp)
+        .sorted()
+        .findFirst();
   }
 }

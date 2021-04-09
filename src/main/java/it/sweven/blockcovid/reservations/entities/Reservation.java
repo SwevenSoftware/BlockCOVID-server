@@ -9,7 +9,7 @@ import org.springframework.data.annotation.PersistenceConstructor;
 
 @Getter
 @Setter
-public class Reservation {
+public class Reservation implements Comparable<Reservation> {
   @Id
   @Setter(value = AccessLevel.NONE)
   private Long id;
@@ -31,5 +31,10 @@ public class Reservation {
     this.username = username;
     this.start = start;
     this.end = end;
+  }
+
+  @Override
+  public int compareTo(Reservation other) {
+    return start.compareTo(other.getStart());
   }
 }
