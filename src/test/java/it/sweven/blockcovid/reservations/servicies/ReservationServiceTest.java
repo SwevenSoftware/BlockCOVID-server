@@ -6,9 +6,11 @@ import static org.mockito.Mockito.*;
 
 import it.sweven.blockcovid.reservations.dto.ReservationInfo;
 import it.sweven.blockcovid.reservations.entities.Reservation;
+import it.sweven.blockcovid.reservations.exceptions.NoSuchReservation;
 import it.sweven.blockcovid.reservations.exceptions.ReservationClash;
 import it.sweven.blockcovid.reservations.repositories.ReservationRepository;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -135,5 +137,65 @@ class ReservationServiceTest {
               return Stream.of(fake2, fake1);
             });
     assertEquals(fake1, service.nextReservation("id", LocalDateTime.MIN).get());
+  }
+
+  @Test
+  void findById() {
+    Reservation expectedReservation = mock(Reservation.class);
+    when(repository.findReservationById("idReservation"))
+        .thenReturn(Optional.of(expectedReservation));
+    assertEquals(expectedReservation, service.findById("idReservation"));
+  }
+
+  @Test
+  void save_validUpdate() throws ReservationClash {
+    Reservation expectedReservation = mock(Reservation.class);
+    when(repository.save(expectedReservation)).thenReturn(expectedReservation);
+    assertEquals(expectedReservation, service.save(expectedReservation));
+  }
+
+  @Test
+  void save_endConflict_throwsReservationClash() {
+    Reservation providedReservation =
+        new Reservation(
+            "idDesk",
+            "username",
+            LocalDateTime.now().plusMinutes(60),
+            LocalDateTime.now().plusMinutes(120));
+    Reservation conflictReservation = mock(Reservation.class);
+    when(conflictReservation.getStart()).thenReturn(LocalDateTime.now().plusMinutes(90));
+    when(repository.findReservationsByDeskIdAndStartIsAfter(
+            "idDesk", providedReservation.getStart()))
+        .thenReturn(Stream.of(conflictReservation));
+    assertThrows(ReservationClash.class, () -> service.save(providedReservation));
+  }
+
+  @Test
+  void save_startConflict_throwsReservationClash() {
+    Reservation providedReservation =
+        new Reservation(
+            "idDesk",
+            "username",
+            LocalDateTime.now().plusMinutes(60),
+            LocalDateTime.now().plusMinutes(120));
+    Reservation conflictReservation = mock(Reservation.class);
+    when(conflictReservation.getEnd()).thenReturn(LocalDateTime.now().plusMinutes(90));
+    when(repository.findReservationsByDeskIdAndEndIsBefore("idDesk", providedReservation.getEnd()))
+        .thenReturn(Stream.of(conflictReservation));
+    assertThrows(ReservationClash.class, () -> service.save(providedReservation));
+  }
+
+  @Test
+  void delete_validId() {
+    Reservation expectedReservation = mock(Reservation.class);
+    when(repository.deleteReservationById("idReservation"))
+        .thenReturn(Optional.of(expectedReservation));
+    assertEquals(expectedReservation, service.delete("idReservation"));
+  }
+
+  @Test
+  void delete_idNotFound_throwsNoSuchReservation() {
+    when(repository.deleteReservationById(anyString())).thenReturn(Optional.empty());
+    assertThrows(NoSuchReservation.class, () -> service.delete("idReservation"));
   }
 }
