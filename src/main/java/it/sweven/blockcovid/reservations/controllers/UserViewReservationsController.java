@@ -1,5 +1,6 @@
 package it.sweven.blockcovid.reservations.controllers;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -52,7 +53,8 @@ public class UserViewReservationsController implements ReservationController {
   @ResponseBody
   @PreAuthorize("#submitter.isUser() and #submitter.isEnabled()")
   public CollectionModel<EntityModel<Reservation>> viewAll(
-      @AuthenticationPrincipal User submitter, @RequestParam("from") LocalDateTime timestamp) {
+      @Parameter(hidden = true) @AuthenticationPrincipal User submitter,
+      @RequestParam("from") LocalDateTime timestamp) {
     return assembler.toCollectionModel(
         service.findByUsernameAndStart(submitter.getUsername(), timestamp));
   }
