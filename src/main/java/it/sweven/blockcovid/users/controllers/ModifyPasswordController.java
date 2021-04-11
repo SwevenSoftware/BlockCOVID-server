@@ -12,7 +12,9 @@ import it.sweven.blockcovid.users.services.UserService;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -48,7 +50,11 @@ public class ModifyPasswordController implements AccountController {
   public EntityModel<User> modifyPassword(
       @Parameter(hidden = true) @AuthenticationPrincipal User user,
       @RequestBody @Valid CredentialChangeRequestForm requestForm) {
-    userService.updatePassword(user, requestForm.getOldPassword(), requestForm.getNewPassword());
+    try {
+      userService.updatePassword(user, requestForm.getOldPassword(), requestForm.getNewPassword());
+    } catch (BadCredentialsException exception) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong or missing credentials");
+    }
     return assembler.setAuthorities(user.getAuthorities()).toModel(user);
   }
 }
