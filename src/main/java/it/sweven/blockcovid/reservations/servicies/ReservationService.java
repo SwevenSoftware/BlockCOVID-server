@@ -8,6 +8,7 @@ import it.sweven.blockcovid.reservations.repositories.ReservationRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -77,5 +78,12 @@ public class ReservationService {
         .findReservationByUsernameAndStartIsBeforeAndEndIsAfter(username, start, start)
         .ifPresent(reservation -> allFutureReservations.add(0, reservation));
     return allFutureReservations;
+  }
+
+  public List<Reservation> findByTimeInterval(LocalDateTime start, LocalDateTime end) {
+    return reservationRepository
+        .findReservationByStartIsGreaterThanEqual(start)
+        .filter(r -> !r.getStart().isAfter(end))
+        .collect(Collectors.toList());
   }
 }

@@ -3,12 +3,12 @@ package it.sweven.blockcovid.rooms.controllers;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.sweven.blockcovid.rooms.entities.Desk;
-import it.sweven.blockcovid.rooms.entities.Status;
 import it.sweven.blockcovid.rooms.exceptions.DeskNotFoundException;
 import it.sweven.blockcovid.rooms.services.DeskService;
 import it.sweven.blockcovid.users.entities.User;
@@ -44,13 +44,13 @@ public class ViewDeskStateController implements RoomsController {
         content = @Content(schema = @Schema(implementation = void.class)))
   })
   @PreAuthorize("#submitter.isEnabled() and #submitter.isUser() or #submitter.isAdmin()")
-  public EntityModel<Status> deskState(
-      @AuthenticationPrincipal User submitter, @PathVariable String deskId) {
+  public EntityModel<Desk> deskState(
+      @Parameter(hidden = true) @AuthenticationPrincipal User submitter,
+      @PathVariable String deskId) {
     try {
-      Desk toReturn = deskService.getDeskById(deskId);
       return EntityModel.of(
-          toReturn.getDeskStatus(),
-          linkTo(methodOn(this.getClass()).deskState(null, null)).withRel("self"));
+          deskService.getDeskById(deskId),
+          linkTo(methodOn(this.getClass()).deskState(null, deskId)).withRel("self"));
     } catch (DeskNotFoundException exception) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No desk found with such ID");
     }

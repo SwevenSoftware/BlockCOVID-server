@@ -43,7 +43,7 @@ class NewDeskControllerTest {
   @Test
   void addDesk_validRequest() throws DeskNotAvailable {
     Set<DeskInfo> providedDesks =
-        Set.of(new DeskInfo(5, 10), new DeskInfo(11, 40), new DeskInfo(1, 1));
+        Set.of(new DeskInfo("id1", 5, 10), new DeskInfo("id2", 11, 40), new DeskInfo("id3", 1, 1));
     when(deskService.addDesk(any(), eq("roomName"))).thenReturn(mock(Desk.class));
     List<DeskWithRoomName> expectedList =
         List.of(

@@ -34,7 +34,7 @@ public class NewReservationController implements ReservationController {
     this.reservationAssembler = reservationAssembler;
   }
 
-  @PostMapping("new")
+  @PostMapping("reservation")
   @ApiResponses({
     @ApiResponse(responseCode = "200", description = "reservation successfully made"),
     @ApiResponse(

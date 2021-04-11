@@ -10,7 +10,6 @@ import it.sweven.blockcovid.reservations.entities.Reservation;
 import it.sweven.blockcovid.reservations.servicies.ReservationService;
 import it.sweven.blockcovid.users.entities.User;
 import java.time.LocalDateTime;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,41 +20,35 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class UserViewReservationsController implements ReservationController {
+public class ViewAllReservationsController implements ReservationController {
   private final ReservationService service;
   private final ReservationAssembler assembler;
 
-  @Autowired
-  public UserViewReservationsController(
-      ReservationService service, ReservationAssembler assembler) {
+  public ViewAllReservationsController(ReservationService service, ReservationAssembler assembler) {
     this.service = service;
     this.assembler = assembler;
   }
 
-  @GetMapping("view")
+  @GetMapping("view/all")
   @ApiResponses({
     @ApiResponse(
         responseCode = "200",
-        description = "successfully retrieved all future reservations of user"),
+        description = "Successfully retrieved all reservation between 'from' and 'to' (included)"),
     @ApiResponse(
         responseCode = "400",
-        description = "time incorrectly formatted",
+        description = "Time incorrectly formatted",
         content = @Content(schema = @Schema(implementation = void.class))),
     @ApiResponse(
         responseCode = "403",
         description = "Method not allowed",
-        content = @Content(schema = @Schema(implementation = void.class))),
-    @ApiResponse(
-        responseCode = "401",
-        description = "User not authenticated",
         content = @Content(schema = @Schema(implementation = void.class)))
   })
   @ResponseBody
-  @PreAuthorize("#submitter.isUser() and #submitter.isEnabled()")
+  @PreAuthorize("#submitter.isAdmin() and #submitter.isEnabled()")
   public CollectionModel<EntityModel<Reservation>> viewAll(
       @Parameter(hidden = true) @AuthenticationPrincipal User submitter,
-      @RequestParam("from") LocalDateTime timestamp) {
-    return assembler.toCollectionModel(
-        service.findByUsernameAndStart(submitter.getUsername(), timestamp));
+      @RequestParam("from") LocalDateTime start,
+      @RequestParam("to") LocalDateTime end) {
+    return assembler.toCollectionModel(service.findByTimeInterval(start, end));
   }
 }

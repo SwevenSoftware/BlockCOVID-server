@@ -32,7 +32,7 @@ public class ModifyReservationController implements ReservationController {
     this.assembler = assembler;
   }
 
-  @PutMapping("{idReservation}")
+  @PutMapping("reservation/{idReservation}")
   @ApiResponses({
     @ApiResponse(responseCode = "200", description = "Reservation successfully modified"),
     @ApiResponse(

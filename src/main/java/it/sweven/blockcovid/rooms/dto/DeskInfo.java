@@ -6,5 +6,6 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class DeskInfo {
+  private final String id;
   private final Integer x, y;
 }
