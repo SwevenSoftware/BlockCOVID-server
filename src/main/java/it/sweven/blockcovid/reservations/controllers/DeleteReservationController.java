@@ -55,7 +55,7 @@ public class DeleteReservationController implements ReservationController {
       @PathVariable String idReservation) {
     try {
       Reservation toDelete = service.findById(idReservation);
-      if (!toDelete.getUsername().equals(submitter.getUsername()))
+      if (submitter.isUser() && !toDelete.getUsername().equals(submitter.getUsername()))
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
       return assembler.toModel(service.delete(idReservation));
     } catch (NoSuchReservation e) {

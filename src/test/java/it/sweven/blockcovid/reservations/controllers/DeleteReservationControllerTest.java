@@ -67,4 +67,17 @@ class DeleteReservationControllerTest {
             () -> controller.deleteReservation(user, "idReservation"));
     assertEquals(thrown.getStatus(), HttpStatus.UNAUTHORIZED);
   }
+
+  @Test
+  void deleteReservation_adminCanDeleteEverything() {
+    User user = mock(User.class);
+    when(user.isUser()).thenReturn(false);
+    when(user.getUsername()).thenReturn("admin");
+    Reservation fakeReservation = mock(Reservation.class);
+    when(fakeReservation.getUsername()).thenReturn("username");
+    when(service.findById("idReservation")).thenReturn(fakeReservation);
+    when(service.delete("idReservation")).thenReturn(fakeReservation);
+    assertEquals(fakeReservation, controller.deleteReservation(user, "idReservation").getContent());
+    verify(service).delete("idReservation");
+  }
 }
