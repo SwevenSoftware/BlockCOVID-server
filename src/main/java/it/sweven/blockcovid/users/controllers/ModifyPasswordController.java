@@ -1,10 +1,12 @@
 package it.sweven.blockcovid.users.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import it.sweven.blockcovid.users.assemblers.UserAssembler;
 import it.sweven.blockcovid.users.dto.CredentialChangeRequestForm;
 import it.sweven.blockcovid.users.entities.User;
@@ -46,6 +48,7 @@ public class ModifyPasswordController implements AccountController {
         description = "Invalid authentication token",
         content = @Content(schema = @Schema(implementation = ResponseStatusException.class)))
   })
+  @Operation(security = @SecurityRequirement(name = "bearer"))
   @PreAuthorize("#user.isEnabled()")
   public EntityModel<User> modifyPassword(
       @Parameter(hidden = true) @AuthenticationPrincipal User user,
