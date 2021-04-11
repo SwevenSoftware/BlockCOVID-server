@@ -18,10 +18,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
@@ -55,6 +52,7 @@ public class ModifyReservationController implements ReservationController {
         description = "Another reservation clashes with yours",
         content = @Content(schema = @Schema(implementation = void.class)))
   })
+  @ResponseBody
   @PreAuthorize("#submitter.isUser() or #submitter.isAdmin()")
   public EntityModel<Reservation> modifyReservation(
       @Parameter(hidden = true) @AuthenticationPrincipal User submitter,

@@ -1,12 +1,12 @@
 package it.sweven.blockcovid.reservations.controllers;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import it.sweven.blockcovid.reservations.dto.DeskAvailability;
 import it.sweven.blockcovid.reservations.servicies.ReservationService;
 import it.sweven.blockcovid.users.entities.User;
 import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicReference;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,8 +26,8 @@ public class GetDeskStateAtTimeController implements ReservationController {
   @GetMapping("desk/{deskId}/{timestamp}")
   @PreAuthorize("#submitter.isEnabled() and #submitter.isUser() or #submitter.isAdmin()")
   public EntityModel<DeskAvailability> getDeskState(
-      @AuthenticationPrincipal User submitter,
-      @PathVariable @DateTimeFormat(pattern = "yyyyMMdd'T'kkmm") LocalDateTime timestamp,
+      @Parameter(hidden = true) @AuthenticationPrincipal User submitter,
+      @PathVariable LocalDateTime timestamp,
       @PathVariable String deskId) {
     AtomicReference<DeskAvailability> toReturn = new AtomicReference<>();
     AtomicReference<LocalDateTime> next = new AtomicReference<>();
