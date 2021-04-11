@@ -18,6 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -49,6 +50,7 @@ public class NewReservationController implements ReservationController {
         description = "Another reservation clashes with yours",
         content = @Content(schema = @Schema(implementation = void.class)))
   })
+  @ResponseBody
   @PreAuthorize("#submitter.isUser()")
   public EntityModel<Reservation> book(
       @Parameter(hidden = true) @AuthenticationPrincipal User submitter,

@@ -6,6 +6,7 @@ import it.sweven.blockcovid.reservations.exceptions.NoSuchReservation;
 import it.sweven.blockcovid.reservations.exceptions.ReservationClash;
 import it.sweven.blockcovid.reservations.repositories.ReservationRepository;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -67,5 +68,14 @@ public class ReservationService {
                 reservationInfo.getDeskId(), reservationInfo.getEnd())
             .parallel()
             .anyMatch(reservation -> reservationInfo.getStart().isBefore(reservation.getEnd()));
+  }
+
+  public List<Reservation> findByUsernameAndStart(String username, LocalDateTime start) {
+    List<Reservation> allFutureReservations =
+        reservationRepository.findReservationsByUsernameAndStartIsAfter(username, start);
+    reservationRepository
+        .findReservationByUsernameAndStartIsBeforeAndEndIsAfter(username, start, start)
+        .ifPresent(reservation -> allFutureReservations.add(0, reservation));
+    return allFutureReservations;
   }
 }
