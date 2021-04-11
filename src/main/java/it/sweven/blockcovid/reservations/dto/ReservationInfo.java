@@ -3,6 +3,7 @@ package it.sweven.blockcovid.reservations.dto;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import net.minidev.json.annotate.JsonIgnore;
 
 @Getter
 @AllArgsConstructor
@@ -12,6 +13,7 @@ public class ReservationInfo implements Dto {
   private final LocalDateTime end;
 
   @Override
+  @JsonIgnore
   public boolean isValid() {
     return deskId != null && start != null && end != null && start.isBefore(end);
   }
