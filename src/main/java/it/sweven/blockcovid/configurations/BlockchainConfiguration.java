@@ -14,15 +14,19 @@ import org.web3j.tx.gas.DefaultGasProvider;
 @Configuration
 public class BlockchainConfiguration {
 
-  private String contract;
+  private final String contract, account, network;
 
   public BlockchainConfiguration(
-      @Value("${it.sweven.blockcovid.blockchain.contract}") String contract) {
+      @Value("${it.sweven.blockcovid.blockchain.contract}") String contract,
+      @Value("${it.sweven.blockcovid.blockchain.account}") String account,
+      @Value("${it.sweven.blockcovid.blockchain.network}") String network) {
     this.contract = contract;
+    this.account = account;
+    this.network = network;
   }
 
   @Bean
-  public Web3j connection(@Value("${it.sweven.blockcovid.blockchain.network}") String network) {
+  public Web3j connection() {
     return Web3j.build(
         new HttpService(Optional.ofNullable(network).orElse("http://127.0.0.1:8545")));
   }
@@ -33,9 +37,7 @@ public class BlockchainConfiguration {
   }
 
   @Bean
-  public Credentials accountCredentials(
-      @Value("${it.sweven.blockcovid.blockchain.account}") String account)
-      throws BlockchainAccountNotFound {
+  public Credentials accountCredentials() throws BlockchainAccountNotFound {
     return Credentials.create(
         Optional.ofNullable(account).orElseThrow(BlockchainAccountNotFound::new));
   }

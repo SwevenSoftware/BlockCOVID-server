@@ -8,6 +8,7 @@ import it.sweven.blockcovid.users.security.TokenAuthenticationFilter;
 import it.sweven.blockcovid.users.security.TokenAuthenticationProvider;
 import it.sweven.blockcovid.users.services.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,12 +39,16 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
   private final TokenAuthenticationProvider authenticationProvider;
   private final TokenService tokenService;
+  private final boolean sslEnabled;
 
   @Autowired
   WebSecurityConfiguration(
-      TokenAuthenticationProvider authenticationProvider, TokenService tokenService) {
+      TokenAuthenticationProvider authenticationProvider,
+      TokenService tokenService,
+      @Value("${server.ssl.enabled}") boolean sslEnabled) {
     this.authenticationProvider = authenticationProvider;
     this.tokenService = tokenService;
+    this.sslEnabled = sslEnabled;
   }
 
   @Override
@@ -70,10 +75,6 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         .anyRequest()
         .authenticated()
         .and()
-        .requiresChannel()
-        .anyRequest()
-        .requiresSecure()
-        .and()
         .csrf()
         .disable()
         .formLogin()
@@ -82,6 +83,10 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         .disable()
         .logout()
         .disable();
+
+    if (sslEnabled) {
+      http.requiresChannel().anyRequest().requiresSecure();
+    }
   }
 
   @Bean
