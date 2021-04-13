@@ -75,9 +75,10 @@ with
 sudo docker-compose down
 ```
 #### Standalone Application
-In this case an instance of mongodb and valid network credentials must be supplied.
+In this case an instance of mongodb and valid network credentials must be supplied trough environment variables, 
+for simplicity you can just source the `.env` file:
 ```shell
-./gradlew bootRun
+source .env && ./gradlew bootRun
 ```
 will start the application, in this case you handle both the mongodb instance and the interaction with the 
 blockchain network
