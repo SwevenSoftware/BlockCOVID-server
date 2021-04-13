@@ -26,9 +26,6 @@ services:
       - ${SERVER_PORT}:8091
     env_file:
       - .env
-    links:
-      - mongo
-      - ganache
     depends_on:
       - mongo
       - ganache
