@@ -23,37 +23,34 @@ requests are handled properly. **Without a valid keystore the server will fail t
 [CA](https://it.wikipedia.org/wiki/Certificate_authority) (such as [letsencrypt](https://letsencrypt.org/))
 
 #### Blockchain
-In order to save the hashes of generated reports on a blockchain netwokrk you need to:
+In order to save the hashes of generated reports on a blockchain network you need to:
 * Select a network to deploy your contract: you can simply use the provided *containered* solution and test the server
-  behavior trough *ganache*. Otherwise, there are a number of ethereum test network such as [Ropsten](https://faucet.ropsten.be/)
+  behavior trough *ganache*. Otherwise, there are a number of ethereum test network such as [Infura](https://infura.io/)
 
-* Open an account on that particular network 
+* Open an account on that particular network
 
-once you have such information compile the file `src/main/resources/aplpication.properties`.
-An example could be the following
-```properties
-server.ssl.key-store-type=PKCS12
-# Position of your keystore
-server.ssl.key-store=classpath:keystore/keystore.p12
-# Keystore password
-server.ssl.key-store-password=keystorePassword
-# Keystore alias
-server.ssl.key-alias=keystoreAlias
-# enabling ssl for requests and responses 
-server.ssl.enabled=true
-# Mongodb URI, enery mongodb instance exposes a URI for connections
-spring.data.mongodb.uri=mongodb://127.0.0.1:27017/blockcovid-test
-# The port of the application
-server.port=8091
-# This is your account private key on the network, the one provided here
-# is just an example
-it.sweven.blockcovid.blockchain.account=0xb43436657ed0d6b922f3e7fab75dc32c610796d374daa6d7f1878669ff79d0e5
-# the contract field can be void, in this case the application will 
-# deploy the contract on the provided network and save the new address 
-# in the database
-it.sweven.blockcovid.blockchain.contract=
-# The network the application should interface with
-it.sweven.blockcovid.blockchain.network=http://127.0.0.1:8545
+once you have such information compile the file `.env`.
+An example could be the following (also included in the project)
+```shell
+# The private key of your account on the network
+export BLOCKCHAIN_ACCOUNT=0xb43436657ed0d6b922f3e7fab75dc32c610796d374daa6d7f1878669ff79d0e5
+# The network to interface with
+export BLOCKCHAIN_NETWORK=http://ganache:8545
+# If you have already deployed the same contract for any reason you can specify 
+# its address here, otherwise a new contract will be deployed 
+export BLOCKCHAIN_CONTRACT=
+
+# the uri of the mongodb instance keeping all your data
+export MONGODB_URI=mongodb://mongo:27017/blockcovid-test
+# SSL certificate information
+export KEYSTORE_TYPE=
+export KEYSTORE=
+export KEYSTORE_PASSWORD=
+export KEYSTORE_ALIAS=
+export SSL_ENABLED=false
+# server port, this will only affect the container exposed port,
+# not he internal port
+export SERVER_PORT=8091
 ```
 
 ### Building
@@ -72,7 +69,7 @@ This way you can test the application with a container version of mongodb and ga
 sudo docker-compose build && \
 sudo docker-compose up
 ```
-this way the containers will be created and started. Eventually when the run ends you can dismantle the built containers 
+The containers will then be created and started. Eventually when the run ends you can dismantle the built containers 
 with
 ```shell
 sudo docker-compose down
