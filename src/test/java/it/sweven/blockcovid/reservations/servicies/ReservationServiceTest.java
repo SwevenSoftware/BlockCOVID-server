@@ -12,6 +12,7 @@ import it.sweven.blockcovid.reservations.repositories.ReservationRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
@@ -243,5 +244,50 @@ class ReservationServiceTest {
         .thenReturn(Optional.empty());
     assertEquals(
         Collections.emptyList(), service.findByUsernameAndStart("user", LocalDateTime.now()));
+  }
+
+  @Test
+  void findByTimeInterval_startBeforeEnd() {
+    LocalDateTime providedStart = LocalDateTime.now().plusMinutes(20),
+        providedEnd = LocalDateTime.now().plusMinutes(40);
+    Reservation mockReservation1 = mock(Reservation.class),
+        mockReservation2 = mock(Reservation.class),
+        mockReservation3 = mock(Reservation.class);
+    when(mockReservation1.getStart()).thenReturn(providedStart);
+    when(mockReservation2.getStart()).thenReturn(providedEnd);
+    when(mockReservation3.getStart()).thenReturn(providedStart.plusMinutes(40));
+    when(repository.findReservationByStartIsGreaterThanEqual(providedStart))
+        .thenReturn(Stream.of(mockReservation1, mockReservation2, mockReservation3));
+    assertEquals(
+        List.of(mockReservation1, mockReservation2),
+        service.findByTimeInterval(providedStart, providedEnd));
+  }
+
+  @Test
+  void findByTimeInterval_startAfterEnd_returnEmptyList() {
+    LocalDateTime providedStart = LocalDateTime.now().plusMinutes(20),
+        providedEnd = LocalDateTime.now().plusMinutes(10);
+    Reservation mockReservation1 = mock(Reservation.class),
+        mockReservation2 = mock(Reservation.class),
+        mockReservation3 = mock(Reservation.class);
+    when(mockReservation1.getStart()).thenReturn(providedStart);
+    when(mockReservation2.getStart()).thenReturn(providedStart.plusMinutes(20));
+    when(mockReservation3.getStart()).thenReturn(providedStart.plusMinutes(40));
+    when(repository.findReservationByStartIsGreaterThanEqual(providedStart))
+        .thenReturn(Stream.of(mockReservation1, mockReservation2, mockReservation3));
+    assertEquals(Collections.emptyList(), service.findByTimeInterval(providedStart, providedEnd));
+  }
+
+  @Test
+  void findByTimeInterval_startEqualsEnd() {
+    LocalDateTime providedStart = LocalDateTime.now().plusMinutes(20),
+        providedEnd = LocalDateTime.now().plusMinutes(20);
+    Reservation mockReservation1 = mock(Reservation.class),
+        mockReservation2 = mock(Reservation.class);
+    when(mockReservation1.getStart()).thenReturn(providedStart);
+    when(mockReservation2.getStart()).thenReturn(providedStart.plusMinutes(20));
+    when(repository.findReservationByStartIsGreaterThanEqual(providedStart))
+        .thenReturn(Stream.of(mockReservation1, mockReservation2));
+    assertEquals(List.of(mockReservation1), service.findByTimeInterval(providedStart, providedEnd));
   }
 }

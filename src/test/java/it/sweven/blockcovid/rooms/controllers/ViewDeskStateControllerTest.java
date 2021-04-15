@@ -6,7 +6,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import it.sweven.blockcovid.rooms.entities.Desk;
-import it.sweven.blockcovid.rooms.entities.Status;
 import it.sweven.blockcovid.rooms.exceptions.DeskNotFoundException;
 import it.sweven.blockcovid.rooms.services.DeskService;
 import it.sweven.blockcovid.users.entities.User;
@@ -29,10 +28,9 @@ class ViewDeskStateControllerTest {
   @Test
   void validRequest() {
     Desk fakeDesk = mock(Desk.class);
-    when(fakeDesk.getDeskStatus()).thenReturn(Status.CLEAN);
     when(deskService.getDeskById(any())).thenReturn(fakeDesk);
-    EntityModel<Status> returned = controller.deskState(mock(User.class), "id");
-    assertEquals(Status.CLEAN, returned.getContent());
+    EntityModel<Desk> returned = controller.deskState(mock(User.class), "id");
+    assertEquals(fakeDesk, returned.getContent());
     assertTrue(returned.getLinks().hasLink("self"));
   }
 

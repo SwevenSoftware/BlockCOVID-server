@@ -17,8 +17,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 
-class UserViewReservationsControllerTest {
-  private UserViewReservationsController controller;
+class ViewPersonalReservationsControllerTest {
+  private ViewPersonalReservationsController controller;
   private ReservationService service;
   private ReservationAssembler assembler;
 
@@ -26,7 +26,7 @@ class UserViewReservationsControllerTest {
   void setUp() {
     service = mock(ReservationService.class);
     assembler = mock(ReservationAssembler.class);
-    controller = new UserViewReservationsController(service, assembler);
+    controller = new ViewPersonalReservationsController(service, assembler);
   }
 
   @Test

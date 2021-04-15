@@ -24,4 +24,6 @@ public interface ReservationRepository extends MongoRepository<Reservation, Long
 
   Optional<Reservation> findReservationByUsernameAndStartIsBeforeAndEndIsAfter(
       String username, LocalDateTime start, LocalDateTime end);
+
+  Stream<Reservation> findReservationByStartIsGreaterThanEqual(LocalDateTime start);
 }

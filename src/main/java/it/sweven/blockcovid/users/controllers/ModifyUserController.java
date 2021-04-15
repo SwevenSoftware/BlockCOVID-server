@@ -60,8 +60,8 @@ public class ModifyUserController implements UsersController {
   })
   @PreAuthorize("#submitter.isAdmin()")
   public EntityModel<User> modifyUser(
-      @AuthenticationPrincipal User submitter,
-      @Parameter(hidden = true) @PathVariable String username,
+      @Parameter(hidden = true) @AuthenticationPrincipal User submitter,
+      @PathVariable String username,
       @Valid @RequestBody CredentialsWithAuthorities newCredentials) {
     User user;
     try {

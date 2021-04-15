@@ -47,7 +47,7 @@ class ViewRoomControllerTest {
         new RoomWithDesks(
             expectedRoom,
             expectedDesks.stream()
-                .map(d -> new DeskInfo(d.getX(), d.getY()))
+                .map(d -> new DeskInfo(d.getId(), d.getX(), d.getY()))
                 .collect(Collectors.toList()));
     EntityModel<RoomWithDesks> expectedEntityModel = EntityModel.of(expectedRoomWithRoom);
     when(assembler.toModel(any())).thenReturn(expectedEntityModel);

@@ -1,6 +1,7 @@
 package it.sweven.blockcovid.rooms.services;
 
 import it.sweven.blockcovid.rooms.dto.DeskInfo;
+import it.sweven.blockcovid.rooms.dto.NewDeskInfo;
 import it.sweven.blockcovid.rooms.entities.Desk;
 import it.sweven.blockcovid.rooms.entities.Room;
 import it.sweven.blockcovid.rooms.exceptions.DeskNotAvailable;
@@ -21,7 +22,7 @@ public class DeskService {
     this.roomRepository = roomRepository;
   }
 
-  public Desk addDesk(DeskInfo desk, String roomName)
+  public Desk addDesk(NewDeskInfo desk, String roomName)
       throws DeskNotAvailable, RoomNotFoundException {
     Room associatedRoom =
         roomRepository.findByName(roomName).orElseThrow(RoomNotFoundException::new);

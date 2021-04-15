@@ -61,7 +61,7 @@ public class ViewRoomController implements RoomsController {
     }
     List<DeskInfo> associatedDesks =
         deskService.getDesksByRoom(roomName).stream()
-            .map(d -> new DeskInfo(d.getX(), d.getY()))
+            .map(d -> new DeskInfo(d.getId(), d.getX(), d.getY()))
             .collect(Collectors.toList());
     return assembler.toModel(new RoomWithDesks(requestedRoom, associatedDesks));
   }

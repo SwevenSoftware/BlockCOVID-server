@@ -39,6 +39,7 @@ public class ReservationAssembler
             .collect(Collectors.toList());
     return CollectionModel.of(
         entityModels,
-        linkTo(methodOn(UserViewReservationsController.class).viewAll(null, null)).withSelfRel());
+        linkTo(methodOn(ViewPersonalReservationsController.class).viewAll(null, null))
+            .withSelfRel());
   }
 }

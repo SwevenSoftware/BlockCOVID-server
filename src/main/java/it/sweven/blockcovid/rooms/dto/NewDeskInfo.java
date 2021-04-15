@@ -5,7 +5,6 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class DeskInfo {
-  private final String id;
+public class NewDeskInfo {
   private final Integer x, y;
 }

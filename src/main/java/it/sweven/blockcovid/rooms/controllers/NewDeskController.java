@@ -6,8 +6,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.sweven.blockcovid.rooms.assemblers.DeskAssembler;
-import it.sweven.blockcovid.rooms.dto.DeskInfo;
 import it.sweven.blockcovid.rooms.dto.DeskWithRoomName;
+import it.sweven.blockcovid.rooms.dto.NewDeskInfo;
 import it.sweven.blockcovid.rooms.entities.Desk;
 import it.sweven.blockcovid.rooms.exceptions.DeskNotAvailable;
 import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
@@ -69,9 +69,9 @@ public class NewDeskController implements RoomsController {
   public CollectionModel<EntityModel<DeskWithRoomName>> addDesk(
       @PathVariable String nameRoom,
       @Parameter(hidden = true) @AuthenticationPrincipal User submitter,
-      @Valid @NotNull @RequestBody Set<DeskInfo> newDesks) {
+      @Valid @NotNull @RequestBody Set<NewDeskInfo> newDesks) {
     List<Desk> addedDesks = new ArrayList<>();
-    for (DeskInfo desk : newDesks) {
+    for (NewDeskInfo desk : newDesks) {
       try {
         addedDesks.add(deskService.addDesk(desk, nameRoom));
       } catch (DeskNotAvailable e) {

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import it.sweven.blockcovid.rooms.dto.DeskInfo;
+import it.sweven.blockcovid.rooms.dto.NewDeskInfo;
 import it.sweven.blockcovid.rooms.entities.Desk;
 import it.sweven.blockcovid.rooms.entities.Room;
 import it.sweven.blockcovid.rooms.exceptions.DeskNotAvailable;
@@ -36,7 +37,7 @@ class DeskServiceTest {
 
   @Test
   void addDesk_validArguments() throws DeskNotAvailable {
-    DeskInfo providedDesk = mock(DeskInfo.class);
+    NewDeskInfo providedDesk = mock(NewDeskInfo.class);
     when(providedDesk.getX()).thenReturn(10);
     when(providedDesk.getY()).thenReturn(35);
     Room requestedRoom = mock(Room.class);
@@ -51,7 +52,7 @@ class DeskServiceTest {
   @Test
   void addDesk_deskPositionGreaterThanRoomSize_throwsIllegalArgumentException()
       throws DeskNotAvailable {
-    DeskInfo providedDesk = mock(DeskInfo.class);
+    NewDeskInfo providedDesk = mock(NewDeskInfo.class);
     when(providedDesk.getX()).thenReturn(40);
     when(providedDesk.getY()).thenReturn(10);
     Room requestedRoom = mock(Room.class);
@@ -68,7 +69,7 @@ class DeskServiceTest {
 
   @Test
   void addDesk_positionAlreadyInUse_throwsDeskNotAvailable() {
-    DeskInfo providedDesk = mock(DeskInfo.class);
+    NewDeskInfo providedDesk = mock(NewDeskInfo.class);
     when(providedDesk.getX()).thenReturn(20);
     when(providedDesk.getY()).thenReturn(10);
     Room requestedRoom = mock(Room.class);
