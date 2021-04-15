@@ -293,7 +293,8 @@ class ReservationServiceTest {
   }
 
   @Test
-  void reservationAfterClosginTime_throwsBadTimeInterval() {
+  void reservationAfterClosingTime_throwsBadTimeInterval() {
     when(fakeRoom.getClosingTime()).thenReturn(LocalTime.now().plusMinutes(15));
+    assertThrows(BadTimeIntervals.class, () -> service.addReservation(info, username));
   }
 }
