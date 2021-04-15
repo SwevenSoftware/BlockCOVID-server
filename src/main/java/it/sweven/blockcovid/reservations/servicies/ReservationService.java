@@ -2,9 +2,16 @@ package it.sweven.blockcovid.reservations.servicies;
 
 import it.sweven.blockcovid.reservations.dto.ReservationInfo;
 import it.sweven.blockcovid.reservations.entities.Reservation;
+import it.sweven.blockcovid.reservations.exceptions.BadTimeIntervals;
 import it.sweven.blockcovid.reservations.exceptions.NoSuchReservation;
 import it.sweven.blockcovid.reservations.exceptions.ReservationClash;
 import it.sweven.blockcovid.reservations.repositories.ReservationRepository;
+import it.sweven.blockcovid.rooms.entities.Desk;
+import it.sweven.blockcovid.rooms.entities.Room;
+import it.sweven.blockcovid.rooms.exceptions.DeskNotFoundException;
+import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
+import it.sweven.blockcovid.rooms.repositories.DeskRepository;
+import it.sweven.blockcovid.rooms.repositories.RoomRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -15,14 +22,30 @@ import org.springframework.stereotype.Service;
 @Service
 public class ReservationService {
   private final ReservationRepository reservationRepository;
+  private final RoomRepository roomRepository;
+  private final DeskRepository deskRepository;
 
   @Autowired
-  public ReservationService(ReservationRepository reservationRepository) {
+  public ReservationService(
+      ReservationRepository reservationRepository,
+      RoomRepository roomRepository,
+      DeskRepository deskRepository) {
     this.reservationRepository = reservationRepository;
+    this.roomRepository = roomRepository;
+    this.deskRepository = deskRepository;
   }
 
   public Reservation addReservation(ReservationInfo reservationInfo, String username)
-      throws ReservationClash {
+      throws ReservationClash, BadTimeIntervals, DeskNotFoundException, RoomNotFoundException {
+    Desk toBook =
+        deskRepository
+            .findById(reservationInfo.getDeskId())
+            .orElseThrow(DeskNotFoundException::new);
+    Room booked =
+        roomRepository.findById(toBook.getRoomId()).orElseThrow(RoomNotFoundException::new);
+    if (booked.getOpeningTime().isAfter(reservationInfo.getStart().toLocalTime())
+        || booked.getClosingTime().isBefore(reservationInfo.getEnd().toLocalTime()))
+      throw new BadTimeIntervals();
     return save(
         new Reservation(
             reservationInfo.getDeskId(),
@@ -41,9 +64,7 @@ public class ReservationService {
   }
 
   public Reservation save(Reservation reservation) throws ReservationClash {
-    if (reservationConflict(
-        new ReservationInfo(reservation.getDeskId(), reservation.getStart(), reservation.getEnd())))
-      throw new ReservationClash();
+    if (reservationConflict(reservation)) throw new ReservationClash();
     return reservationRepository.save(reservation);
   }
 
@@ -58,17 +79,17 @@ public class ReservationService {
         .findFirst();
   }
 
-  private boolean reservationConflict(ReservationInfo reservationInfo) {
+  private boolean reservationConflict(Reservation reservation) {
     return reservationRepository
             .findReservationsByDeskIdAndStartIsAfter(
-                reservationInfo.getDeskId(), reservationInfo.getStart())
+                reservation.getDeskId(), reservation.getStart())
             .parallel()
-            .anyMatch(reservation -> reservationInfo.getEnd().isAfter(reservation.getStart()))
+            .anyMatch(foundReservation -> reservation.getEnd().isAfter(foundReservation.getStart()))
         || reservationRepository
-            .findReservationsByDeskIdAndEndIsBefore(
-                reservationInfo.getDeskId(), reservationInfo.getEnd())
+            .findReservationsByDeskIdAndEndIsBefore(reservation.getDeskId(), reservation.getEnd())
             .parallel()
-            .anyMatch(reservation -> reservationInfo.getStart().isBefore(reservation.getEnd()));
+            .anyMatch(
+                foundReservation -> reservation.getStart().isBefore(foundReservation.getEnd()));
   }
 
   public List<Reservation> findByUsernameAndStart(String username, LocalDateTime start) {

@@ -5,13 +5,13 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 import it.sweven.blockcovid.users.security.TokenAuthenticationFilter;
-import it.sweven.blockcovid.users.security.TokenAuthenticationProvider;
 import it.sweven.blockcovid.users.services.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -37,13 +37,13 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
           new NegatedRequestMatcher(PROTECTED_URLS),
           new AntPathRequestMatcher("/api/account/login"));
 
-  private final TokenAuthenticationProvider authenticationProvider;
+  private final AbstractUserDetailsAuthenticationProvider authenticationProvider;
   private final TokenService tokenService;
   private final boolean sslEnabled;
 
   @Autowired
   WebSecurityConfiguration(
-      TokenAuthenticationProvider authenticationProvider,
+      AbstractUserDetailsAuthenticationProvider authenticationProvider,
       TokenService tokenService,
       @Value("${server.ssl.enabled}") boolean sslEnabled) {
     this.authenticationProvider = authenticationProvider;
