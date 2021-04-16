@@ -43,9 +43,8 @@ public class ReservationService {
             .orElseThrow(DeskNotFoundException::new);
     Room booked =
         roomRepository.findById(toBook.getRoomId()).orElseThrow(RoomNotFoundException::new);
-    if (booked.getOpeningTime().isAfter(reservationInfo.getStart().toLocalTime())
-        || booked.getClosingTime().isBefore(reservationInfo.getEnd().toLocalTime()))
-      throw new BadTimeIntervals();
+    if (!(booked.isRoomOpen(reservationInfo.getStart())
+        && booked.isRoomOpen(reservationInfo.getEnd()))) throw new BadTimeIntervals();
     return save(
         new Reservation(
             reservationInfo.getDeskId(),

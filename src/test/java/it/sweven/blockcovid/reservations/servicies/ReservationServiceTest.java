@@ -17,11 +17,7 @@ import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.rooms.repositories.DeskRepository;
 import it.sweven.blockcovid.rooms.repositories.RoomRepository;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,8 +38,7 @@ class ReservationServiceTest {
   void setUp() {
     reservationRepository = mock(ReservationRepository.class);
     fakeRoom = mock(Room.class);
-    when(fakeRoom.getOpeningTime()).thenReturn(LocalTime.now().minusHours(3));
-    when(fakeRoom.getClosingTime()).thenReturn(LocalTime.now().plusHours(3));
+    when(fakeRoom.isRoomOpen(any())).thenReturn(true);
 
     roomRepository = mock(RoomRepository.class);
     when(roomRepository.findById(any())).thenReturn(Optional.of(fakeRoom));
@@ -288,13 +283,14 @@ class ReservationServiceTest {
 
   @Test
   void reservationBeforeOpeningTime_throwsBadTimeInterval() {
-    when(fakeRoom.getOpeningTime()).thenReturn(LocalTime.now().plusMinutes(15));
+    when(fakeRoom.isRoomOpen(any())).thenReturn(false);
     assertThrows(BadTimeIntervals.class, () -> service.addReservation(info, username));
   }
 
   @Test
   void reservationAfterClosingTime_throwsBadTimeInterval() {
-    when(fakeRoom.getClosingTime()).thenReturn(LocalTime.now().plusMinutes(15));
+    when(fakeRoom.isRoomOpen(info.getStart())).thenReturn(true);
+    when(fakeRoom.isRoomOpen(info.getStart())).thenReturn(false);
     assertThrows(BadTimeIntervals.class, () -> service.addReservation(info, username));
   }
 }

@@ -2,6 +2,7 @@ package it.sweven.blockcovid.rooms.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.DayOfWeek;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Set;
 import lombok.*;
@@ -97,5 +98,13 @@ public class Room {
   public Status getRoomStatus() {
     if (roomStatus == null) return Status.DIRTY;
     return roomStatus;
+  }
+
+  @JsonIgnore
+  public boolean isRoomOpen(LocalDateTime timestamp) {
+    return closed
+        && openingDays.contains(timestamp.getDayOfWeek())
+        && !(openingTime.isBefore(timestamp.toLocalTime())
+            || closingTime.isAfter(timestamp.toLocalTime()));
   }
 }

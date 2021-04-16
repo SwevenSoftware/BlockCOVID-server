@@ -3,6 +3,7 @@ package it.sweven.blockcovid.rooms.entities;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.DayOfWeek;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collections;
 import java.util.Set;
@@ -170,5 +171,89 @@ class RoomTest {
             100,
             Status.CLEAN);
     assertEquals(Status.CLEAN, room.getRoomStatus());
+  }
+
+  @Test
+  void isRoomOpenCheckIfClosed() {
+    room =
+        new Room(
+            "idRoom",
+            "room",
+            true,
+            LocalTime.of(14, 0),
+            LocalTime.of(18, 0),
+            Set.of(DayOfWeek.MONDAY),
+            100,
+            100,
+            Status.CLEAN);
+    assertFalse(room.isRoomOpen(LocalDateTime.now()));
+  }
+
+  @Test
+  void isRoomOpenChecksOpeningDays() {
+    room =
+        new Room(
+            "idRoom",
+            "room",
+            true,
+            LocalTime.of(14, 0),
+            LocalTime.of(18, 0),
+            Set.of(DayOfWeek.MONDAY),
+            100,
+            100,
+            Status.CLEAN);
+    /* 2021-04-20T15.30 has valid time but it's tuesday */
+    assertFalse(room.isRoomOpen(LocalDateTime.of(2021, 4, 20, 15, 30)));
+  }
+
+  @Test
+  void isRoomOpenChecksOpeningTime() {
+    room =
+        new Room(
+            "idRoom",
+            "room",
+            true,
+            LocalTime.of(14, 0),
+            LocalTime.of(18, 0),
+            Set.of(DayOfWeek.MONDAY),
+            100,
+            100,
+            Status.CLEAN);
+    /* 2021-04-20T15.30 has valid time but it's tuesday */
+    assertFalse(room.isRoomOpen(LocalDateTime.of(2021, 4, 19, 12, 30)));
+  }
+
+  @Test
+  void isRoomOpenChecksClosingTime() {
+    room =
+        new Room(
+            "idRoom",
+            "room",
+            true,
+            LocalTime.of(14, 0),
+            LocalTime.of(18, 0),
+            Set.of(DayOfWeek.MONDAY),
+            100,
+            100,
+            Status.CLEAN);
+    /* 2021-04-20T15.30 has valid time but it's tuesday */
+    assertFalse(room.isRoomOpen(LocalDateTime.of(2021, 4, 19, 19, 30)));
+  }
+
+  @Test
+  void isRoomOpenRightAnswer() {
+    room =
+        new Room(
+            "idRoom",
+            "room",
+            true,
+            LocalTime.of(14, 0),
+            LocalTime.of(18, 0),
+            Set.of(DayOfWeek.MONDAY),
+            100,
+            100,
+            Status.CLEAN);
+    /* 2021-04-20T15.30 has valid time but it's tuesday */
+    assertFalse(room.isRoomOpen(LocalDateTime.of(2021, 4, 19, 15, 30)));
   }
 }
