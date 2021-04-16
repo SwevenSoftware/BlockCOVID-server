@@ -8,8 +8,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.sweven.blockcovid.reservations.assemblers.ReservationAssembler;
 import it.sweven.blockcovid.reservations.dto.ReservationInfo;
 import it.sweven.blockcovid.reservations.entities.Reservation;
+import it.sweven.blockcovid.reservations.exceptions.BadTimeIntervals;
 import it.sweven.blockcovid.reservations.exceptions.ReservationClash;
 import it.sweven.blockcovid.reservations.servicies.ReservationService;
+import it.sweven.blockcovid.rooms.exceptions.DeskNotFoundException;
+import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.users.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
@@ -55,13 +58,25 @@ public class NewReservationController implements ReservationController {
   public EntityModel<Reservation> book(
       @Parameter(hidden = true) @AuthenticationPrincipal User submitter,
       @RequestBody ReservationInfo reservationInfo) {
-    if (reservationInfo.isValid()) {
+    if (reservationInfo.getStart() != null
+        && reservationInfo.getEnd() != null
+        && reservationInfo.getDeskId() != null
+        && reservationInfo.getStart().isBefore(reservationInfo.getEnd())) {
       try {
         return reservationAssembler.toModel(
             reservationService.addReservation(reservationInfo, submitter.getUsername()));
       } catch (ReservationClash reservationClash) {
         throw new ResponseStatusException(
             HttpStatus.CONFLICT, "Another reservation for the same desk clashes with yours");
+      } catch (BadTimeIntervals badTimeIntervals) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            "Your reservation must be inside the room opening time interval");
+      } catch (DeskNotFoundException deskNotFoundException) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid desk id");
+      } catch (RoomNotFoundException roomNotFoundException) {
+        throw new ResponseStatusException(
+            HttpStatus.INTERNAL_SERVER_ERROR, "desk associated with no room");
       }
     } else {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid fields in your request");
