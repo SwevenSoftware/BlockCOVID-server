@@ -195,7 +195,7 @@ class RoomTest {
         new Room(
             "idRoom",
             "room",
-            true,
+            false,
             LocalTime.of(14, 0),
             LocalTime.of(18, 0),
             Set.of(DayOfWeek.MONDAY),
@@ -212,14 +212,13 @@ class RoomTest {
         new Room(
             "idRoom",
             "room",
-            true,
+            false,
             LocalTime.of(14, 0),
             LocalTime.of(18, 0),
             Set.of(DayOfWeek.MONDAY),
             100,
             100,
             Status.CLEAN);
-    /* 2021-04-20T15.30 has valid time but it's tuesday */
     assertFalse(room.isRoomOpen(LocalDateTime.of(2021, 4, 19, 12, 30)));
   }
 
@@ -229,14 +228,13 @@ class RoomTest {
         new Room(
             "idRoom",
             "room",
-            true,
+            false,
             LocalTime.of(14, 0),
             LocalTime.of(18, 0),
             Set.of(DayOfWeek.MONDAY),
             100,
             100,
             Status.CLEAN);
-    /* 2021-04-20T15.30 has valid time but it's tuesday */
     assertFalse(room.isRoomOpen(LocalDateTime.of(2021, 4, 19, 19, 30)));
   }
 
@@ -246,14 +244,13 @@ class RoomTest {
         new Room(
             "idRoom",
             "room",
-            true,
+            false,
             LocalTime.of(14, 0),
             LocalTime.of(18, 0),
             Set.of(DayOfWeek.MONDAY),
             100,
             100,
             Status.CLEAN);
-    /* 2021-04-20T15.30 has valid time but it's tuesday */
-    assertFalse(room.isRoomOpen(LocalDateTime.of(2021, 4, 19, 15, 30)));
+    assertTrue(room.isRoomOpen(LocalDateTime.of(2021, 4, 19, 15, 30)));
   }
 }

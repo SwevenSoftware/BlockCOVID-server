@@ -102,9 +102,9 @@ public class Room {
 
   @JsonIgnore
   public boolean isRoomOpen(LocalDateTime timestamp) {
-    return closed
+    return !closed
         && openingDays.contains(timestamp.getDayOfWeek())
-        && !(openingTime.isBefore(timestamp.toLocalTime())
-            || closingTime.isAfter(timestamp.toLocalTime()));
+        && !(openingTime.isAfter(timestamp.toLocalTime())
+            || closingTime.isBefore(timestamp.toLocalTime()));
   }
 }

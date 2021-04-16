@@ -283,7 +283,8 @@ class ReservationServiceTest {
 
   @Test
   void reservationBeforeOpeningTime_throwsBadTimeInterval() {
-    when(fakeRoom.isRoomOpen(any())).thenReturn(false);
+    when(fakeRoom.isRoomOpen(info.getStart())).thenReturn(false);
+    when(fakeRoom.isRoomOpen(info.getEnd())).thenReturn(true);
     assertThrows(BadTimeIntervals.class, () -> service.addReservation(info, username));
   }
 
