@@ -17,6 +17,7 @@ import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.rooms.repositories.DeskRepository;
 import it.sweven.blockcovid.rooms.repositories.RoomRepository;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
@@ -39,6 +40,7 @@ class ReservationServiceTest {
     reservationRepository = mock(ReservationRepository.class);
     fakeRoom = mock(Room.class);
     when(fakeRoom.isRoomOpen(any())).thenReturn(true);
+    when(fakeRoom.getClosingTime()).thenReturn(LocalTime.now().plusHours(2));
 
     roomRepository = mock(RoomRepository.class);
     when(roomRepository.findById(any())).thenReturn(Optional.of(fakeRoom));
@@ -292,6 +294,12 @@ class ReservationServiceTest {
   void reservationAfterClosingTime_throwsBadTimeInterval() {
     when(fakeRoom.isRoomOpen(info.getStart())).thenReturn(true);
     when(fakeRoom.isRoomOpen(info.getEnd())).thenReturn(false);
+    assertThrows(BadTimeIntervals.class, () -> service.addReservation(info, username));
+  }
+
+  @Test
+  void addReservation_reservationEndsAfterClosingTime() {
+    when(fakeRoom.getClosingTime()).thenReturn(LocalTime.now().plusMinutes(20));
     assertThrows(BadTimeIntervals.class, () -> service.addReservation(info, username));
   }
 }
