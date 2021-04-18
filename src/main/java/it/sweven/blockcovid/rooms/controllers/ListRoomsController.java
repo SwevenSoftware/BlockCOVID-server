@@ -5,13 +5,15 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import it.sweven.blockcovid.reservations.servicies.ReservationService;
 import it.sweven.blockcovid.rooms.assemblers.RoomWithDesksAssembler;
-import it.sweven.blockcovid.rooms.dto.DeskInfo;
+import it.sweven.blockcovid.rooms.dto.DeskInfoAvailability;
 import it.sweven.blockcovid.rooms.dto.RoomWithDesks;
 import it.sweven.blockcovid.rooms.entities.Room;
 import it.sweven.blockcovid.rooms.services.DeskService;
 import it.sweven.blockcovid.rooms.services.RoomService;
 import it.sweven.blockcovid.users.entities.User;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,13 +28,18 @@ public class ListRoomsController implements RoomsController {
 
   private final RoomService roomService;
   private final DeskService deskService;
+  private final ReservationService reservationService;
   private final RoomWithDesksAssembler assembler;
 
   @Autowired
   public ListRoomsController(
-      RoomService roomService, DeskService deskService, RoomWithDesksAssembler assembler) {
+      RoomService roomService,
+      DeskService deskService,
+      ReservationService reservationService,
+      RoomWithDesksAssembler assembler) {
     this.roomService = roomService;
     this.deskService = deskService;
+    this.reservationService = reservationService;
     this.assembler = assembler;
   }
 
@@ -55,7 +62,14 @@ public class ListRoomsController implements RoomsController {
           new RoomWithDesks(
               room,
               deskService.getDesksByRoom(room.getName()).stream()
-                  .map(d -> new DeskInfo(d.getId(), d.getX(), d.getY()))
+                  .map(
+                      d -> {
+                        boolean available =
+                            reservationService
+                                .findIfTimeFallsInto(d.getId(), LocalDateTime.now())
+                                .isEmpty();
+                        return new DeskInfoAvailability(d.getId(), d.getX(), d.getY(), available);
+                      })
                   .collect(Collectors.toList())));
     }
     return assembler.toCollectionModel(requestedRooms);
