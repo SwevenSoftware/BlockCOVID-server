@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import it.sweven.blockcovid.rooms.dto.DeskInfo;
+import it.sweven.blockcovid.rooms.dto.DeskInfoAvailability;
 import it.sweven.blockcovid.rooms.dto.RoomWithDesks;
 import it.sweven.blockcovid.rooms.entities.Room;
 import java.util.List;
@@ -37,8 +37,10 @@ class RoomWithDesksAssemblerTest {
     when(room2.getName()).thenReturn("room2Name");
     List<RoomWithDesks> entities =
         List.of(
-            new RoomWithDesks(room1, List.of(mock(DeskInfo.class))),
-            new RoomWithDesks(room2, List.of(mock(DeskInfo.class), mock(DeskInfo.class))));
+            new RoomWithDesks(room1, List.of(mock(DeskInfoAvailability.class))),
+            new RoomWithDesks(
+                room2,
+                List.of(mock(DeskInfoAvailability.class), mock(DeskInfoAvailability.class))));
     assertEquals(
         entities,
         assembler.toCollectionModel(entities).getContent().stream()
