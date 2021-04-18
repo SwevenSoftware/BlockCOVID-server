@@ -1,31 +1,49 @@
 package it.sweven.blockcovid.users.security;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
+import it.sweven.blockcovid.users.entities.Token;
 import it.sweven.blockcovid.users.entities.User;
+import it.sweven.blockcovid.users.services.TokenService;
 import it.sweven.blockcovid.users.services.UserAuthenticationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 class TokenAuthenticationProviderTest {
 
   private UserAuthenticationService service;
   private TokenAuthenticationProvider provider;
+  private TokenService tokenService;
+  private Token fakeToken;
+  private UsernamePasswordAuthenticationToken fakeUsernameAuthToken;
 
   @BeforeEach
   void setUp() {
     service = mock(UserAuthenticationService.class);
-    provider = new TokenAuthenticationProvider(service);
+    tokenService = mock(TokenService.class);
+    fakeToken = mock(Token.class);
+    when(fakeToken.expired()).thenReturn(false);
+    when(tokenService.getToken(any())).thenReturn(fakeToken);
+    fakeUsernameAuthToken = mock(UsernamePasswordAuthenticationToken.class);
+    when(fakeUsernameAuthToken.getCredentials()).thenReturn("token");
+    provider = new TokenAuthenticationProvider(service, tokenService);
   }
 
   @Test
   void additionalAuthenticationChecks_noExceptionThrown() {
-    provider.additionalAuthenticationChecks(
-        mock(User.class), mock(UsernamePasswordAuthenticationToken.class));
+    provider.additionalAuthenticationChecks(mock(User.class), fakeUsernameAuthToken);
+  }
+
+  @Test
+  void additionalAuthenticationChecksTokenExpiredAuthenticationException() {
+    when(fakeToken.expired()).thenReturn(true);
+    assertThrows(
+        CredentialsExpiredException.class,
+        () -> provider.additionalAuthenticationChecks(mock(User.class), fakeUsernameAuthToken));
   }
 
   @Test

@@ -20,6 +20,7 @@ class TokenServiceTest {
   @BeforeEach
   void setup() {
     repository = mock(TokenRepository.class);
+    doAnswer(invocation -> Optional.of(mock(Token.class))).when(repository).deleteTokenById(any());
     service = new TokenService(repository);
   }
 
@@ -65,11 +66,17 @@ class TokenServiceTest {
     doAnswer(
             invocation -> {
               tokenDeleted.set(true);
-              return null;
+              return Optional.of(mock(Token.class));
             })
         .when(repository)
-        .deleteById("idToken");
+        .deleteTokenById(any());
     service.delete("idToken");
     assertTrue(tokenDeleted.get());
+  }
+
+  @Test
+  void deleteEmptyOptional_throwsAuthenticationException() {
+    when(repository.deleteTokenById(any())).thenReturn(Optional.empty());
+    assertThrows(AuthenticationCredentialsNotFoundException.class, () -> service.delete("token"));
   }
 }
