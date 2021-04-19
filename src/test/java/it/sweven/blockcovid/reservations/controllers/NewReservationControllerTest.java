@@ -104,6 +104,12 @@ class NewReservationControllerTest {
   }
 
   @Test
+  void reservationInfoStartBeforeNow_throwsResponseStatusException() {
+    when(info.getStart()).thenReturn(LocalDateTime.now().minusMinutes(10));
+    assertThrows(ResponseStatusException.class, () -> controller.book(testUser, info));
+  }
+
+  @Test
   void reservationInfoStartAfterEnd_throwsResponseStatusException() {
     when(info.getStart()).thenReturn(LocalDateTime.now().plusMinutes(30));
     when(info.getEnd()).thenReturn(LocalDateTime.now());

@@ -14,6 +14,7 @@ import it.sweven.blockcovid.reservations.servicies.ReservationService;
 import it.sweven.blockcovid.rooms.exceptions.DeskNotFoundException;
 import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.users.entities.User;
+import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
@@ -61,6 +62,7 @@ public class NewReservationController implements ReservationController {
     if (reservationInfo.getStart() != null
         && reservationInfo.getEnd() != null
         && reservationInfo.getDeskId() != null
+        && !reservationInfo.getStart().isBefore(LocalDateTime.now().minusMinutes(2))
         && reservationInfo.getStart().isBefore(reservationInfo.getEnd())) {
       try {
         return reservationAssembler.toModel(
