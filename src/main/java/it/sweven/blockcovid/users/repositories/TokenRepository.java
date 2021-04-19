@@ -7,5 +7,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 public interface TokenRepository extends MongoRepository<Token, String> {
   Optional<Token> findById(String id);
 
-  void deleteById(String id);
+  Optional<Token> deleteTokenById(String id);
 }
