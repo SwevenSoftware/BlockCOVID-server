@@ -5,8 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-import it.sweven.blockcovid.reservations.assemblers.ReservationAssembler;
-import it.sweven.blockcovid.reservations.entities.Reservation;
+import it.sweven.blockcovid.reservations.assemblers.ReservationWithRoomAssembler;
+import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.reservations.exceptions.NoSuchReservation;
 import it.sweven.blockcovid.reservations.servicies.ReservationService;
 import it.sweven.blockcovid.users.entities.User;
@@ -24,7 +24,7 @@ class DeleteReservationControllerTest {
   @BeforeEach
   void setUp() {
     service = mock(ReservationService.class);
-    ReservationAssembler assembler = mock(ReservationAssembler.class);
+    ReservationWithRoomAssembler assembler = mock(ReservationWithRoomAssembler.class);
     when(assembler.toModel(any()))
         .thenAnswer(invocation -> EntityModel.of(invocation.getArgument(0)));
     controller = new DeleteReservationController(service, assembler);
@@ -35,7 +35,7 @@ class DeleteReservationControllerTest {
     User user = mock(User.class);
     when(user.isUser()).thenReturn(true);
     when(user.getUsername()).thenReturn("username");
-    Reservation fakeReservation = mock(Reservation.class);
+    ReservationWithRoom fakeReservation = mock(ReservationWithRoom.class);
     when(fakeReservation.getUsername()).thenReturn("username");
     when(service.findById("idReservation")).thenReturn(fakeReservation);
     when(service.delete("idReservation")).thenReturn(fakeReservation);
@@ -58,7 +58,7 @@ class DeleteReservationControllerTest {
     User user = mock(User.class);
     when(user.isUser()).thenReturn(true);
     when(user.getUsername()).thenReturn("username");
-    Reservation fakeReservation = mock(Reservation.class);
+    ReservationWithRoom fakeReservation = mock(ReservationWithRoom.class);
     when(fakeReservation.getUsername()).thenReturn("another");
     when(service.findById(anyString())).thenReturn(fakeReservation);
     ResponseStatusException thrown =
@@ -73,7 +73,7 @@ class DeleteReservationControllerTest {
     User user = mock(User.class);
     when(user.isUser()).thenReturn(false);
     when(user.getUsername()).thenReturn("admin");
-    Reservation fakeReservation = mock(Reservation.class);
+    ReservationWithRoom fakeReservation = mock(ReservationWithRoom.class);
     when(fakeReservation.getUsername()).thenReturn("username");
     when(service.findById("idReservation")).thenReturn(fakeReservation);
     when(service.delete("idReservation")).thenReturn(fakeReservation);

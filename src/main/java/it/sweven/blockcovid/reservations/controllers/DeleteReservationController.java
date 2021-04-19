@@ -5,8 +5,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import it.sweven.blockcovid.reservations.assemblers.ReservationAssembler;
-import it.sweven.blockcovid.reservations.entities.Reservation;
+import it.sweven.blockcovid.reservations.assemblers.ReservationWithRoomAssembler;
+import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.reservations.exceptions.NoSuchReservation;
 import it.sweven.blockcovid.reservations.servicies.ReservationService;
 import it.sweven.blockcovid.users.entities.User;
@@ -24,10 +24,11 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 public class DeleteReservationController implements ReservationController {
   private final ReservationService service;
-  private final ReservationAssembler assembler;
+  private final ReservationWithRoomAssembler assembler;
 
   @Autowired
-  public DeleteReservationController(ReservationService service, ReservationAssembler assembler) {
+  public DeleteReservationController(
+      ReservationService service, ReservationWithRoomAssembler assembler) {
     this.service = service;
     this.assembler = assembler;
   }
@@ -50,11 +51,11 @@ public class DeleteReservationController implements ReservationController {
   })
   @PreAuthorize("#submitter.isUser() or #submitter.isAdmin()")
   @ResponseBody
-  public EntityModel<Reservation> deleteReservation(
+  public EntityModel<ReservationWithRoom> deleteReservation(
       @Parameter(hidden = true) @AuthenticationPrincipal User submitter,
       @PathVariable String idReservation) {
     try {
-      Reservation toDelete = service.findById(idReservation);
+      ReservationWithRoom toDelete = service.findById(idReservation);
       if (submitter.isUser() && !toDelete.getUsername().equals(submitter.getUsername()))
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
       return assembler.toModel(service.delete(idReservation));

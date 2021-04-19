@@ -4,8 +4,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import it.sweven.blockcovid.reservations.assemblers.ReservationAssembler;
+import it.sweven.blockcovid.reservations.assemblers.ReservationWithRoomAssembler;
 import it.sweven.blockcovid.reservations.dto.ReservationInfo;
+import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.reservations.entities.Reservation;
 import it.sweven.blockcovid.reservations.exceptions.NoSuchReservation;
 import it.sweven.blockcovid.reservations.exceptions.ReservationClash;
@@ -26,7 +27,7 @@ class ModifyReservationControllerTest {
   @BeforeEach
   void setUp() {
     service = mock(ReservationService.class);
-    ReservationAssembler assembler = mock(ReservationAssembler.class);
+    ReservationWithRoomAssembler assembler = mock(ReservationWithRoomAssembler.class);
     when(assembler.toModel(any()))
         .thenAnswer(invocation -> EntityModel.of(invocation.getArgument(0)));
     controller = new ModifyReservationController(service, assembler);
@@ -40,17 +41,19 @@ class ModifyReservationControllerTest {
     ReservationInfo providedInfo =
         new ReservationInfo(
             "idDesk", LocalDateTime.now().plusMinutes(60), LocalDateTime.now().plusMinutes(120));
-    Reservation fakeReservation = mock(Reservation.class);
+    ReservationWithRoom fakeReservation = mock(ReservationWithRoom.class);
+    Reservation reservationToSave = mock(Reservation.class);
+    when(fakeReservation.toReservation()).thenReturn(reservationToSave);
     when(fakeReservation.getUsername()).thenReturn("username");
     when(service.findById("idReservation")).thenReturn(fakeReservation);
-    when(service.save(fakeReservation)).thenReturn(fakeReservation);
+    when(service.save(reservationToSave)).thenReturn(fakeReservation);
     assertEquals(
         fakeReservation,
         controller.modifyReservation(user, "idReservation", providedInfo).getContent());
-    verify(fakeReservation).setDeskId(providedInfo.getDeskId());
-    verify(fakeReservation).setStart(providedInfo.getStart());
-    verify(fakeReservation).setEnd(providedInfo.getEnd());
-    verify(service).save(fakeReservation);
+    verify(reservationToSave).setDeskId(providedInfo.getDeskId());
+    verify(reservationToSave).setStart(providedInfo.getStart());
+    verify(reservationToSave).setEnd(providedInfo.getEnd());
+    verify(service).save(reservationToSave);
   }
 
   @Test
@@ -68,7 +71,9 @@ class ModifyReservationControllerTest {
   @Test
   void modifyReservation_conflictNewReservation_throwsResponseStatusException()
       throws ReservationClash {
-    when(service.findById(anyString())).thenReturn(mock(Reservation.class));
+    ReservationWithRoom mockReservation = mock(ReservationWithRoom.class);
+    when(mockReservation.toReservation()).thenReturn(mock(Reservation.class));
+    when(service.findById(anyString())).thenReturn(mockReservation);
     when(service.save(any())).thenThrow(new ReservationClash());
     ResponseStatusException thrown =
         assertThrows(
@@ -84,7 +89,7 @@ class ModifyReservationControllerTest {
     User user = mock(User.class);
     when(user.isUser()).thenReturn(true);
     when(user.getUsername()).thenReturn("username");
-    Reservation fakeReservation = mock(Reservation.class);
+    ReservationWithRoom fakeReservation = mock(ReservationWithRoom.class);
     when(fakeReservation.getUsername()).thenReturn("another");
     when(service.findById(anyString())).thenReturn(fakeReservation);
     ResponseStatusException thrown =

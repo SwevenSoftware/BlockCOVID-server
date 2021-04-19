@@ -5,8 +5,9 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import it.sweven.blockcovid.reservations.assemblers.ReservationAssembler;
+import it.sweven.blockcovid.reservations.assemblers.ReservationWithRoomAssembler;
 import it.sweven.blockcovid.reservations.dto.ReservationInfo;
+import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.reservations.entities.Reservation;
 import it.sweven.blockcovid.reservations.exceptions.NoSuchReservation;
 import it.sweven.blockcovid.reservations.exceptions.ReservationClash;
@@ -24,10 +25,11 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 public class ModifyReservationController implements ReservationController {
   private final ReservationService service;
-  private final ReservationAssembler assembler;
+  private final ReservationWithRoomAssembler assembler;
 
   @Autowired
-  public ModifyReservationController(ReservationService service, ReservationAssembler assembler) {
+  public ModifyReservationController(
+      ReservationService service, ReservationWithRoomAssembler assembler) {
     this.service = service;
     this.assembler = assembler;
   }
@@ -54,18 +56,19 @@ public class ModifyReservationController implements ReservationController {
   })
   @ResponseBody
   @PreAuthorize("#submitter.isUser() or #submitter.isAdmin()")
-  public EntityModel<Reservation> modifyReservation(
+  public EntityModel<ReservationWithRoom> modifyReservation(
       @Parameter(hidden = true) @AuthenticationPrincipal User submitter,
       @PathVariable String idReservation,
       @RequestBody ReservationInfo reservationInfo) {
-    Reservation toModify;
+    ReservationWithRoom requested;
     try {
-      toModify = service.findById(idReservation);
+      requested = service.findById(idReservation);
     } catch (NoSuchReservation e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
-    if (submitter.isUser() && !toModify.getUsername().equals(submitter.getUsername()))
+    if (submitter.isUser() && !requested.getUsername().equals(submitter.getUsername()))
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+    Reservation toModify = requested.toReservation();
     Optional.ofNullable(reservationInfo.getDeskId()).ifPresent(toModify::setDeskId);
     Optional.ofNullable(reservationInfo.getStart()).ifPresent(toModify::setStart);
     Optional.ofNullable(reservationInfo.getEnd()).ifPresent(toModify::setEnd);

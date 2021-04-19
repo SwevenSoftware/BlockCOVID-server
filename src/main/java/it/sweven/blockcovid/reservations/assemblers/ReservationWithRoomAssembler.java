@@ -4,7 +4,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import it.sweven.blockcovid.reservations.controllers.*;
-import it.sweven.blockcovid.reservations.entities.Reservation;
+import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -14,10 +14,10 @@ import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ReservationAssembler
-    implements RepresentationModelAssembler<Reservation, EntityModel<Reservation>> {
+public class ReservationWithRoomAssembler
+    implements RepresentationModelAssembler<ReservationWithRoom, EntityModel<ReservationWithRoom>> {
   @Override
-  public EntityModel<Reservation> toModel(Reservation entity) {
+  public EntityModel<ReservationWithRoom> toModel(ReservationWithRoom entity) {
     return EntityModel.of(
         entity,
         linkTo(methodOn(NewReservationController.class).book(null, null))
@@ -31,9 +31,9 @@ public class ReservationAssembler
   }
 
   @Override
-  public CollectionModel<EntityModel<Reservation>> toCollectionModel(
-      Iterable<? extends Reservation> entities) {
-    List<EntityModel<Reservation>> entityModels =
+  public CollectionModel<EntityModel<ReservationWithRoom>> toCollectionModel(
+      Iterable<? extends ReservationWithRoom> entities) {
+    List<EntityModel<ReservationWithRoom>> entityModels =
         StreamSupport.stream(entities.spliterator(), true)
             .map(this::toModel)
             .collect(Collectors.toList());

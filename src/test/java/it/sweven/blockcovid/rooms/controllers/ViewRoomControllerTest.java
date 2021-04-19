@@ -6,7 +6,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import it.sweven.blockcovid.reservations.entities.Reservation;
+import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.reservations.servicies.ReservationService;
 import it.sweven.blockcovid.rooms.assemblers.RoomWithDesksAssembler;
 import it.sweven.blockcovid.rooms.dto.DeskInfoAvailability;
@@ -49,7 +49,7 @@ class ViewRoomControllerTest {
         List.of(new Desk("desk0", 3, 45, "roomId"), new Desk("desk1", 20, 11, "roomId"));
     when(deskService.getDesksByRoom("roomName")).thenReturn(expectedDesks);
     when(reservationService.findIfTimeFallsInto(eq("desk0"), any()))
-        .thenReturn(Optional.of(mock(Reservation.class)));
+        .thenReturn(Optional.of(mock(ReservationWithRoom.class)));
     when(reservationService.findIfTimeFallsInto(eq("desk1"), any())).thenReturn(Optional.empty());
     RoomWithDesks expectedRoomWithRoom =
         new RoomWithDesks(

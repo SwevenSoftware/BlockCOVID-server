@@ -5,8 +5,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import it.sweven.blockcovid.reservations.assemblers.ReservationAssembler;
-import it.sweven.blockcovid.reservations.entities.Reservation;
+import it.sweven.blockcovid.reservations.assemblers.ReservationWithRoomAssembler;
+import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.reservations.servicies.ReservationService;
 import it.sweven.blockcovid.users.entities.User;
 import java.time.LocalDateTime;
@@ -22,9 +22,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ViewAllReservationsController implements ReservationController {
   private final ReservationService service;
-  private final ReservationAssembler assembler;
+  private final ReservationWithRoomAssembler assembler;
 
-  public ViewAllReservationsController(ReservationService service, ReservationAssembler assembler) {
+  public ViewAllReservationsController(
+      ReservationService service, ReservationWithRoomAssembler assembler) {
     this.service = service;
     this.assembler = assembler;
   }
@@ -45,7 +46,7 @@ public class ViewAllReservationsController implements ReservationController {
   })
   @ResponseBody
   @PreAuthorize("#submitter.isAdmin() and #submitter.isEnabled()")
-  public CollectionModel<EntityModel<Reservation>> viewAll(
+  public CollectionModel<EntityModel<ReservationWithRoom>> viewAll(
       @Parameter(hidden = true) @AuthenticationPrincipal User submitter,
       @RequestParam("from") LocalDateTime start,
       @RequestParam("to") LocalDateTime end) {
