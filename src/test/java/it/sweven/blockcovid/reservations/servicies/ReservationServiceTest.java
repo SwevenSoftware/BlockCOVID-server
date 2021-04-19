@@ -64,7 +64,7 @@ class ReservationServiceTest {
     fakeReservation1 = mock(Reservation.class);
     fakeReservation2 = mock(Reservation.class);
     when(fakeReservation1.getStart()).thenReturn(LocalDateTime.now().withHour(20));
-    when(fakeReservation1.getEnd()).thenReturn(LocalDateTime.now().withHour(21));
+    when(fakeReservation1.getEnd()).thenReturn(LocalDateTime.now().withHour(22));
     when(fakeReservation2.getStart()).thenReturn(LocalDateTime.now().withHour(22));
     when(fakeReservation2.getEnd()).thenReturn(LocalDateTime.now().withHour(23));
     Stream<Reservation> reservationStream1 = Stream.of(fakeReservation1, fakeReservation2);
@@ -176,10 +176,10 @@ class ReservationServiceTest {
         new Reservation(
             "idDesk",
             "username",
-            LocalDateTime.now().plusMinutes(60),
-            LocalDateTime.now().plusMinutes(120));
+            LocalDateTime.now().withHour(14),
+            LocalDateTime.now().withHour(16));
     Reservation conflictReservation = mock(Reservation.class);
-    when(conflictReservation.getStart()).thenReturn(LocalDateTime.now().plusMinutes(90));
+    when(conflictReservation.getStart()).thenReturn(LocalDateTime.now().withHour(15));
     when(reservationRepository.findReservationsByDeskIdAndStartIsAfter(
             "idDesk", providedReservation.getStart()))
         .thenReturn(Stream.of(conflictReservation));
@@ -192,10 +192,10 @@ class ReservationServiceTest {
         new Reservation(
             "idDesk",
             "username",
-            LocalDateTime.now().plusMinutes(60),
-            LocalDateTime.now().plusMinutes(120));
+            LocalDateTime.now().withHour(14),
+            LocalDateTime.now().withHour(16));
     Reservation conflictReservation = mock(Reservation.class);
-    when(conflictReservation.getEnd()).thenReturn(LocalDateTime.now().plusMinutes(90));
+    when(conflictReservation.getEnd()).thenReturn(LocalDateTime.now().withHour(15));
     when(reservationRepository.findReservationsByDeskIdAndEndIsBefore(
             "idDesk", providedReservation.getEnd()))
         .thenReturn(Stream.of(conflictReservation));
