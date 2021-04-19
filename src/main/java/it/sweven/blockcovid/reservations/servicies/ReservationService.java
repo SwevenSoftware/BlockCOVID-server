@@ -58,8 +58,9 @@ public class ReservationService {
   }
 
   public Optional<Reservation> findIfTimeFallsInto(String deskId, LocalDateTime timestamp) {
-    return reservationRepository.findReservationsByDeskIdAndStartIsBeforeAndEndIsAfter(
-        deskId, timestamp, timestamp);
+    return reservationRepository
+        .findReservationByDeskIdAndStartIsLessThanEqualAndEndIsGreaterThanEqual(
+            deskId, timestamp, timestamp);
   }
 
   public Reservation findById(String id) throws NoSuchReservation {
@@ -96,12 +97,8 @@ public class ReservationService {
   }
 
   public List<Reservation> findByUsernameAndStart(String username, LocalDateTime start) {
-    List<Reservation> allFutureReservations =
-        reservationRepository.findReservationsByUsernameAndStartIsAfter(username, start);
-    reservationRepository
-        .findReservationByUsernameAndStartIsBeforeAndEndIsAfter(username, start, start)
-        .ifPresent(reservation -> allFutureReservations.add(0, reservation));
-    return allFutureReservations;
+    return reservationRepository.findReservationsByUsernameAndStartIsGreaterThanEqual(
+        username, start);
   }
 
   public List<Reservation> findByTimeInterval(LocalDateTime start, LocalDateTime end) {

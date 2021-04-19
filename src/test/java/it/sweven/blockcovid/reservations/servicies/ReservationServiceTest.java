@@ -102,8 +102,9 @@ class ReservationServiceTest {
   @Test
   void findIfTimeFallsInto_callsRepository() {
     AtomicBoolean repositoryCalled = new AtomicBoolean(false);
-    when(reservationRepository.findReservationsByDeskIdAndStartIsBeforeAndEndIsAfter(
-            any(), any(), any()))
+    when(reservationRepository
+            .findReservationByDeskIdAndStartIsLessThanEqualAndEndIsGreaterThanEqual(
+                any(), any(), any()))
         .thenAnswer(
             invocation -> {
               LocalDateTime tmp = invocation.getArgument(1);
@@ -188,45 +189,19 @@ class ReservationServiceTest {
   }
 
   @Test
-  void findByUsernameAndStart_futureReservationsPresentAndUserCurrentlyReserving() {
-    ArrayList<Reservation> fakeList = mock(ArrayList.class);
-    when(reservationRepository.findReservationsByUsernameAndStartIsAfter(anyString(), any()))
-        .thenReturn(fakeList);
-    when(reservationRepository.findReservationByUsernameAndStartIsBeforeAndEndIsAfter(
-            anyString(), any(), any()))
-        .thenReturn(Optional.of(mock(Reservation.class)));
-    assertEquals(fakeList, service.findByUsernameAndStart("user", LocalDateTime.now()));
+  void findByUsernameAndStart_reservationsFound() {
+    List<Reservation> expectedList = List.of(mock(Reservation.class), mock(Reservation.class));
+    when(reservationRepository.findReservationsByUsernameAndStartIsGreaterThanEqual(
+            anyString(), any()))
+        .thenReturn(new ArrayList<>(expectedList));
+    assertEquals(expectedList, service.findByUsernameAndStart("user", LocalDateTime.now()));
   }
 
   @Test
-  void findByUsernameAndStart_futureReservationsPresentButUserNotCurrentlyReserving() {
-    ArrayList<Reservation> fakeList = mock(ArrayList.class);
-    when(reservationRepository.findReservationsByUsernameAndStartIsAfter(anyString(), any()))
-        .thenReturn(fakeList);
-    when(reservationRepository.findReservationByUsernameAndStartIsBeforeAndEndIsAfter(
-            anyString(), any(), any()))
-        .thenReturn(Optional.empty());
-    assertEquals(fakeList, service.findByUsernameAndStart("user", LocalDateTime.now()));
-  }
-
-  @Test
-  void findByUsernameAndStart_futureReservationsEmptyAndUserCurrentlyReserving() {
-    Reservation fakeReservation = mock(Reservation.class);
-    when(reservationRepository.findReservationsByUsernameAndStartIsAfter(anyString(), any()))
+  void findByUsernameAndStart_noReservationsFound() {
+    when(reservationRepository.findReservationsByUsernameAndStartIsGreaterThanEqual(
+            anyString(), any()))
         .thenReturn(new ArrayList<>());
-    when(reservationRepository.findReservationByUsernameAndStartIsBeforeAndEndIsAfter(
-            anyString(), any(), any()))
-        .thenReturn(Optional.of(fakeReservation));
-    assertFalse(service.findByUsernameAndStart("user", LocalDateTime.now()).isEmpty());
-  }
-
-  @Test
-  void findByUsernameAndStart_futureReservationsEmptyAndUserNotCurrentlyReserving() {
-    when(reservationRepository.findReservationsByUsernameAndStartIsAfter(anyString(), any()))
-        .thenReturn(new ArrayList<>());
-    when(reservationRepository.findReservationByUsernameAndStartIsBeforeAndEndIsAfter(
-            anyString(), any(), any()))
-        .thenReturn(Optional.empty());
     assertEquals(
         Collections.emptyList(), service.findByUsernameAndStart("user", LocalDateTime.now()));
   }
