@@ -109,7 +109,7 @@ class ReservationServiceTest {
 
   @Test
   void clashWithReservationStartingBeforeEnding() {
-    when(fakeReservation3.getEnd()).thenReturn(LocalDateTime.now().plusMinutes(15));
+    when(fakeReservation3.getEnd()).thenReturn(LocalDateTime.now().withHour(23).withMinute(50));
     assertThrows(ReservationClash.class, () -> service.addReservation(info, username));
   }
 
