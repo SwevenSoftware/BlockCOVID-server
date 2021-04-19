@@ -4,6 +4,7 @@ import it.sweven.blockcovid.users.entities.Token;
 import it.sweven.blockcovid.users.repositories.TokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -25,7 +26,9 @@ public class TokenService {
     return tokenRepository.save(token);
   }
 
-  public void delete(String token) {
-    tokenRepository.deleteById(token);
+  public Token delete(String token) throws AuthenticationException {
+    return tokenRepository
+        .deleteTokenById(token)
+        .orElseThrow(() -> new AuthenticationCredentialsNotFoundException(token));
   }
 }
