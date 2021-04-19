@@ -360,7 +360,7 @@ class ReservationServiceTest {
 
   @Test
   void addReservation_reservationEndsAfterClosingTime() {
-    when(fakeRoom.getClosingTime()).thenReturn(LocalTime.now().plusMinutes(20));
+    when(fakeRoom.getClosingTime()).thenReturn(LocalTime.now().withHour(13));
     assertThrows(BadTimeIntervals.class, () -> service.addReservation(info, username));
   }
 }
