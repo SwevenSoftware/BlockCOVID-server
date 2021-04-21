@@ -140,12 +140,13 @@ public class ReservationService {
 
   private boolean reservationConflict(Reservation reservation) {
     return reservationRepository
-            .findReservationsByDeskIdAndStartIsAfter(
+            .findReservationsByDeskIdAndStartIsGreaterThanEqual(
                 reservation.getDeskId(), reservation.getStart())
             .parallel()
             .anyMatch(foundReservation -> reservation.getEnd().isAfter(foundReservation.getStart()))
         || reservationRepository
-            .findReservationsByDeskIdAndEndIsBefore(reservation.getDeskId(), reservation.getEnd())
+            .findReservationsByDeskIdAndStartIsLessThan(
+                reservation.getDeskId(), reservation.getStart())
             .parallel()
             .anyMatch(
                 foundReservation -> reservation.getStart().isBefore(foundReservation.getEnd()));

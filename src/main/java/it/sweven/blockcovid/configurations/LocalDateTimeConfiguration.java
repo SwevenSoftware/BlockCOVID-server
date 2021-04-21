@@ -13,7 +13,7 @@ public class LocalDateTimeConfiguration {
   @Bean
   public Formatter<LocalDateTime> localDateTimeFormatter() {
     return new Formatter<>() {
-      private final String PATTERN = "yyyy'-'MM'-'dd'T'kk':'mm";
+      private final String PATTERN = "yyyy-MM-dd'T'HH:mm";
 
       @Override
       public LocalDateTime parse(String text, Locale locale) throws ParseException {

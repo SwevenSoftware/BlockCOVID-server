@@ -18,8 +18,7 @@ public class Reservation implements Comparable<Reservation> {
   private LocalDateTime start, end;
 
   @PersistenceConstructor
-  public Reservation(
-      String id, String deskId, String username, LocalDateTime start, LocalDateTime end) {
+  Reservation(String id, String deskId, String username, LocalDateTime start, LocalDateTime end) {
     this.id = id;
     this.deskId = deskId;
     this.username = username;

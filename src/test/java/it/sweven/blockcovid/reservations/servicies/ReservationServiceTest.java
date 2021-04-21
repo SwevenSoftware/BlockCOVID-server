@@ -77,9 +77,9 @@ class ReservationServiceTest {
     when(fakeReservation4.getEnd()).thenReturn(LocalDateTime.now().withHour(13));
     Stream<Reservation> reservationStream2 = Stream.of(fakeReservation3, fakeReservation4);
 
-    when(reservationRepository.findReservationsByDeskIdAndStartIsAfter(any(), any()))
+    when(reservationRepository.findReservationsByDeskIdAndStartIsGreaterThanEqual(any(), any()))
         .thenReturn(reservationStream1);
-    when(reservationRepository.findReservationsByDeskIdAndEndIsBefore(any(), any()))
+    when(reservationRepository.findReservationsByDeskIdAndStartIsLessThan(any(), any()))
         .thenReturn(reservationStream2);
   }
 
@@ -90,6 +90,17 @@ class ReservationServiceTest {
     assertEquals(reservation.getUsername(), reservationWithRoom.getUsername());
     assertEquals(reservation.getStart(), reservationWithRoom.getStart());
     assertEquals(reservation.getEnd(), reservationWithRoom.getEnd());
+  }
+
+  private Reservation getReservationMock(
+      String id, String deskId, String username, LocalDateTime start, LocalDateTime end) {
+    Reservation reservation = mock(Reservation.class);
+    when(reservation.getId()).thenReturn(id);
+    when(reservation.getDeskId()).thenReturn(deskId);
+    when(reservation.getUsername()).thenReturn(username);
+    when(reservation.getStart()).thenReturn(start);
+    when(reservation.getEnd()).thenReturn(end);
+    return reservation;
   }
 
   @Test
@@ -116,7 +127,7 @@ class ReservationServiceTest {
   @Test
   void findIfTimeFallsInto_callsRepository() {
     Reservation reservation =
-        new Reservation(
+        getReservationMock(
             "reservationId",
             "deskId",
             "username",
@@ -133,33 +144,29 @@ class ReservationServiceTest {
   @Test
   void nextReservationSortsAccordingToReservationComparable() {
     Reservation reservation1 =
-        new Reservation(
+        getReservationMock(
             "reservationId1",
             "deskId1",
             "username",
             LocalDateTime.now().plusMinutes(10),
             LocalDateTime.now().plusMinutes(30));
     Reservation reservation2 =
-        new Reservation(
+        getReservationMock(
             "reservationId1",
             "deskId1",
             "username",
             LocalDateTime.now().plusMinutes(70),
             LocalDateTime.now().plusMinutes(90));
     when(reservationRepository.findReservationsByDeskIdAndStartIsAfter(any(), any()))
-        .thenAnswer(
-            invocation -> {
-              assertEquals("id", invocation.getArgument(0));
-              assertEquals(LocalDateTime.MIN, invocation.getArgument(1));
-              return Stream.of(reservation2, reservation1);
-            });
-    reservationsEquals(reservation1, service.nextReservation("id", LocalDateTime.MIN).get());
+        .thenReturn(Stream.of(reservation2, reservation1));
+    reservationsEquals(reservation2, service.nextReservation("id", LocalDateTime.MIN).get());
+    verify(reservationRepository).findReservationsByDeskIdAndStartIsAfter("id", LocalDateTime.MIN);
   }
 
   @Test
   void findById() {
     Reservation reservation =
-        new Reservation(
+        getReservationMock(
             "reservationId1",
             "deskId1",
             "username",
@@ -173,14 +180,15 @@ class ReservationServiceTest {
   @Test
   void save_endConflict_throwsReservationClash() {
     Reservation providedReservation =
-        new Reservation(
+        getReservationMock(
+            "reservationId",
             "idDesk",
             "username",
             LocalDateTime.now().withHour(14),
             LocalDateTime.now().withHour(16));
     Reservation conflictReservation = mock(Reservation.class);
     when(conflictReservation.getStart()).thenReturn(LocalDateTime.now().withHour(15));
-    when(reservationRepository.findReservationsByDeskIdAndStartIsAfter(
+    when(reservationRepository.findReservationsByDeskIdAndStartIsGreaterThanEqual(
             "idDesk", providedReservation.getStart()))
         .thenReturn(Stream.of(conflictReservation));
     assertThrows(ReservationClash.class, () -> service.save(providedReservation));
@@ -189,15 +197,16 @@ class ReservationServiceTest {
   @Test
   void save_startConflict_throwsReservationClash() {
     Reservation providedReservation =
-        new Reservation(
+        getReservationMock(
+            "reservationId",
             "idDesk",
             "username",
             LocalDateTime.now().withHour(14),
             LocalDateTime.now().withHour(16));
     Reservation conflictReservation = mock(Reservation.class);
     when(conflictReservation.getEnd()).thenReturn(LocalDateTime.now().withHour(15));
-    when(reservationRepository.findReservationsByDeskIdAndEndIsBefore(
-            "idDesk", providedReservation.getEnd()))
+    when(reservationRepository.findReservationsByDeskIdAndStartIsLessThan(
+            "idDesk", providedReservation.getStart()))
         .thenReturn(Stream.of(conflictReservation));
     assertThrows(ReservationClash.class, () -> service.save(providedReservation));
   }
@@ -205,7 +214,7 @@ class ReservationServiceTest {
   @Test
   void delete_validId() {
     Reservation reservation =
-        new Reservation(
+        getReservationMock(
             "reservationId1",
             "deskId1",
             "username",
@@ -226,13 +235,13 @@ class ReservationServiceTest {
   void findByUsernameAndStart_reservationsFound() {
     List<Reservation> expectedList =
         List.of(
-            new Reservation(
+            getReservationMock(
                 "reservationId1",
                 "deskId1",
                 "username",
                 LocalDateTime.now().plusMinutes(10),
                 LocalDateTime.now().plusMinutes(30)),
-            new Reservation(
+            getReservationMock(
                 "reservationId2",
                 "deskId2",
                 "username",
@@ -264,21 +273,21 @@ class ReservationServiceTest {
         providedEnd = LocalDateTime.now().plusMinutes(40);
     Reservation
         reservation1 =
-            new Reservation(
+            getReservationMock(
                 "reservationId1",
                 "deskId1",
                 "username",
                 LocalDateTime.now().plusMinutes(10),
                 LocalDateTime.now().plusMinutes(30)),
         reservation2 =
-            new Reservation(
+            getReservationMock(
                 "reservationId2",
                 "deskId2",
                 "username",
                 LocalDateTime.now().plusMinutes(30),
                 LocalDateTime.now().plusMinutes(50)),
         reservation3 =
-            new Reservation(
+            getReservationMock(
                 "reservationId3",
                 "deskId3",
                 "username",
@@ -312,14 +321,14 @@ class ReservationServiceTest {
         providedEnd = LocalDateTime.now().plusMinutes(20);
     Reservation
         reservation1 =
-            new Reservation(
+            getReservationMock(
                 "reservationId1",
                 "deskId1",
                 "username",
                 providedStart,
                 providedStart.plusMinutes(30)),
         reservation2 =
-            new Reservation(
+            getReservationMock(
                 "reservationId2",
                 "deskId2",
                 "username",

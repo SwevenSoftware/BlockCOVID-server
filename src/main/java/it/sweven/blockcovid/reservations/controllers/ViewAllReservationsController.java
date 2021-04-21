@@ -10,6 +10,7 @@ import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.reservations.servicies.ReservationService;
 import it.sweven.blockcovid.users.entities.User;
 import java.time.LocalDateTime;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -48,8 +49,8 @@ public class ViewAllReservationsController implements ReservationController {
   @PreAuthorize("#submitter.isAdmin() and #submitter.isEnabled()")
   public CollectionModel<EntityModel<ReservationWithRoom>> viewAll(
       @Parameter(hidden = true) @AuthenticationPrincipal User submitter,
-      @RequestParam("from") LocalDateTime start,
-      @RequestParam("to") LocalDateTime end) {
+      @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+      @RequestParam("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
     return assembler.toCollectionModel(service.findByTimeInterval(start, end));
   }
 }
