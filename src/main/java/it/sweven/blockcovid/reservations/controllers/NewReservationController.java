@@ -5,9 +5,9 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import it.sweven.blockcovid.reservations.assemblers.ReservationAssembler;
+import it.sweven.blockcovid.reservations.assemblers.ReservationWithRoomAssembler;
 import it.sweven.blockcovid.reservations.dto.ReservationInfo;
-import it.sweven.blockcovid.reservations.entities.Reservation;
+import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.reservations.exceptions.BadTimeIntervals;
 import it.sweven.blockcovid.reservations.exceptions.ReservationClash;
 import it.sweven.blockcovid.reservations.servicies.ReservationService;
@@ -29,13 +29,14 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 public class NewReservationController implements ReservationController {
   private final ReservationService reservationService;
-  private final ReservationAssembler reservationAssembler;
+  private final ReservationWithRoomAssembler reservationWithRoomAssembler;
 
   @Autowired
   public NewReservationController(
-      ReservationService reservationService, ReservationAssembler reservationAssembler) {
+      ReservationService reservationService,
+      ReservationWithRoomAssembler reservationWithRoomAssembler) {
     this.reservationService = reservationService;
-    this.reservationAssembler = reservationAssembler;
+    this.reservationWithRoomAssembler = reservationWithRoomAssembler;
   }
 
   @PostMapping("reservation")
@@ -56,7 +57,7 @@ public class NewReservationController implements ReservationController {
   })
   @ResponseBody
   @PreAuthorize("#submitter.isUser()")
-  public EntityModel<Reservation> book(
+  public EntityModel<ReservationWithRoom> book(
       @Parameter(hidden = true) @AuthenticationPrincipal User submitter,
       @RequestBody ReservationInfo reservationInfo) {
     if (reservationInfo.getStart() != null
@@ -65,7 +66,7 @@ public class NewReservationController implements ReservationController {
         && !reservationInfo.getStart().isBefore(LocalDateTime.now().minusMinutes(2))
         && reservationInfo.getStart().isBefore(reservationInfo.getEnd())) {
       try {
-        return reservationAssembler.toModel(
+        return reservationWithRoomAssembler.toModel(
             reservationService.addReservation(reservationInfo, submitter.getUsername()));
       } catch (ReservationClash reservationClash) {
         throw new ResponseStatusException(

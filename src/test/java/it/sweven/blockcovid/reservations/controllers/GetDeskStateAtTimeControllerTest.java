@@ -6,7 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import it.sweven.blockcovid.reservations.dto.DeskAvailability;
-import it.sweven.blockcovid.reservations.entities.Reservation;
+import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.reservations.exceptions.NoNextReservation;
 import it.sweven.blockcovid.reservations.servicies.ReservationService;
 import it.sweven.blockcovid.users.entities.User;
@@ -27,7 +27,7 @@ class GetDeskStateAtTimeControllerTest {
 
   @Test
   void validDeskAndTime() throws NoNextReservation {
-    Reservation fakeReservation = mock(Reservation.class);
+    ReservationWithRoom fakeReservation = mock(ReservationWithRoom.class);
     when(fakeReservation.getStart()).thenReturn(LocalDateTime.now().plusHours(2));
     when(reservationService.nextReservation(any(), any())).thenReturn(Optional.of(fakeReservation));
     when(reservationService.findIfTimeFallsInto(any(), any())).thenReturn(Optional.empty());
@@ -40,7 +40,7 @@ class GetDeskStateAtTimeControllerTest {
 
   @Test
   void getDeskState_timestampInsideReservation() {
-    Reservation fakeReservation = mock(Reservation.class);
+    ReservationWithRoom fakeReservation = mock(ReservationWithRoom.class);
     when(fakeReservation.getEnd()).thenReturn(LocalDateTime.now().plusHours(2));
     when(reservationService.nextReservation(any(), any())).thenReturn(Optional.of(fakeReservation));
     when(reservationService.findIfTimeFallsInto(any(), any()))

@@ -14,16 +14,19 @@ public interface ReservationRepository extends MongoRepository<Reservation, Long
 
   Stream<Reservation> findReservationsByDeskIdAndStartIsAfter(String deskId, LocalDateTime start);
 
+  Stream<Reservation> findReservationsByDeskIdAndStartIsGreaterThanEqual(
+      String deskId, LocalDateTime start);
+
+  Stream<Reservation> findReservationsByDeskIdAndStartIsLessThan(
+      String deskId, LocalDateTime start);
+
   Stream<Reservation> findReservationsByDeskIdAndEndIsBefore(String deskId, LocalDateTime end);
 
-  Optional<Reservation> findReservationsByDeskIdAndStartIsBeforeAndEndIsAfter(
+  Optional<Reservation> findReservationByDeskIdAndStartIsLessThanEqualAndEndIsGreaterThanEqual(
       String deskId, LocalDateTime start, LocalDateTime end);
 
-  ArrayList<Reservation> findReservationsByUsernameAndStartIsAfter(
+  ArrayList<Reservation> findReservationsByUsernameAndStartIsGreaterThanEqual(
       String username, LocalDateTime start);
-
-  Optional<Reservation> findReservationByUsernameAndStartIsBeforeAndEndIsAfter(
-      String username, LocalDateTime start, LocalDateTime end);
 
   Stream<Reservation> findReservationByStartIsGreaterThanEqual(LocalDateTime start);
 }

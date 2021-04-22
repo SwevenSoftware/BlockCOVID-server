@@ -1,6 +1,7 @@
 package it.sweven.blockcovid.reservations.servicies;
 
 import it.sweven.blockcovid.reservations.dto.ReservationInfo;
+import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.reservations.entities.Reservation;
 import it.sweven.blockcovid.reservations.exceptions.BadTimeIntervals;
 import it.sweven.blockcovid.reservations.exceptions.NoSuchReservation;
@@ -35,7 +36,7 @@ public class ReservationService {
     this.deskRepository = deskRepository;
   }
 
-  public Reservation addReservation(ReservationInfo reservationInfo, String username)
+  public ReservationWithRoom addReservation(ReservationInfo reservationInfo, String username)
       throws ReservationClash, BadTimeIntervals, DeskNotFoundException, RoomNotFoundException {
     Desk toBook =
         deskRepository
@@ -57,57 +58,139 @@ public class ReservationService {
             reservationInfo.getEnd()));
   }
 
-  public Optional<Reservation> findIfTimeFallsInto(String deskId, LocalDateTime timestamp) {
-    return reservationRepository.findReservationsByDeskIdAndStartIsBeforeAndEndIsAfter(
-        deskId, timestamp, timestamp);
+  public Optional<ReservationWithRoom> findIfTimeFallsInto(String deskId, LocalDateTime timestamp) {
+    return reservationRepository
+        .findReservationByDeskIdAndStartIsLessThanEqualAndEndIsGreaterThanEqual(
+            deskId, timestamp, timestamp)
+        .map(
+            r ->
+                new ReservationWithRoom(
+                    r.getId(),
+                    r.getDeskId(),
+                    getRoomName(r.getDeskId()),
+                    r.getUsername(),
+                    r.getStart(),
+                    r.getEnd()))
+        .filter(r -> r.getRoom() != null);
   }
 
-  public Reservation findById(String id) throws NoSuchReservation {
-    return reservationRepository.findReservationById(id).orElseThrow(NoSuchReservation::new);
+  public ReservationWithRoom findById(String id) throws NoSuchReservation {
+    return reservationRepository
+        .findReservationById(id)
+        .map(
+            r ->
+                new ReservationWithRoom(
+                    r.getId(),
+                    r.getDeskId(),
+                    getRoomName(r.getDeskId()),
+                    r.getUsername(),
+                    r.getStart(),
+                    r.getEnd()))
+        .filter(r -> r.getRoom() != null)
+        .orElseThrow(NoSuchReservation::new);
   }
 
-  public Reservation save(Reservation reservation) throws ReservationClash {
+  public ReservationWithRoom save(Reservation reservation)
+      throws ReservationClash, RoomNotFoundException {
     if (reservationConflict(reservation)) throw new ReservationClash();
-    return reservationRepository.save(reservation);
+    Reservation saved = reservationRepository.save(reservation);
+    String roomName = getRoomName(saved.getDeskId());
+    if (roomName == null) throw new RoomNotFoundException();
+    return new ReservationWithRoom(
+        saved.getId(),
+        saved.getDeskId(),
+        roomName,
+        saved.getUsername(),
+        saved.getStart(),
+        saved.getEnd());
   }
 
-  public Reservation delete(String id) throws NoSuchReservation {
-    return reservationRepository.deleteReservationById(id).orElseThrow(NoSuchReservation::new);
+  public ReservationWithRoom delete(String id) throws NoSuchReservation {
+    return reservationRepository
+        .deleteReservationById(id)
+        .map(
+            r ->
+                new ReservationWithRoom(
+                    r.getId(),
+                    r.getDeskId(),
+                    getRoomName(r.getDeskId()),
+                    r.getUsername(),
+                    r.getStart(),
+                    r.getEnd()))
+        .filter(r -> r.getRoom() != null)
+        .orElseThrow(NoSuchReservation::new);
   }
 
-  public Optional<Reservation> nextReservation(String deskId, LocalDateTime timestamp) {
+  public Optional<ReservationWithRoom> nextReservation(String deskId, LocalDateTime timestamp) {
     return reservationRepository
         .findReservationsByDeskIdAndStartIsAfter(deskId, timestamp)
         .sorted()
+        .map(
+            r ->
+                new ReservationWithRoom(
+                    r.getId(),
+                    r.getDeskId(),
+                    getRoomName(r.getDeskId()),
+                    r.getUsername(),
+                    r.getStart(),
+                    r.getEnd()))
+        .filter(r -> r.getRoom() != null)
         .findFirst();
   }
 
   private boolean reservationConflict(Reservation reservation) {
     return reservationRepository
-            .findReservationsByDeskIdAndStartIsAfter(
+            .findReservationsByDeskIdAndStartIsGreaterThanEqual(
                 reservation.getDeskId(), reservation.getStart())
             .parallel()
             .anyMatch(foundReservation -> reservation.getEnd().isAfter(foundReservation.getStart()))
         || reservationRepository
-            .findReservationsByDeskIdAndEndIsBefore(reservation.getDeskId(), reservation.getEnd())
+            .findReservationsByDeskIdAndStartIsLessThan(
+                reservation.getDeskId(), reservation.getStart())
             .parallel()
             .anyMatch(
                 foundReservation -> reservation.getStart().isBefore(foundReservation.getEnd()));
   }
 
-  public List<Reservation> findByUsernameAndStart(String username, LocalDateTime start) {
-    List<Reservation> allFutureReservations =
-        reservationRepository.findReservationsByUsernameAndStartIsAfter(username, start);
-    reservationRepository
-        .findReservationByUsernameAndStartIsBeforeAndEndIsAfter(username, start, start)
-        .ifPresent(reservation -> allFutureReservations.add(0, reservation));
-    return allFutureReservations;
+  public List<ReservationWithRoom> findByUsernameAndStart(String username, LocalDateTime start) {
+    return reservationRepository
+        .findReservationsByUsernameAndStartIsGreaterThanEqual(username, start)
+        .stream()
+        .map(
+            r ->
+                new ReservationWithRoom(
+                    r.getId(),
+                    r.getDeskId(),
+                    getRoomName(r.getDeskId()),
+                    r.getUsername(),
+                    r.getStart(),
+                    r.getEnd()))
+        .filter(r -> r.getRoom() != null)
+        .collect(Collectors.toList());
   }
 
-  public List<Reservation> findByTimeInterval(LocalDateTime start, LocalDateTime end) {
+  public List<ReservationWithRoom> findByTimeInterval(LocalDateTime start, LocalDateTime end) {
     return reservationRepository
         .findReservationByStartIsGreaterThanEqual(start)
         .filter(r -> !r.getStart().isAfter(end))
+        .map(
+            r ->
+                new ReservationWithRoom(
+                    r.getId(),
+                    r.getDeskId(),
+                    getRoomName(r.getDeskId()),
+                    r.getUsername(),
+                    r.getStart(),
+                    r.getEnd()))
+        .filter(r -> r.getRoom() != null)
         .collect(Collectors.toList());
+  }
+
+  private String getRoomName(String deskId) {
+    Optional<Desk> desk = deskRepository.findById(deskId);
+    if (desk.isEmpty()) return null;
+    Optional<Room> room = roomRepository.findById(desk.get().getRoomId());
+    if (room.isEmpty()) return null;
+    return room.get().getName();
   }
 }

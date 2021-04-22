@@ -5,12 +5,13 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import it.sweven.blockcovid.reservations.assemblers.ReservationAssembler;
-import it.sweven.blockcovid.reservations.entities.Reservation;
+import it.sweven.blockcovid.reservations.assemblers.ReservationWithRoomAssembler;
+import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.reservations.servicies.ReservationService;
 import it.sweven.blockcovid.users.entities.User;
 import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,11 +24,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ViewPersonalReservationsController implements ReservationController {
   private final ReservationService service;
-  private final ReservationAssembler assembler;
+  private final ReservationWithRoomAssembler assembler;
 
   @Autowired
   public ViewPersonalReservationsController(
-      ReservationService service, ReservationAssembler assembler) {
+      ReservationService service, ReservationWithRoomAssembler assembler) {
     this.service = service;
     this.assembler = assembler;
   }
@@ -52,9 +53,10 @@ public class ViewPersonalReservationsController implements ReservationController
   })
   @ResponseBody
   @PreAuthorize("#submitter.isUser() and #submitter.isEnabled()")
-  public CollectionModel<EntityModel<Reservation>> viewAll(
+  public CollectionModel<EntityModel<ReservationWithRoom>> viewAll(
       @Parameter(hidden = true) @AuthenticationPrincipal User submitter,
-      @RequestParam("from") LocalDateTime timestamp) {
+      @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+          LocalDateTime timestamp) {
     return assembler.toCollectionModel(
         service.findByUsernameAndStart(submitter.getUsername(), timestamp));
   }

@@ -3,8 +3,8 @@ package it.sweven.blockcovid.reservations.controllers;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import it.sweven.blockcovid.reservations.assemblers.ReservationAssembler;
-import it.sweven.blockcovid.reservations.entities.Reservation;
+import it.sweven.blockcovid.reservations.assemblers.ReservationWithRoomAssembler;
+import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.reservations.servicies.ReservationService;
 import it.sweven.blockcovid.users.entities.User;
 import java.time.LocalDateTime;
@@ -22,11 +22,11 @@ class ViewAllReservationsControllerTest {
   @BeforeEach
   void setUp() {
     service = mock(ReservationService.class);
-    ReservationAssembler assembler =
+    ReservationWithRoomAssembler assembler =
         spy(
-            new ReservationAssembler() {
+            new ReservationWithRoomAssembler() {
               @Override
-              public EntityModel<Reservation> toModel(Reservation entity) {
+              public EntityModel<ReservationWithRoom> toModel(ReservationWithRoom entity) {
                 return EntityModel.of(entity);
               }
             });
@@ -37,8 +37,11 @@ class ViewAllReservationsControllerTest {
   void viewAll() {
     LocalDateTime providedStart = LocalDateTime.now().plusMinutes(20),
         providedEnd = LocalDateTime.now().plusMinutes(60);
-    List<Reservation> expectedList =
-        List.of(mock(Reservation.class), mock(Reservation.class), mock(Reservation.class));
+    List<ReservationWithRoom> expectedList =
+        List.of(
+            mock(ReservationWithRoom.class),
+            mock(ReservationWithRoom.class),
+            mock(ReservationWithRoom.class));
     when(service.findByTimeInterval(providedStart, providedEnd)).thenReturn(expectedList);
     assertEquals(
         expectedList,

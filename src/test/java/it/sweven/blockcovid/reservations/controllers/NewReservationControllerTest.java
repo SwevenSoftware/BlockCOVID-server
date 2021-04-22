@@ -4,9 +4,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import it.sweven.blockcovid.reservations.assemblers.ReservationAssembler;
+import it.sweven.blockcovid.reservations.assemblers.ReservationWithRoomAssembler;
 import it.sweven.blockcovid.reservations.dto.ReservationInfo;
-import it.sweven.blockcovid.reservations.entities.Reservation;
+import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.reservations.exceptions.BadTimeIntervals;
 import it.sweven.blockcovid.reservations.exceptions.ReservationClash;
 import it.sweven.blockcovid.reservations.servicies.ReservationService;
@@ -29,8 +29,8 @@ class NewReservationControllerTest {
   @BeforeEach
   void setUp() throws ReservationClash, BadTimeIntervals {
     service = mock(ReservationService.class);
-    when(service.addReservation(any(), any())).thenReturn(mock(Reservation.class));
-    ReservationAssembler assembler = mock(ReservationAssembler.class);
+    when(service.addReservation(any(), any())).thenReturn(mock(ReservationWithRoom.class));
+    ReservationWithRoomAssembler assembler = mock(ReservationWithRoomAssembler.class);
     doAnswer(invocation -> EntityModel.of(invocation.getArgument(0)))
         .when(assembler)
         .toModel(any());
@@ -44,7 +44,7 @@ class NewReservationControllerTest {
 
   @Test
   void validReservation() throws ReservationClash, BadTimeIntervals {
-    Reservation fakeReservation = mock(Reservation.class);
+    ReservationWithRoom fakeReservation = mock(ReservationWithRoom.class);
     when(service.addReservation(any(), any())).thenReturn(fakeReservation);
     assertEquals(fakeReservation, controller.book(testUser, info).getContent());
   }
