@@ -87,6 +87,15 @@ class NewReservationControllerTest {
   }
 
   @Test
+  void serviceThrowsBadAttributeValueExpException_throwsResponseStatusException()
+      throws ReservationClash, BadTimeIntervals, BadAttributeValueExpException {
+    when(service.addReservation(any(), any())).thenThrow(BadAttributeValueExpException.class);
+    ResponseStatusException thrown =
+        assertThrows(ResponseStatusException.class, () -> controller.book(testUser, info));
+    assertEquals(HttpStatus.BAD_REQUEST, thrown.getStatus());
+  }
+
+  @Test
   void reservationInfoNullStart_throwsResponseStatusException() {
     when(info.getStart()).thenReturn(null);
     assertThrows(ResponseStatusException.class, () -> controller.book(testUser, info));
