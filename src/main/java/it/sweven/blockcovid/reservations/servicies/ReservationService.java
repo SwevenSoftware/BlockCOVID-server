@@ -140,16 +140,15 @@ public class ReservationService {
 
   private boolean reservationConflict(Reservation reservation) {
     return reservationRepository
-            .findReservationsByDeskIdAndStartIsGreaterThanEqual(
-                reservation.getDeskId(), reservation.getStart())
-            .parallel()
-            .anyMatch(foundReservation -> reservation.getEnd().isAfter(foundReservation.getStart()))
-        || reservationRepository
-            .findReservationsByDeskIdAndStartIsLessThan(
-                reservation.getDeskId(), reservation.getStart())
-            .parallel()
-            .anyMatch(
-                foundReservation -> reservation.getStart().isBefore(foundReservation.getEnd()));
+        .findReservationsByDeskId(reservation.getDeskId())
+        .parallel()
+        .anyMatch(reservation1 -> reservation1.clashesWith(reservation));
+  }
+
+  public boolean timeConflict(String deskId, LocalDateTime from, LocalDateTime to) {
+    return reservationRepository
+        .findReservationsByDeskId(deskId)
+        .anyMatch(reservation -> reservation.intervalInsideReservation(from, to));
   }
 
   public List<ReservationWithRoom> findByUsernameAndStart(String username, LocalDateTime start) {

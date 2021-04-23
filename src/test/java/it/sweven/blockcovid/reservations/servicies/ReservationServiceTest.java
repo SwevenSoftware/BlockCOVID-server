@@ -31,7 +31,7 @@ class ReservationServiceTest {
   private ReservationService service;
 
   private ReservationInfo info;
-  private Reservation fakeReservation1, fakeReservation2, fakeReservation3;
+  private Reservation fakeReservation1, fakeReservation2, fakeReservation3, fakeReservation4;
   private final String username = "username";
   private Room fakeRoom;
 
@@ -67,20 +67,17 @@ class ReservationServiceTest {
     when(fakeReservation1.getEnd()).thenReturn(LocalDateTime.now().withHour(22));
     when(fakeReservation2.getStart()).thenReturn(LocalDateTime.now().withHour(22));
     when(fakeReservation2.getEnd()).thenReturn(LocalDateTime.now().withHour(23));
-    Stream<Reservation> reservationStream1 = Stream.of(fakeReservation1, fakeReservation2);
 
     fakeReservation3 = mock(Reservation.class);
-    Reservation fakeReservation4 = mock(Reservation.class);
+    fakeReservation4 = mock(Reservation.class);
     when(fakeReservation3.getStart()).thenReturn(LocalDateTime.now().withHour(10));
     when(fakeReservation3.getEnd()).thenReturn(LocalDateTime.now().withHour(12));
     when(fakeReservation4.getStart()).thenReturn(LocalDateTime.now().withHour(12));
     when(fakeReservation4.getEnd()).thenReturn(LocalDateTime.now().withHour(13));
-    Stream<Reservation> reservationStream2 = Stream.of(fakeReservation3, fakeReservation4);
 
-    when(reservationRepository.findReservationsByDeskIdAndStartIsGreaterThanEqual(any(), any()))
-        .thenReturn(reservationStream1);
-    when(reservationRepository.findReservationsByDeskIdAndStartIsLessThan(any(), any()))
-        .thenReturn(reservationStream2);
+    when(reservationRepository.findReservationsByDeskId(any()))
+        .thenReturn(
+            Stream.of(fakeReservation1, fakeReservation2, fakeReservation3, fakeReservation4));
   }
 
   private void reservationsEquals(
@@ -113,14 +110,8 @@ class ReservationServiceTest {
   }
 
   @Test
-  void clashWithReservationEndingAfterStart() {
-    when(fakeReservation1.getStart()).thenReturn(LocalDateTime.now().withHour(11));
-    assertThrows(ReservationClash.class, () -> service.addReservation(info, username));
-  }
-
-  @Test
-  void clashWithReservationStartingBeforeEnding() {
-    when(fakeReservation3.getEnd()).thenReturn(LocalDateTime.now().withHour(23).withMinute(50));
+  void clashesAreReported() {
+    when(fakeReservation1.clashesWith(any())).thenReturn(true);
     assertThrows(ReservationClash.class, () -> service.addReservation(info, username));
   }
 
@@ -175,40 +166,6 @@ class ReservationServiceTest {
     when(reservationRepository.findReservationById("idReservation"))
         .thenReturn(Optional.of(reservation));
     reservationsEquals(reservation, service.findById("idReservation"));
-  }
-
-  @Test
-  void save_endConflict_throwsReservationClash() {
-    Reservation providedReservation =
-        getReservationMock(
-            "reservationId",
-            "idDesk",
-            "username",
-            LocalDateTime.now().withHour(14),
-            LocalDateTime.now().withHour(16));
-    Reservation conflictReservation = mock(Reservation.class);
-    when(conflictReservation.getStart()).thenReturn(LocalDateTime.now().withHour(15));
-    when(reservationRepository.findReservationsByDeskIdAndStartIsGreaterThanEqual(
-            "idDesk", providedReservation.getStart()))
-        .thenReturn(Stream.of(conflictReservation));
-    assertThrows(ReservationClash.class, () -> service.save(providedReservation));
-  }
-
-  @Test
-  void save_startConflict_throwsReservationClash() {
-    Reservation providedReservation =
-        getReservationMock(
-            "reservationId",
-            "idDesk",
-            "username",
-            LocalDateTime.now().withHour(14),
-            LocalDateTime.now().withHour(16));
-    Reservation conflictReservation = mock(Reservation.class);
-    when(conflictReservation.getEnd()).thenReturn(LocalDateTime.now().withHour(15));
-    when(reservationRepository.findReservationsByDeskIdAndStartIsLessThan(
-            "idDesk", providedReservation.getStart()))
-        .thenReturn(Stream.of(conflictReservation));
-    assertThrows(ReservationClash.class, () -> service.save(providedReservation));
   }
 
   @Test
@@ -371,5 +328,22 @@ class ReservationServiceTest {
   void addReservation_reservationEndsAfterClosingTime() {
     when(fakeRoom.getClosingTime()).thenReturn(LocalTime.now().withHour(13));
     assertThrows(BadTimeIntervals.class, () -> service.addReservation(info, username));
+  }
+
+  @Test
+  void timeConflictFindsConflict() {
+    when(fakeReservation1.intervalInsideReservation(any(), any())).thenReturn(true);
+    assertTrue(
+        service.timeConflict("id1", LocalDateTime.now(), LocalDateTime.now().plusMinutes(5)));
+  }
+
+  @Test
+  void timeConflictNoConflicts() {
+    when(fakeReservation1.intervalInsideReservation(any(), any())).thenReturn(false);
+    when(fakeReservation2.intervalInsideReservation(any(), any())).thenReturn(false);
+    when(fakeReservation3.intervalInsideReservation(any(), any())).thenReturn(false);
+    when(fakeReservation4.intervalInsideReservation(any(), any())).thenReturn(false);
+    assertFalse(
+        service.timeConflict("id1", LocalDateTime.now(), LocalDateTime.now().plusMinutes(5)));
   }
 }

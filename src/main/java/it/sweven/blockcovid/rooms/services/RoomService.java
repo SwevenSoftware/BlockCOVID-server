@@ -28,7 +28,7 @@ public class RoomService {
   }
 
   public Room getByName(String roomName) throws RoomNotFoundException {
-    return roomRepository.findRoomByName(roomName).orElseThrow(() -> new RoomNotFoundException());
+    return roomRepository.findRoomByName(roomName).orElseThrow(RoomNotFoundException::new);
   }
 
   public Room createRoom(RoomInfo roomInfo) throws BadAttributeValueExpException {
@@ -51,7 +51,13 @@ public class RoomService {
 
   public Room setStatus(String roomName, Status status) throws RoomNotFoundException {
     Room toChange = roomRepository.findRoomByName(roomName).orElseThrow(RoomNotFoundException::new);
-    deskRepository.findAllByRoomId(toChange.getId()).forEach(desk -> desk.setDeskStatus(status));
+    deskRepository
+        .findAllByRoomId(toChange.getId())
+        .forEach(
+            desk -> {
+              desk.setDeskStatus(status);
+              deskRepository.save(desk);
+            });
     toChange.setRoomStatus(status);
     return roomRepository.save(toChange);
   }
