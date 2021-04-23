@@ -3,6 +3,7 @@ package it.sweven.blockcovid.reservations.servicies;
 import it.sweven.blockcovid.reservations.dto.ReservationInfo;
 import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.reservations.entities.Reservation;
+import it.sweven.blockcovid.reservations.entities.ReservationBuilder;
 import it.sweven.blockcovid.reservations.exceptions.BadTimeIntervals;
 import it.sweven.blockcovid.reservations.exceptions.NoSuchReservation;
 import it.sweven.blockcovid.reservations.exceptions.ReservationClash;
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.management.BadAttributeValueExpException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +39,8 @@ public class ReservationService {
   }
 
   public ReservationWithRoom addReservation(ReservationInfo reservationInfo, String username)
-      throws ReservationClash, BadTimeIntervals, DeskNotFoundException, RoomNotFoundException {
+      throws ReservationClash, BadTimeIntervals, DeskNotFoundException, RoomNotFoundException,
+          BadAttributeValueExpException {
     Desk toBook =
         deskRepository
             .findById(reservationInfo.getDeskId())
@@ -51,11 +54,12 @@ public class ReservationService {
     if (reservationInfo.getEnd().isAfter(nextClosing)) throw new BadTimeIntervals();
 
     return save(
-        new Reservation(
-            reservationInfo.getDeskId(),
-            username,
-            reservationInfo.getStart(),
-            reservationInfo.getEnd()));
+        new ReservationBuilder()
+            .deskId(reservationInfo.getDeskId())
+            .username(username)
+            .start(reservationInfo.getStart())
+            .end(reservationInfo.getEnd())
+            .build());
   }
 
   public Optional<ReservationWithRoom> findIfTimeFallsInto(String deskId, LocalDateTime timestamp) {

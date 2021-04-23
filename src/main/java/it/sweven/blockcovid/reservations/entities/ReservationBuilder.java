@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ReservationBuilder {
   private String id, username, deskId;
-  private LocalDateTime start, end;
+  private LocalDateTime start, end, realStart, realEnd;
 
   public ReservationBuilder id(String id) {
     this.id = id;
@@ -35,6 +35,11 @@ public class ReservationBuilder {
     return this;
   }
 
+  public ReservationBuilder realStart(LocalDateTime realStart) {
+    this.realStart = realStart;
+    return this;
+  }
+
   public ReservationBuilder from(ReservationWithRoom reservation) {
     return id(reservation.getId())
         .username(reservation.getUsername())
@@ -47,7 +52,7 @@ public class ReservationBuilder {
     if (deskId == null || username == null || start == null || end == null)
       throw new BadAttributeValueExpException("fields not specified");
     if (start.isAfter(end)) throw new BadAttributeValueExpException("start may not be after end");
-    if (id == null) return new Reservation(deskId, username, start, end);
-    else return new Reservation(id, deskId, username, start, end);
+    if (id == null) return new Reservation(deskId, username, start, end, realStart);
+    else return new Reservation(id, deskId, username, start, end, realStart, realEnd, false);
   }
 }

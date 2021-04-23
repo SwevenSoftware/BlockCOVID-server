@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Stream;
+import javax.management.BadAttributeValueExpException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -101,7 +102,7 @@ class ReservationServiceTest {
   }
 
   @Test
-  void validAddition() throws ReservationClash, BadTimeIntervals {
+  void validAddition() throws ReservationClash, BadTimeIntervals, BadAttributeValueExpException {
     ReservationWithRoom added = service.addReservation(info, username);
     assertEquals(info.getDeskId(), added.getDeskId());
     assertEquals(info.getStart(), added.getStart());

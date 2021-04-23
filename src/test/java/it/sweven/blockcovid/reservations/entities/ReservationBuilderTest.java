@@ -83,4 +83,22 @@ class ReservationBuilderTest {
     assertEquals(reservation.getStart(), LocalDateTime.MIN.withHour(13));
     assertEquals(reservation.getEnd(), LocalDateTime.MIN.withHour(15));
   }
+
+  @Test
+  void build_validWithRealStart() throws BadAttributeValueExpException {
+    Reservation reservation =
+        builder
+            .deskId("deskId")
+            .username("username")
+            .start(LocalDateTime.MIN.withHour(13))
+            .end(LocalDateTime.MIN.withHour(15))
+            .realStart(LocalDateTime.MIN.withHour(13))
+            .build();
+    assertNull(reservation.getId());
+    assertEquals(reservation.getDeskId(), "deskId");
+    assertEquals(reservation.getUsername(), "username");
+    assertEquals(reservation.getStart(), LocalDateTime.MIN.withHour(13));
+    assertEquals(reservation.getEnd(), LocalDateTime.MIN.withHour(15));
+    assertEquals(reservation.getRealStart(), LocalDateTime.MIN.withHour(13));
+  }
 }

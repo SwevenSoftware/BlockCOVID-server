@@ -15,22 +15,41 @@ public class Reservation implements Comparable<Reservation> {
   private String id;
 
   private String username, deskId;
-  private LocalDateTime start, end;
+  private LocalDateTime start, end, realStart, realEnd;
+  private Boolean deskCleaned;
 
   @PersistenceConstructor
-  Reservation(String id, String deskId, String username, LocalDateTime start, LocalDateTime end) {
+  Reservation(
+      String id,
+      String deskId,
+      String username,
+      LocalDateTime start,
+      LocalDateTime end,
+      LocalDateTime realStart,
+      LocalDateTime realEnd,
+      Boolean deskCleaned) {
     this.id = id;
     this.deskId = deskId;
     this.username = username;
     this.start = start;
     this.end = end;
+    this.realStart = realStart;
+    this.realEnd = realEnd;
+    this.deskCleaned = deskCleaned;
   }
 
-  public Reservation(String deskId, String username, LocalDateTime start, LocalDateTime end) {
+  public Reservation(
+      String deskId,
+      String username,
+      LocalDateTime start,
+      LocalDateTime end,
+      LocalDateTime realStart) {
     this.deskId = deskId;
     this.username = username;
     this.start = start;
     this.end = end;
+    this.realStart = realStart;
+    this.deskCleaned = false;
   }
 
   @Override
