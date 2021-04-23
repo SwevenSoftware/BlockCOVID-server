@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.reservations.servicies.ReservationService;
 import it.sweven.blockcovid.rooms.assemblers.RoomWithDesksAssembler;
 import it.sweven.blockcovid.rooms.dto.DeskInfoAvailability;
@@ -17,8 +16,8 @@ import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.rooms.services.DeskService;
 import it.sweven.blockcovid.rooms.services.RoomService;
 import it.sweven.blockcovid.users.entities.User;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.EntityModel;
@@ -48,9 +47,8 @@ class ViewRoomControllerTest {
     List<Desk> expectedDesks =
         List.of(new Desk("desk0", 3, 45, "roomId"), new Desk("desk1", 20, 11, "roomId"));
     when(deskService.getDesksByRoom("roomName")).thenReturn(expectedDesks);
-    when(reservationService.findIfTimeFallsInto(eq("desk0"), any()))
-        .thenReturn(Optional.of(mock(ReservationWithRoom.class)));
-    when(reservationService.findIfTimeFallsInto(eq("desk1"), any())).thenReturn(Optional.empty());
+    when(reservationService.timeConflict(eq("desk0"), any(), any())).thenReturn(true);
+    when(reservationService.timeConflict(eq("desk1"), any(), any())).thenReturn(false);
     RoomWithDesks expectedRoomWithRoom =
         new RoomWithDesks(
             expectedRoom,
@@ -59,7 +57,27 @@ class ViewRoomControllerTest {
                 new DeskInfoAvailability("desk1", 20, 11, true)));
     EntityModel<RoomWithDesks> expectedEntityModel = EntityModel.of(expectedRoomWithRoom);
     when(assembler.toModel(expectedRoomWithRoom)).thenReturn(expectedEntityModel);
-    assertEquals(expectedEntityModel, controller.viewRoom(mock(User.class), "roomName"));
+    assertEquals(
+        expectedEntityModel,
+        controller.viewRoom(
+            mock(User.class),
+            "roomName",
+            LocalDateTime.now().withHour(15),
+            LocalDateTime.now().withHour(16)));
+  }
+
+  @Test
+  void viewRoom_fromAfterTo_throwsRoomNotFoundException() {
+    ResponseStatusException thrown =
+        assertThrows(
+            ResponseStatusException.class,
+            () ->
+                controller.viewRoom(
+                    mock(User.class),
+                    "roomName",
+                    LocalDateTime.now().withHour(16),
+                    LocalDateTime.now().withHour(12)));
+    assertEquals(thrown.getStatus(), HttpStatus.BAD_REQUEST);
   }
 
   @Test
@@ -67,7 +85,13 @@ class ViewRoomControllerTest {
     when(roomService.getByName("roomName")).thenThrow(new RoomNotFoundException());
     ResponseStatusException thrown =
         assertThrows(
-            ResponseStatusException.class, () -> controller.viewRoom(mock(User.class), "roomName"));
+            ResponseStatusException.class,
+            () ->
+                controller.viewRoom(
+                    mock(User.class),
+                    "roomName",
+                    LocalDateTime.now().withHour(15),
+                    LocalDateTime.now().withHour(16)));
     assertEquals(thrown.getStatus(), HttpStatus.NOT_FOUND);
   }
 }

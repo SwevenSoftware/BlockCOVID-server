@@ -8,6 +8,7 @@ import it.sweven.blockcovid.rooms.controllers.NewRoomController;
 import it.sweven.blockcovid.rooms.controllers.ViewRoomController;
 import it.sweven.blockcovid.rooms.dto.RoomWithDesks;
 import it.sweven.blockcovid.users.entities.Authority;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -38,10 +39,19 @@ public class RoomWithDesksAssembler
     EntityModel<RoomWithDesks> roomModel =
         EntityModel.of(
             entity,
-            linkTo(methodOn(ViewRoomController.class).viewRoom(null, entity.getRoom().getName()))
+            linkTo(
+                    methodOn(ViewRoomController.class)
+                        .viewRoom(
+                            null,
+                            entity.getRoom().getName(),
+                            LocalDateTime.now(),
+                            LocalDateTime.now()))
                 .withSelfRel(),
             linkTo(methodOn(NewRoomController.class).newRoom(null, null)).withRel("new_room"),
-            linkTo(methodOn(ListRoomsController.class).listRooms(null)).withRel("list_rooms"));
+            linkTo(
+                    methodOn(ListRoomsController.class)
+                        .listRooms(null, LocalDateTime.now(), LocalDateTime.now()))
+                .withRel("list_rooms"));
     clearAuthorities();
     return roomModel;
   }
@@ -54,6 +64,10 @@ public class RoomWithDesksAssembler
             .map(this::toModel)
             .collect(Collectors.toList());
     return CollectionModel.of(
-        entityModels, linkTo(methodOn(ListRoomsController.class).listRooms(null)).withSelfRel());
+        entityModels,
+        linkTo(
+                methodOn(ListRoomsController.class)
+                    .listRooms(null, LocalDateTime.now(), LocalDateTime.now()))
+            .withSelfRel());
   }
 }

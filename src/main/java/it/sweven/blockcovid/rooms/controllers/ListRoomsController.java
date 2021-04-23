@@ -17,8 +17,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -55,7 +57,11 @@ public class ListRoomsController implements RoomsController {
         content = @Content(schema = @Schema(implementation = ResponseStatusException.class)))
   })
   public CollectionModel<EntityModel<RoomWithDesks>> listRooms(
-      @Parameter(hidden = true) @AuthenticationPrincipal User submitter) {
+      @Parameter(hidden = true) @AuthenticationPrincipal User submitter,
+      @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
+      @RequestParam("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to) {
+    if (from.isAfter(to))
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, from + " may not be after " + to);
     ArrayList<RoomWithDesks> requestedRooms = new ArrayList<>();
     for (Room room : roomService.getAllRooms()) {
       requestedRooms.add(
@@ -64,10 +70,7 @@ public class ListRoomsController implements RoomsController {
               deskService.getDesksByRoom(room.getName()).stream()
                   .map(
                       d -> {
-                        boolean available =
-                            reservationService
-                                .findIfTimeFallsInto(d.getId(), LocalDateTime.now())
-                                .isEmpty();
+                        boolean available = !reservationService.timeConflict(d.getId(), from, to);
                         return new DeskInfoAvailability(d.getId(), d.getX(), d.getY(), available);
                       })
                   .collect(Collectors.toList())));

@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -59,7 +60,11 @@ public class ViewRoomController implements RoomsController {
   })
   public EntityModel<RoomWithDesks> viewRoom(
       @Parameter(hidden = true) @AuthenticationPrincipal User submitter,
-      @PathVariable String roomName) {
+      @PathVariable String roomName,
+      @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
+      @RequestParam("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to) {
+    if (from.isAfter(to))
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, from + " may not be after " + to);
     Room requestedRoom;
     try {
       requestedRoom = roomService.getByName(roomName);
@@ -70,10 +75,7 @@ public class ViewRoomController implements RoomsController {
         deskService.getDesksByRoom(roomName).stream()
             .map(
                 d -> {
-                  boolean available =
-                      reservationService
-                          .findIfTimeFallsInto(d.getId(), LocalDateTime.now())
-                          .isEmpty();
+                  boolean available = !reservationService.timeConflict(d.getId(), from, to);
                   return new DeskInfoAvailability(d.getId(), d.getX(), d.getY(), available);
                 })
             .collect(Collectors.toList());
