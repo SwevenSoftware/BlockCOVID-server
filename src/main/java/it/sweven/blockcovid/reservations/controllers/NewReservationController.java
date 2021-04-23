@@ -15,6 +15,7 @@ import it.sweven.blockcovid.rooms.exceptions.DeskNotFoundException;
 import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.users.entities.User;
 import java.time.LocalDateTime;
+import javax.management.BadAttributeValueExpException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
@@ -80,6 +81,8 @@ public class NewReservationController implements ReservationController {
       } catch (RoomNotFoundException roomNotFoundException) {
         throw new ResponseStatusException(
             HttpStatus.INTERNAL_SERVER_ERROR, "desk associated with no room");
+      } catch (BadAttributeValueExpException e) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid fields in your request");
       }
     } else {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid fields in your request");
