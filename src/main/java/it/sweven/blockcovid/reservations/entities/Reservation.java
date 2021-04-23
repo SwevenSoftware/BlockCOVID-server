@@ -39,12 +39,12 @@ public class Reservation implements Comparable<Reservation> {
   }
 
   public boolean intervalInsideReservation(LocalDateTime start, LocalDateTime end) {
-    return (this.start.isBefore(start) && this.end.isAfter(start))
+    return (!start.isBefore(this.start) && this.end.isAfter(start))
         || (start.isBefore(this.start) && this.start.isBefore(end));
   }
 
   public boolean clashesWith(Reservation other) {
-    return !other.getId().equals(this.id)
+    return (other.getId() == null || getId() == null || !other.getId().equals(this.id))
         && deskId.equals(other.getDeskId())
         && intervalInsideReservation(other.start, other.end);
   }

@@ -37,10 +37,11 @@ public class RoomAssembler implements RepresentationModelAssembler<Room, EntityM
     EntityModel<Room> roomModel =
         EntityModel.of(
             entity,
-            linkTo(methodOn(ViewRoomController.class).viewRoom(null, entity.getName()))
+            linkTo(methodOn(ViewRoomController.class).viewRoom(null, entity.getName(), null, null))
                 .withSelfRel(),
             linkTo(methodOn(NewRoomController.class).newRoom(null, null)).withRel("new_room"),
-            linkTo(methodOn(ListRoomsController.class).listRooms(null)).withRel("list_rooms"));
+            linkTo(methodOn(ListRoomsController.class).listRooms(null, null, null))
+                .withRel("list_rooms"));
     clearAuthorities();
     return roomModel;
   }
@@ -52,6 +53,7 @@ public class RoomAssembler implements RepresentationModelAssembler<Room, EntityM
             .map(this::toModel)
             .collect(Collectors.toList());
     return CollectionModel.of(
-        entityModels, linkTo(methodOn(ListRoomsController.class).listRooms(null)).withSelfRel());
+        entityModels,
+        linkTo(methodOn(ListRoomsController.class).listRooms(null, null, null)).withSelfRel());
   }
 }
