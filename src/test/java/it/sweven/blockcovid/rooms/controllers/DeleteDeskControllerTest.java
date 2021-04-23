@@ -8,7 +8,6 @@ import it.sweven.blockcovid.rooms.assemblers.DeskAssembler;
 import it.sweven.blockcovid.rooms.dto.DeskInfo;
 import it.sweven.blockcovid.rooms.dto.DeskWithRoomName;
 import it.sweven.blockcovid.rooms.entities.Desk;
-import it.sweven.blockcovid.rooms.exceptions.DeskNotFoundException;
 import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.rooms.services.DeskService;
 import it.sweven.blockcovid.users.entities.User;
@@ -36,20 +35,20 @@ class DeleteDeskControllerTest {
   @Test
   void validRequest() {
     Desk fakeDesk = mock(Desk.class);
-    DeskWithRoomName expected = new DeskWithRoomName("room", null, null);
-    when(deskService.deleteDeskByInfosAndRoomName(any(), any())).thenReturn(fakeDesk);
+    when(fakeDesk.getId()).thenReturn("idFakeDesk");
+    DeskInfo providedDeskInfo = mock(DeskInfo.class);
+    DeskWithRoomName expected = new DeskWithRoomName("room", "id1", null, null);
+    when(deskService.getDeskByInfoAndRoomName(providedDeskInfo, "room")).thenReturn(fakeDesk);
+    when(deskService.deleteDeskById("idFakeDesk")).thenReturn(fakeDesk);
     assertEquals(
         expected.getRoomName(),
-        controller
-            .delete(mock(User.class), "room", mock(DeskInfo.class))
-            .getContent()
-            .getRoomName());
+        controller.delete(mock(User.class), "room", providedDeskInfo).getContent().getRoomName());
   }
 
   @Test
   void roomNotFound() {
-    when(deskService.deleteDeskByInfosAndRoomName(any(), any()))
-        .thenThrow(new RoomNotFoundException());
+    when(deskService.getDeskByInfoAndRoomName(any(), any())).thenReturn(mock(Desk.class));
+    when(deskService.deleteDeskById(any())).thenThrow(new RoomNotFoundException());
     ResponseStatusException thrown =
         assertThrows(
             ResponseStatusException.class,
@@ -59,8 +58,8 @@ class DeleteDeskControllerTest {
 
   @Test
   void deskNotFound() {
-    when(deskService.deleteDeskByInfosAndRoomName(any(), any()))
-        .thenThrow(new DeskNotFoundException());
+    when(deskService.getDeskByInfoAndRoomName(any(), any())).thenReturn(mock(Desk.class));
+    when(deskService.deleteDeskById(any())).thenThrow(new RoomNotFoundException());
     ResponseStatusException thrown =
         assertThrows(
             ResponseStatusException.class,

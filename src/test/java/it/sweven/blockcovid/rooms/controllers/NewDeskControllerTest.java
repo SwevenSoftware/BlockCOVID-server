@@ -6,8 +6,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import it.sweven.blockcovid.rooms.assemblers.DeskAssembler;
-import it.sweven.blockcovid.rooms.dto.DeskInfo;
 import it.sweven.blockcovid.rooms.dto.DeskWithRoomName;
+import it.sweven.blockcovid.rooms.dto.NewDeskInfo;
 import it.sweven.blockcovid.rooms.entities.Desk;
 import it.sweven.blockcovid.rooms.exceptions.DeskNotAvailable;
 import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
@@ -42,14 +42,14 @@ class NewDeskControllerTest {
 
   @Test
   void addDesk_validRequest() throws DeskNotAvailable {
-    Set<DeskInfo> providedDesks =
-        Set.of(new DeskInfo(5, 10), new DeskInfo(11, 40), new DeskInfo(1, 1));
+    Set<NewDeskInfo> providedDesks =
+        Set.of(new NewDeskInfo(5, 10), new NewDeskInfo(11, 40), new NewDeskInfo(1, 1));
     when(deskService.addDesk(any(), eq("roomName"))).thenReturn(mock(Desk.class));
     List<DeskWithRoomName> expectedList =
         List.of(
-            new DeskWithRoomName("roomName", 5, 10),
-            new DeskWithRoomName("roomName", 11, 40),
-            new DeskWithRoomName("roomName", 1, 1));
+            new DeskWithRoomName("roomName", "id1", 5, 10),
+            new DeskWithRoomName("roomName", "id2", 11, 40),
+            new DeskWithRoomName("roomName", "id3", 1, 1));
     when(deskAssembler.toCollectionModel(any()))
         .thenAnswer(
             invocation ->
@@ -65,8 +65,9 @@ class NewDeskControllerTest {
   @Test
   void addDesk_deskIsNotAvailable() throws DeskNotAvailable {
     when(deskService.addDesk(any(), eq("roomName"))).thenReturn(mock(Desk.class));
-    DeskInfo faultyDesk = mock(DeskInfo.class);
-    Set<DeskInfo> providedDesks = Set.of(mock(DeskInfo.class), faultyDesk, mock(DeskInfo.class));
+    NewDeskInfo faultyDesk = mock(NewDeskInfo.class);
+    Set<NewDeskInfo> providedDesks =
+        Set.of(mock(NewDeskInfo.class), faultyDesk, mock(NewDeskInfo.class));
     when(deskService.addDesk(faultyDesk, "roomName")).thenThrow(new DeskNotAvailable());
     ResponseStatusException thrown =
         assertThrows(
@@ -84,15 +85,16 @@ class NewDeskControllerTest {
             ResponseStatusException.class,
             () ->
                 controller.addDesk(
-                    "roomName", admin, Set.of(mock(DeskInfo.class), mock(DeskInfo.class))));
+                    "roomName", admin, Set.of(mock(NewDeskInfo.class), mock(NewDeskInfo.class))));
     assertEquals(HttpStatus.NOT_FOUND, thrown.getStatus());
   }
 
   @Test
   void addDesk_IllegalArgumentProvided() throws DeskNotAvailable {
     when(deskService.addDesk(any(), eq("roomName"))).thenReturn(mock(Desk.class));
-    DeskInfo faultyDesk = mock(DeskInfo.class);
-    Set<DeskInfo> providedDesks = Set.of(mock(DeskInfo.class), faultyDesk, mock(DeskInfo.class));
+    NewDeskInfo faultyDesk = mock(NewDeskInfo.class);
+    Set<NewDeskInfo> providedDesks =
+        Set.of(mock(NewDeskInfo.class), faultyDesk, mock(NewDeskInfo.class));
     when(deskService.addDesk(faultyDesk, "roomName")).thenThrow(new IllegalArgumentException());
     ResponseStatusException thrown =
         assertThrows(

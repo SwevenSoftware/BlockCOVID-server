@@ -15,10 +15,13 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.server.ResponseStatusException;
 
 class ModifyPasswordControllerTest {
   private ModifyPasswordController controller;
+  private UserService userService;
 
   @BeforeEach
   void setUp() {
@@ -34,7 +37,7 @@ class ModifyPasswordControllerTest {
     when(assembler.setAuthorities(anySet())).thenReturn(assembler);
 
     // Mock UserService
-    UserService userService = mock(UserService.class);
+    userService = mock(UserService.class);
     // Mock UserService.updatePassword
     doAnswer(
             invocation -> {
@@ -70,5 +73,16 @@ class ModifyPasswordControllerTest {
         new CredentialChangeRequestForm("password", "newPassword");
     User expectedUser = new User("user", "newPassword", Collections.emptySet());
     assertEquals(expectedUser, controller.modifyPassword(oldUser, requestForm).getContent());
+  }
+
+  @Test
+  void modifyPassword_badOldPassword() {
+    User oldUser = new User("user", "password", Collections.emptySet());
+    CredentialChangeRequestForm requestForm =
+        new CredentialChangeRequestForm("not_the_right_password", "newPassword");
+    ResponseStatusException thrown =
+        assertThrows(
+            ResponseStatusException.class, () -> controller.modifyPassword(oldUser, requestForm));
+    assertEquals(HttpStatus.BAD_REQUEST, thrown.getStatus());
   }
 }

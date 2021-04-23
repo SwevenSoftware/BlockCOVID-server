@@ -11,5 +11,5 @@ import lombok.Getter;
 @EqualsAndHashCode
 public class RoomWithDesks {
   private final Room room;
-  private final List<DeskInfo> desks;
+  private final List<DeskInfoAvailability> desks;
 }
