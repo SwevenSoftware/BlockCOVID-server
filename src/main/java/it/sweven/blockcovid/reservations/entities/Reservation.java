@@ -37,4 +37,15 @@ public class Reservation implements Comparable<Reservation> {
   public int compareTo(Reservation other) {
     return start.compareTo(other.getStart());
   }
+
+  public boolean intervalInsideReservation(LocalDateTime start, LocalDateTime end) {
+    return (this.start.isBefore(start) && this.end.isAfter(start))
+        || (start.isBefore(this.start) && this.start.isBefore(end));
+  }
+
+  public boolean clashesWith(Reservation other) {
+    return !other.getId().equals(this.id)
+        && deskId.equals(other.getDeskId())
+        && intervalInsideReservation(other.start, other.end);
+  }
 }
