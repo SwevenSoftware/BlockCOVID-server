@@ -71,6 +71,15 @@ class StartNewReservationControllerTest {
   }
 
   @Test
+  void endBeforeStart_throwsResponseStatusException_BAD_REQUEST() {
+    when(fakeInfo.getEnd()).thenReturn(LocalDateTime.now().minusMinutes(15));
+    ResponseStatusException thrown =
+        assertThrows(
+            ResponseStatusException.class, () -> controller.start(mock(User.class), fakeInfo));
+    assertEquals(HttpStatus.BAD_REQUEST, thrown.getStatus());
+  }
+
+  @Test
   void nullReservationDeskId_throwsResponseStatusException_BAD_REQUEST() {
     when(fakeInfo.getDeskId()).thenReturn(null);
     ResponseStatusException thrown =
