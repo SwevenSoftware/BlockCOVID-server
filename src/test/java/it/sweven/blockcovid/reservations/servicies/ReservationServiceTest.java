@@ -10,6 +10,7 @@ import it.sweven.blockcovid.reservations.entities.Reservation;
 import it.sweven.blockcovid.reservations.exceptions.BadTimeIntervals;
 import it.sweven.blockcovid.reservations.exceptions.NoSuchReservation;
 import it.sweven.blockcovid.reservations.exceptions.ReservationClash;
+import it.sweven.blockcovid.reservations.exceptions.StartingTooEarly;
 import it.sweven.blockcovid.reservations.repositories.ReservationRepository;
 import it.sweven.blockcovid.rooms.entities.Desk;
 import it.sweven.blockcovid.rooms.entities.Room;
@@ -20,6 +21,7 @@ import it.sweven.blockcovid.rooms.repositories.RoomRepository;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import javax.management.BadAttributeValueExpException;
 import org.junit.jupiter.api.BeforeEach;
@@ -346,5 +348,41 @@ class ReservationServiceTest {
     when(fakeReservation4.intervalInsideReservation(any(), any())).thenReturn(false);
     assertFalse(
         service.timeConflict("id1", LocalDateTime.now(), LocalDateTime.now().plusMinutes(5)));
+  }
+
+  @Test
+  void startHappyPath() throws ReservationClash, StartingTooEarly {
+    when(fakeReservation1.getStart()).thenReturn(LocalDateTime.now());
+    when(fakeReservation1.getDeskId()).thenReturn("");
+    when(reservationRepository.findReservationById(any()))
+        .thenReturn(Optional.of(fakeReservation1));
+    LocalDateTime now = LocalDateTime.now();
+    AtomicBoolean correctTime = new AtomicBoolean(false);
+    doAnswer(
+            invocation -> {
+              correctTime.set(invocation.getArgument(0) == now);
+              return null;
+            })
+        .when(fakeReservation1)
+        .setRealStart(any());
+    service.start("id", now);
+    assertTrue(correctTime.get());
+  }
+
+  @Test
+  void startReservationNotFound() {
+    when(reservationRepository.findReservationById(any())).thenReturn(Optional.empty());
+    LocalDateTime now = LocalDateTime.now();
+    assertThrows(NoSuchReservation.class, () -> service.start("id", now));
+  }
+
+  @Test
+  void startStartingBefore30Minutes() {
+    when(fakeReservation1.getStart()).thenReturn(LocalDateTime.now());
+    when(fakeReservation1.getDeskId()).thenReturn("");
+    when(reservationRepository.findReservationById(any()))
+        .thenReturn(Optional.of(fakeReservation1));
+    LocalDateTime now = LocalDateTime.now();
+    assertThrows(StartingTooEarly.class, () -> service.start("id", now.minusMinutes(31)));
   }
 }
