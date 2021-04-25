@@ -58,7 +58,7 @@ public class UsageReportController implements ReportsController {
   @GetMapping(value = "/usage", produces = MediaType.APPLICATION_PDF_VALUE)
   @ResponseBody
   @ApiResponses({
-    @ApiResponse(responseCode = "200", description = "Report listing rooms' cleaning status"),
+    @ApiResponse(responseCode = "200", description = "Report listing reservations' usage status"),
     @ApiResponse(
         responseCode = "403",
         description = "Method not allowed",

@@ -49,7 +49,7 @@ public class AdminCleanerReportController implements ReportsController {
   @GetMapping(value = "/cleaner", produces = MediaType.APPLICATION_PDF_VALUE)
   @ResponseBody
   @ApiResponses({
-    @ApiResponse(responseCode = "200", description = "Report listing reservations' usage status"),
+    @ApiResponse(responseCode = "200", description = "Report listing rooms' cleaning status"),
     @ApiResponse(
         responseCode = "403",
         description = "Method not allowed",

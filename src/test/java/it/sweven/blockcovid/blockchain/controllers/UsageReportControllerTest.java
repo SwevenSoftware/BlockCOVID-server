@@ -78,9 +78,44 @@ class UsageReportControllerTest {
   }
 
   @Test
-  void report_reservationsNotStarted_returnEmptyReport() throws Exception {
+  void report_reservationsNotBuilt_returnEmptyReport() throws Exception {
     LocalDateTime from = LocalDateTime.MIN.withHour(13), to = LocalDateTime.MIN.withHour(19);
     when(reservationBuilder.build()).thenThrow(new BadAttributeValueExpException(""));
+    when(reservationService.findByTimeInterval(from, to))
+        .thenReturn(List.of(mock(ReservationWithRoom.class), mock(ReservationWithRoom.class)));
+    when(documentService.generateUsageReport(Collections.emptyList())).thenReturn("pathReport");
+    Files.deleteIfExists(Path.of("pathReport"));
+    Files.createFile(Path.of("pathReport"));
+    byte[] expectedBytes = "empty report".getBytes();
+    when(documentService.readReport("pathReport")).thenReturn(expectedBytes);
+    assertEquals(expectedBytes, controller.report(mock(User.class), from, to));
+    verify(blockchainService).registerReport(eq(documentContract), any());
+    Files.deleteIfExists(Path.of("pathReport"));
+  }
+
+  @Test
+  void report_reservationsNotStarted_returnEmptyReport() throws Exception {
+    LocalDateTime from = LocalDateTime.MIN.withHour(13), to = LocalDateTime.MIN.withHour(19);
+    Reservation reservation = mock(Reservation.class);
+    when(reservationBuilder.build()).thenReturn(reservation);
+    when(reservationService.findByTimeInterval(from, to))
+        .thenReturn(List.of(mock(ReservationWithRoom.class), mock(ReservationWithRoom.class)));
+    when(documentService.generateUsageReport(Collections.emptyList())).thenReturn("pathReport");
+    Files.deleteIfExists(Path.of("pathReport"));
+    Files.createFile(Path.of("pathReport"));
+    byte[] expectedBytes = "empty report".getBytes();
+    when(documentService.readReport("pathReport")).thenReturn(expectedBytes);
+    assertEquals(expectedBytes, controller.report(mock(User.class), from, to));
+    verify(blockchainService).registerReport(eq(documentContract), any());
+    Files.deleteIfExists(Path.of("pathReport"));
+  }
+
+  @Test
+  void report_reservationsNotEnded_returnEmptyReport() throws Exception {
+    LocalDateTime from = LocalDateTime.MIN.withHour(13), to = LocalDateTime.MIN.withHour(19);
+    Reservation reservation = mock(Reservation.class);
+    when(reservation.getRealStart()).thenReturn(LocalDateTime.MIN.withHour(14));
+    when(reservationBuilder.build()).thenReturn(reservation);
     when(reservationService.findByTimeInterval(from, to))
         .thenReturn(List.of(mock(ReservationWithRoom.class), mock(ReservationWithRoom.class)));
     when(documentService.generateUsageReport(Collections.emptyList())).thenReturn("pathReport");
