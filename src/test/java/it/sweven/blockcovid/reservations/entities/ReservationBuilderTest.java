@@ -52,6 +52,30 @@ class ReservationBuilderTest {
   }
 
   @Test
+  void build_realEndWithoutRealStart_throwsBadAttributeValueExpException() {
+    builder
+        .id("id")
+        .deskId("deskId")
+        .username("username")
+        .start(LocalDateTime.MIN.withHour(10))
+        .end(LocalDateTime.MIN.withHour(16))
+        .realEnd(LocalDateTime.MIN.withHour(14));
+    assertThrows(BadAttributeValueExpException.class, () -> builder.build());
+  }
+
+  @Test
+  void build_deskCleanedBeforeRealEnd_throwsBadAttributeValueExpException() {
+    builder
+        .id("id")
+        .deskId("deskId")
+        .username("username")
+        .start(LocalDateTime.MIN.withHour(10))
+        .end(LocalDateTime.MIN.withHour(16))
+        .deskCleaned(true);
+    assertThrows(BadAttributeValueExpException.class, () -> builder.build());
+  }
+
+  @Test
   void build_validWithId() throws BadAttributeValueExpException {
     Reservation reservation =
         builder

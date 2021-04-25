@@ -67,4 +67,11 @@ public class Reservation implements Comparable<Reservation> {
         && deskId.equals(other.getDeskId())
         && intervalInsideReservation(other.start, other.end);
   }
+
+  public LocalDateTime getRealEnd() {
+    if (realStart != null && realEnd == null && LocalDateTime.now().isAfter(end)) {
+      return end;
+    }
+    return realEnd;
+  }
 }
