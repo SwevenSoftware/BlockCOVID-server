@@ -27,7 +27,7 @@ public class AccountInfoController implements AccountController {
     assembler = userAssembler;
   }
 
-  @GetMapping(value = "/info", consumes = "application/json", produces = "application/json")
+  @GetMapping("/info")
   @ResponseBody
   @ApiResponses({
     @ApiResponse(responseCode = "200"),
