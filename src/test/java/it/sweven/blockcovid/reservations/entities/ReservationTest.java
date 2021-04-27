@@ -266,4 +266,56 @@ class ReservationTest {
             false);
     assertTrue(res5.clashesWith(res6));
   }
+
+  @Test
+  void getStartReturnsRealStartIfSet() {
+    LocalDateTime start = LocalDateTime.now().withHour(10);
+    LocalDateTime realStart = LocalDateTime.now().withHour(11);
+    Reservation testReservation =
+        new Reservation(
+            "id",
+            "deskId",
+            "username",
+            start,
+            LocalDateTime.now().withHour(12),
+            realStart,
+            null,
+            false);
+    assertEquals(realStart, testReservation.getStart());
+  }
+
+  @Test
+  void getEndReturnsRealEndIfSet() {
+    LocalDateTime end = LocalDateTime.now().withHour(12);
+    LocalDateTime realEnd = LocalDateTime.now().withHour(13);
+    Reservation testReservation =
+        new Reservation(
+            "id",
+            "deskId",
+            "username",
+            LocalDateTime.now().withHour(10),
+            end,
+            null,
+            realEnd,
+            false);
+    assertEquals(realEnd, testReservation.getEnd());
+  }
+
+  @Test
+  void getStartReturnsStartIfRealStartNotSet() {
+    LocalDateTime start = LocalDateTime.now().withHour(10);
+    Reservation testReservation =
+        new Reservation(
+            "id", "deskId", "username", start, LocalDateTime.now().withHour(12), null, null, false);
+    assertEquals(start, testReservation.getStart());
+  }
+
+  @Test
+  void getEndReturnsEndIfRealEndNotSet() {
+    LocalDateTime end = LocalDateTime.now().withHour(12);
+    Reservation testReservation =
+        new Reservation(
+            "id", "deskId", "username", LocalDateTime.now().withHour(10), end, null, null, false);
+    assertEquals(end, testReservation.getEnd());
+  }
 }
