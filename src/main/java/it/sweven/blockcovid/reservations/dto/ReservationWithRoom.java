@@ -9,4 +9,5 @@ import lombok.Getter;
 public class ReservationWithRoom {
   private final String id, deskId, room, username;
   private final LocalDateTime start, end;
+  private final boolean started;
 }

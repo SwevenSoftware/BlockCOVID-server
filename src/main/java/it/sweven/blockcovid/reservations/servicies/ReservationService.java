@@ -76,7 +76,8 @@ public class ReservationService {
                     getRoomName(r.getDeskId()),
                     r.getUsername(),
                     r.getStart(),
-                    r.getEnd()))
+                    r.getEnd(),
+                    r.getRealStart() != null))
         .filter(r -> r.getRoom() != null);
   }
 
@@ -91,7 +92,8 @@ public class ReservationService {
                     getRoomName(r.getDeskId()),
                     r.getUsername(),
                     r.getStart(),
-                    r.getEnd()))
+                    r.getEnd(),
+                    r.getRealStart() != null))
         .filter(r -> r.getRoom() != null)
         .orElseThrow(NoSuchReservation::new);
   }
@@ -108,7 +110,8 @@ public class ReservationService {
         roomName,
         saved.getUsername(),
         saved.getStart(),
-        saved.getEnd());
+        saved.getEnd(),
+        saved.getRealStart() != null);
   }
 
   public ReservationWithRoom delete(String id) throws NoSuchReservation {
@@ -122,7 +125,8 @@ public class ReservationService {
                     getRoomName(r.getDeskId()),
                     r.getUsername(),
                     r.getStart(),
-                    r.getEnd()))
+                    r.getEnd(),
+                    r.getRealStart() != null))
         .filter(r -> r.getRoom() != null)
         .orElseThrow(NoSuchReservation::new);
   }
@@ -139,7 +143,8 @@ public class ReservationService {
                     getRoomName(r.getDeskId()),
                     r.getUsername(),
                     r.getStart(),
-                    r.getEnd()))
+                    r.getEnd(),
+                    r.getRealStart() != null))
         .filter(r -> r.getRoom() != null)
         .findFirst();
   }
@@ -169,7 +174,8 @@ public class ReservationService {
                     getRoomName(r.getDeskId()),
                     r.getUsername(),
                     r.getStart(),
-                    r.getEnd()))
+                    r.getEnd(),
+                    r.getRealStart() != null))
         .filter(r -> r.getRoom() != null)
         .collect(Collectors.toList());
   }
@@ -186,7 +192,8 @@ public class ReservationService {
                     getRoomName(r.getDeskId()),
                     r.getUsername(),
                     r.getStart(),
-                    r.getEnd()))
+                    r.getEnd(),
+                    r.getRealStart() != null))
         .filter(r -> r.getRoom() != null)
         .collect(Collectors.toList());
   }
