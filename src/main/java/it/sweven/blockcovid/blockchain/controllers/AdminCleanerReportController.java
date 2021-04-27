@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.sweven.blockcovid.blockchain.entities.BlockchainDeploymentInformation;
 import it.sweven.blockcovid.blockchain.services.BlockchainService;
-import it.sweven.blockcovid.blockchain.services.DocumentContractService;
 import it.sweven.blockcovid.blockchain.services.DocumentService;
 import it.sweven.blockcovid.rooms.services.RoomService;
 import it.sweven.blockcovid.users.entities.User;
@@ -30,7 +29,6 @@ public class AdminCleanerReportController implements ReportsController {
   private final RoomService roomService;
   private final DocumentService documentService;
   private final BlockchainService blockchainService;
-  private final DocumentContractService documentContractService;
   private final BlockchainDeploymentInformation deploymentInformation;
   private final Logger logger = LoggerFactory.getLogger(AdminCleanerReportController.class);
 
@@ -39,12 +37,10 @@ public class AdminCleanerReportController implements ReportsController {
       RoomService roomService,
       DocumentService documentService,
       BlockchainService blockchainService,
-      DocumentContractService documentContractService,
       BlockchainDeploymentInformation deploymentInformation) {
     this.roomService = roomService;
     this.documentService = documentService;
     this.blockchainService = blockchainService;
-    this.documentContractService = documentContractService;
     this.deploymentInformation = deploymentInformation;
   }
 
@@ -65,11 +61,7 @@ public class AdminCleanerReportController implements ReportsController {
   public byte[] report(@AuthenticationPrincipal User submitter) {
     try {
       String path = documentService.generateCleanerReport(roomService.getAllRooms());
-      DocumentContract contract =
-          documentContractService.getContractByAccountAndNetwork(
-              deploymentInformation.getAccount(),
-              deploymentInformation.getNetwork(),
-              deploymentInformation.getContract());
+      DocumentContract contract = blockchainService.loadContract(deploymentInformation);
       logger.info("file saved at path " + path);
       Thread registrationThread =
           new Thread(

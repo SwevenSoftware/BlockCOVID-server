@@ -5,7 +5,6 @@ import static org.mockito.Mockito.*;
 
 import it.sweven.blockcovid.blockchain.entities.BlockchainDeploymentInformation;
 import it.sweven.blockcovid.blockchain.services.BlockchainService;
-import it.sweven.blockcovid.blockchain.services.DocumentContractService;
 import it.sweven.blockcovid.blockchain.services.DocumentService;
 import it.sweven.blockcovid.rooms.entities.Room;
 import it.sweven.blockcovid.rooms.services.RoomService;
@@ -26,24 +25,18 @@ class AdminCleanerReportControllerTest {
   private DocumentService documentService;
   private AdminCleanerReportController controller;
   private BlockchainService blockchainService;
-  private DocumentContractService documentContractService;
 
   @BeforeEach
   void setUp() {
     roomService = mock(RoomService.class);
     documentService = mock(DocumentService.class);
     blockchainService = mock(BlockchainService.class);
-    documentContractService = mock(DocumentContractService.class);
     BlockchainDeploymentInformation credentials = mock(BlockchainDeploymentInformation.class);
     when(roomService.getAllRooms()).thenReturn(Collections.emptyList());
     controller =
         spy(
             new AdminCleanerReportController(
-                roomService,
-                documentService,
-                blockchainService,
-                documentContractService,
-                credentials));
+                roomService, documentService, blockchainService, credentials));
   }
 
   @Test
@@ -75,12 +68,8 @@ class AdminCleanerReportControllerTest {
   }
 
   @Test
-  void report_errorWhileRetrievingContract() throws Exception {
-    List<Room> mockRooms = List.of(mock(Room.class), mock(Room.class));
-    when(roomService.getAllRooms()).thenReturn(mockRooms);
-    when(documentService.generateCleanerReport(mockRooms)).thenReturn("reportPath");
-    when(documentContractService.getContractByAccountAndNetwork(any(), any(), any()))
-        .thenThrow(new Exception());
+  void report_errorLoadingContract() throws Exception {
+    when(blockchainService.loadContract(any())).thenThrow(new Exception());
     ResponseStatusException thrown =
         assertThrows(ResponseStatusException.class, () -> controller.report(mock(User.class)));
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, thrown.getStatus());

@@ -12,8 +12,10 @@ import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.web3j.documentcontract.DocumentContract;
+import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.RemoteFunctionCall;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.tx.gas.ContractGasProvider;
 
 class BlockchainServiceTest {
   private DocumentContract contract;
@@ -22,7 +24,7 @@ class BlockchainServiceTest {
   @BeforeEach
   void init() {
     this.contract = mock(DocumentContract.class);
-    this.service = new BlockchainService();
+    this.service = new BlockchainService(mock(Web3j.class), mock(ContractGasProvider.class));
   }
 
   @Test
