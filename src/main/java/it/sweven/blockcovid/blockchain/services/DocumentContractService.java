@@ -40,11 +40,18 @@ public class DocumentContractService {
                   .getContract()
               : contract;
       return DocumentContract.load(contractAddress, connection, accountCredentials, gasProvider);
-    } catch (NoSuchElementException exception) {
+    } catch (Exception exception) {
       DocumentContract deployed = deployContract(accountCredentials);
-      logger.info(
-          "No old deployed contract found, deployed new contract at "
-              + deployed.getContractAddress());
+      if (exception instanceof NoSuchElementException)
+        logger.info(
+            "No old deployed contract found, deployed new contract at "
+                + deployed.getContractAddress());
+      else
+        logger.info(
+            "unable to load contract at address "
+                + contract
+                + ", deployed new contract at address "
+                + deployed.getContractAddress());
       documentContractRepository.save(
           new BlockchainDeploymentInformation(
               accountCredentials, deployed.getContractAddress(), network));
