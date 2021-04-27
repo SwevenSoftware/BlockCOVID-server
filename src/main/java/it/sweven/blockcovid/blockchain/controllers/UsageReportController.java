@@ -8,14 +8,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.sweven.blockcovid.blockchain.services.BlockchainService;
 import it.sweven.blockcovid.blockchain.services.DocumentContractService;
 import it.sweven.blockcovid.blockchain.services.DocumentService;
-import it.sweven.blockcovid.reservations.entities.ReservationBuilder;
 import it.sweven.blockcovid.reservations.servicies.ReservationService;
 import it.sweven.blockcovid.users.entities.User;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.stream.Collectors;
-import javax.management.BadAttributeValueExpException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -33,7 +30,6 @@ import org.web3j.documentcontract.DocumentContract;
 @RestController
 public class UsageReportController implements ReportsController {
   private final ReservationService reservationService;
-  private final ReservationBuilder reservationBuilder;
   private final DocumentService documentService;
   private final BlockchainService blockchainService;
   private final DocumentContractService documentContractService;
@@ -42,13 +38,11 @@ public class UsageReportController implements ReportsController {
   @Autowired
   public UsageReportController(
       ReservationService reservationService,
-      ReservationBuilder reservationBuilder,
       DocumentService documentService,
       BlockchainService blockchainService,
       DocumentContractService documentContractService,
       Credentials blockchainCredentials) {
     this.reservationService = reservationService;
-    this.reservationBuilder = reservationBuilder;
     this.documentService = documentService;
     this.blockchainService = blockchainService;
     this.documentContractService = documentContractService;
@@ -75,19 +69,7 @@ public class UsageReportController implements ReportsController {
       @RequestParam("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to) {
     try {
       String path =
-          documentService.generateUsageReport(
-              reservationService.findByTimeInterval(from, to).stream()
-                  .parallel()
-                  .map(
-                      r -> {
-                        try {
-                          return reservationBuilder.from(r).build();
-                        } catch (BadAttributeValueExpException e) {
-                          return null;
-                        }
-                      })
-                  .filter(r -> r != null && r.getRealStart() != null && r.getRealEnd() != null)
-                  .collect(Collectors.toList()));
+          documentService.generateUsageReport(reservationService.findByTimeInterval(from, to));
       DocumentContract contract =
           documentContractService.getContractByAccount(blockchainCredentials);
       blockchainService.registerReport(contract, new FileInputStream(path));

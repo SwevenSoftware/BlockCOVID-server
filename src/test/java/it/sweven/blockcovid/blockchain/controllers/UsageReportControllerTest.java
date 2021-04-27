@@ -7,8 +7,6 @@ import it.sweven.blockcovid.blockchain.services.BlockchainService;
 import it.sweven.blockcovid.blockchain.services.DocumentContractService;
 import it.sweven.blockcovid.blockchain.services.DocumentService;
 import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
-import it.sweven.blockcovid.reservations.entities.Reservation;
-import it.sweven.blockcovid.reservations.entities.ReservationBuilder;
 import it.sweven.blockcovid.reservations.servicies.ReservationService;
 import it.sweven.blockcovid.users.entities.User;
 import java.io.IOException;
@@ -17,7 +15,6 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import javax.management.BadAttributeValueExpException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -28,7 +25,6 @@ import org.web3j.documentcontract.DocumentContract;
 class UsageReportControllerTest {
 
   private ReservationService reservationService;
-  private ReservationBuilder reservationBuilder;
   private DocumentService documentService;
   private UsageReportController controller;
   private BlockchainService blockchainService;
@@ -39,8 +35,6 @@ class UsageReportControllerTest {
   @BeforeEach
   void setUp() throws Exception {
     reservationService = mock(ReservationService.class);
-    reservationBuilder = mock(ReservationBuilder.class);
-    when(reservationBuilder.from(any())).thenReturn(reservationBuilder);
     documentService = mock(DocumentService.class);
     blockchainService = mock(BlockchainService.class);
     documentContractService = mock(DocumentContractService.class);
@@ -50,7 +44,6 @@ class UsageReportControllerTest {
     controller =
         new UsageReportController(
             reservationService,
-            reservationBuilder,
             documentService,
             blockchainService,
             documentContractService,
@@ -60,68 +53,13 @@ class UsageReportControllerTest {
   @Test
   void report_reportCorrectlyGenerated() throws Exception {
     LocalDateTime from = LocalDateTime.MIN.withHour(13), to = LocalDateTime.MIN.withHour(19);
-    Reservation reservation = mock(Reservation.class);
-    when(reservation.getRealStart()).thenReturn(LocalDateTime.MIN.withHour(14));
-    when(reservation.getRealEnd()).thenReturn(LocalDateTime.MIN.withHour(17));
-    when(reservationBuilder.build()).thenReturn(reservation);
-    when(reservationService.findByTimeInterval(from, to))
-        .thenReturn(List.of(mock(ReservationWithRoom.class), mock(ReservationWithRoom.class)));
-    when(documentService.generateUsageReport(List.of(reservation, reservation)))
-        .thenReturn("pathReport");
+    List<ReservationWithRoom> listReservations =
+        List.of(mock(ReservationWithRoom.class), mock(ReservationWithRoom.class));
+    when(reservationService.findByTimeInterval(from, to)).thenReturn(listReservations);
+    when(documentService.generateUsageReport(listReservations)).thenReturn("pathReport");
     Files.deleteIfExists(Path.of("pathReport"));
     Files.createFile(Path.of("pathReport"));
     byte[] expectedBytes = "correct report".getBytes();
-    when(documentService.readReport("pathReport")).thenReturn(expectedBytes);
-    assertEquals(expectedBytes, controller.report(mock(User.class), from, to));
-    verify(blockchainService).registerReport(eq(documentContract), any());
-    Files.deleteIfExists(Path.of("pathReport"));
-  }
-
-  @Test
-  void report_reservationsNotBuilt_returnEmptyReport() throws Exception {
-    LocalDateTime from = LocalDateTime.MIN.withHour(13), to = LocalDateTime.MIN.withHour(19);
-    when(reservationBuilder.build()).thenThrow(new BadAttributeValueExpException(""));
-    when(reservationService.findByTimeInterval(from, to))
-        .thenReturn(List.of(mock(ReservationWithRoom.class), mock(ReservationWithRoom.class)));
-    when(documentService.generateUsageReport(Collections.emptyList())).thenReturn("pathReport");
-    Files.deleteIfExists(Path.of("pathReport"));
-    Files.createFile(Path.of("pathReport"));
-    byte[] expectedBytes = "empty report".getBytes();
-    when(documentService.readReport("pathReport")).thenReturn(expectedBytes);
-    assertEquals(expectedBytes, controller.report(mock(User.class), from, to));
-    verify(blockchainService).registerReport(eq(documentContract), any());
-    Files.deleteIfExists(Path.of("pathReport"));
-  }
-
-  @Test
-  void report_reservationsNotStarted_returnEmptyReport() throws Exception {
-    LocalDateTime from = LocalDateTime.MIN.withHour(13), to = LocalDateTime.MIN.withHour(19);
-    Reservation reservation = mock(Reservation.class);
-    when(reservationBuilder.build()).thenReturn(reservation);
-    when(reservationService.findByTimeInterval(from, to))
-        .thenReturn(List.of(mock(ReservationWithRoom.class), mock(ReservationWithRoom.class)));
-    when(documentService.generateUsageReport(Collections.emptyList())).thenReturn("pathReport");
-    Files.deleteIfExists(Path.of("pathReport"));
-    Files.createFile(Path.of("pathReport"));
-    byte[] expectedBytes = "empty report".getBytes();
-    when(documentService.readReport("pathReport")).thenReturn(expectedBytes);
-    assertEquals(expectedBytes, controller.report(mock(User.class), from, to));
-    verify(blockchainService).registerReport(eq(documentContract), any());
-    Files.deleteIfExists(Path.of("pathReport"));
-  }
-
-  @Test
-  void report_reservationsNotEnded_returnEmptyReport() throws Exception {
-    LocalDateTime from = LocalDateTime.MIN.withHour(13), to = LocalDateTime.MIN.withHour(19);
-    Reservation reservation = mock(Reservation.class);
-    when(reservation.getRealStart()).thenReturn(LocalDateTime.MIN.withHour(14));
-    when(reservationBuilder.build()).thenReturn(reservation);
-    when(reservationService.findByTimeInterval(from, to))
-        .thenReturn(List.of(mock(ReservationWithRoom.class), mock(ReservationWithRoom.class)));
-    when(documentService.generateUsageReport(Collections.emptyList())).thenReturn("pathReport");
-    Files.deleteIfExists(Path.of("pathReport"));
-    Files.createFile(Path.of("pathReport"));
-    byte[] expectedBytes = "empty report".getBytes();
     when(documentService.readReport("pathReport")).thenReturn(expectedBytes);
     assertEquals(expectedBytes, controller.report(mock(User.class), from, to));
     verify(blockchainService).registerReport(eq(documentContract), any());

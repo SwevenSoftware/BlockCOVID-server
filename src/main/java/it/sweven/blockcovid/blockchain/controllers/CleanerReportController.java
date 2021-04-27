@@ -25,7 +25,7 @@ import org.web3j.crypto.Credentials;
 import org.web3j.documentcontract.DocumentContract;
 
 @RestController
-public class AdminCleanerReportController implements ReportsController {
+public class CleanerReportController implements ReportsController {
   private final RoomService roomService;
   private final DocumentService documentService;
   private final BlockchainService blockchainService;
@@ -33,7 +33,7 @@ public class AdminCleanerReportController implements ReportsController {
   private final Credentials blockchainCredentials;
 
   @Autowired
-  public AdminCleanerReportController(
+  public CleanerReportController(
       RoomService roomService,
       DocumentService documentService,
       BlockchainService blockchainService,
