@@ -10,5 +10,5 @@ import org.web3j.crypto.Credentials;
 @Getter
 public class BlockchainDeploymentInformation {
   Credentials account;
-  String address, network;
+  String contract, network;
 }

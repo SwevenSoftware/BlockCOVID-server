@@ -30,13 +30,15 @@ public class DocumentContractService {
   }
 
   public DocumentContract getContractByAccountAndNetwork(
-      Credentials accountCredentials, String network) throws Exception {
+      Credentials accountCredentials, String network, String contract) throws Exception {
     try {
       String contractAddress =
-          documentContractRepository
-              .findByAccountAndNetwork(accountCredentials, network)
-              .orElseThrow(NoSuchElementException::new)
-              .getAddress();
+          (contract == null || contract.equals(""))
+              ? documentContractRepository
+                  .findByAccountAndNetwork(accountCredentials, network)
+                  .orElseThrow(NoSuchElementException::new)
+                  .getContract()
+              : contract;
       return DocumentContract.load(contractAddress, connection, accountCredentials, gasProvider);
     } catch (NoSuchElementException exception) {
       DocumentContract deployed = deployContract(accountCredentials);

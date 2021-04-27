@@ -42,7 +42,9 @@ public class BlockchainController {
     String savedPath = documentService.generateCleanerReport(roomService.getAllRooms());
     DocumentContract contract =
         documentContractService.getContractByAccountAndNetwork(
-            deploymentInformation.getAccount(), deploymentInformation.getNetwork());
+            deploymentInformation.getAccount(),
+            deploymentInformation.getNetwork(),
+            deploymentInformation.getContract());
     TransactionReceipt transactionReceipt =
         blockchainService.registerReport(contract, new FileInputStream(savedPath));
     logger.info("saved report at " + savedPath + " on block " + transactionReceipt.getBlockHash());
