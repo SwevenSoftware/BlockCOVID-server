@@ -1,6 +1,8 @@
 package it.sweven.blockcovid.configurations;
 
+import it.sweven.blockcovid.blockchain.entities.BlockchainDeploymentInformation;
 import it.sweven.blockcovid.blockchain.exceptions.BlockchainAccountNotFound;
+import it.sweven.blockcovid.blockchain.exceptions.InvalidNetworkException;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -37,8 +39,12 @@ public class BlockchainConfiguration {
   }
 
   @Bean
-  public Credentials accountCredentials() throws BlockchainAccountNotFound {
-    return Credentials.create(
-        Optional.ofNullable(account).orElseThrow(BlockchainAccountNotFound::new));
+  public BlockchainDeploymentInformation deploymentInformation()
+      throws BlockchainAccountNotFound, InvalidNetworkException {
+    Credentials account =
+        Credentials.create(
+            Optional.ofNullable(this.account).orElseThrow(BlockchainAccountNotFound::new));
+    if (network == null || network.equals("")) throw new InvalidNetworkException();
+    return new BlockchainDeploymentInformation(account, contract, network);
   }
 }

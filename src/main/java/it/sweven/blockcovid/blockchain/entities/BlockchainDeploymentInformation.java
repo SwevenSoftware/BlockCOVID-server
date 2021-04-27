@@ -8,7 +8,7 @@ import org.web3j.crypto.Credentials;
 @Data
 @AllArgsConstructor
 @Getter
-public class BlockchainDeploymentInformations {
+public class BlockchainDeploymentInformation {
   Credentials account;
-  String address;
+  String address, network;
 }

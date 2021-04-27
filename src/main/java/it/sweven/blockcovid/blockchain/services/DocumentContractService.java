@@ -1,6 +1,6 @@
 package it.sweven.blockcovid.blockchain.services;
 
-import it.sweven.blockcovid.blockchain.entities.BlockchainDeploymentInformations;
+import it.sweven.blockcovid.blockchain.entities.BlockchainDeploymentInformation;
 import it.sweven.blockcovid.blockchain.repositories.DocumentContractRepository;
 import java.util.NoSuchElementException;
 import org.slf4j.Logger;
@@ -29,11 +29,12 @@ public class DocumentContractService {
     this.gasProvider = gasProvider;
   }
 
-  public DocumentContract getContractByAccount(Credentials accountCredentials) throws Exception {
+  public DocumentContract getContractByAccountAndNetwork(
+      Credentials accountCredentials, String network) throws Exception {
     try {
       String contractAddress =
           documentContractRepository
-              .findByAccount(accountCredentials)
+              .findByAccountAndNetwork(accountCredentials, network)
               .orElseThrow(NoSuchElementException::new)
               .getAddress();
       return DocumentContract.load(contractAddress, connection, accountCredentials, gasProvider);
@@ -43,7 +44,8 @@ public class DocumentContractService {
           "No old deployed contract found, deployed new contract at "
               + deployed.getContractAddress());
       documentContractRepository.save(
-          new BlockchainDeploymentInformations(accountCredentials, deployed.getContractAddress()));
+          new BlockchainDeploymentInformation(
+              accountCredentials, deployed.getContractAddress(), network));
       return deployed;
     }
   }

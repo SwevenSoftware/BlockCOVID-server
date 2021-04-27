@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ch.qos.logback.core.read.ListAppender;
+import it.sweven.blockcovid.blockchain.entities.BlockchainDeploymentInformation;
 import it.sweven.blockcovid.blockchain.services.BlockchainService;
 import it.sweven.blockcovid.blockchain.services.DocumentContractService;
 import it.sweven.blockcovid.blockchain.services.DocumentService;
@@ -19,7 +20,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.LoggingEvent;
-import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 class BlockchainControllerTest {
@@ -34,7 +34,8 @@ class BlockchainControllerTest {
     documentService = mock(DocumentService.class);
     RoomService roomService = mock(RoomService.class);
     DocumentContractService documentContractService = mock(DocumentContractService.class);
-    Credentials accountCredentials = mock(Credentials.class);
+    BlockchainDeploymentInformation deploymentInformation =
+        mock(BlockchainDeploymentInformation.class);
     listAppender = new ListAppender<>();
     listAppender.start();
     controller =
@@ -43,7 +44,7 @@ class BlockchainControllerTest {
             documentContractService,
             documentService,
             roomService,
-            accountCredentials);
+            deploymentInformation);
     Logger logger = LoggerFactory.getLogger(BlockchainController.class);
     LogManager.getLogger("BlockchainController");
   }
