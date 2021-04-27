@@ -69,9 +69,10 @@ public class DocumentService {
     return DESTINATION_DIR + "/Report_" + id + ".pdf";
   }
 
-  public void setAsVerified(String path) throws IOException {
+  public String setAsVerified(String path) throws IOException {
     Path src = Path.of(path);
-    Path dest = Path.of(DESTINATION_DIR + "Registered_" + src.getFileName());
+    Path dest = Path.of(DESTINATION_DIR + "/Registered_" + src.getFileName());
     Files.move(src, dest, ATOMIC_MOVE);
+    return dest.toString();
   }
 }

@@ -45,8 +45,21 @@ public class BlockchainController {
             deploymentInformation.getAccount(),
             deploymentInformation.getNetwork(),
             deploymentInformation.getContract());
-    TransactionReceipt transactionReceipt =
-        blockchainService.registerReport(contract, new FileInputStream(savedPath));
-    logger.info("saved report at " + savedPath + " on block " + transactionReceipt.getBlockHash());
+    try {
+      TransactionReceipt receipt =
+          blockchainService.registerReport(contract, new FileInputStream(savedPath));
+      String newPath = documentService.setAsVerified(savedPath);
+      logger.info(
+          "registered file "
+              + savedPath
+              + " (now "
+              + newPath
+              + ") on the blockchain "
+              + deploymentInformation.getNetwork()
+              + " on block "
+              + receipt.getBlockNumber().toString());
+    } catch (Exception exception) {
+      logger.error("Unable to open file stream for file at path: " + savedPath);
+    }
   }
 }
