@@ -41,7 +41,13 @@ public class DocumentContractService {
               : contract;
       return DocumentContract.load(contractAddress, connection, accountCredentials, gasProvider);
     } catch (Exception exception) {
-      DocumentContract deployed = deployContract(accountCredentials);
+      DocumentContract deployed;
+      try {
+        deployed = deployContract(accountCredentials);
+      } catch (Exception exception1) {
+        logger.error(exception1.getMessage());
+        throw exception1;
+      }
       if (exception instanceof NoSuchElementException)
         logger.info(
             "No old deployed contract found, deployed new contract at "

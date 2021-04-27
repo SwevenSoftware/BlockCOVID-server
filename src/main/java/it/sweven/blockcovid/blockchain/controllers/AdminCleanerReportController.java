@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import it.sweven.blockcovid.blockchain.entities.BlockchainDeploymentInformation;
 import it.sweven.blockcovid.blockchain.services.BlockchainService;
 import it.sweven.blockcovid.blockchain.services.DocumentContractService;
 import it.sweven.blockcovid.blockchain.services.DocumentService;
@@ -11,6 +12,8 @@ import it.sweven.blockcovid.rooms.services.RoomService;
 import it.sweven.blockcovid.users.entities.User;
 import java.io.FileInputStream;
 import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,7 +23,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-import org.web3j.crypto.Credentials;
 import org.web3j.documentcontract.DocumentContract;
 
 @RestController
@@ -29,7 +31,8 @@ public class AdminCleanerReportController implements ReportsController {
   private final DocumentService documentService;
   private final BlockchainService blockchainService;
   private final DocumentContractService documentContractService;
-  private final Credentials blockchainCredentials;
+  private final BlockchainDeploymentInformation deploymentInformation;
+  private final Logger logger = LoggerFactory.getLogger(AdminCleanerReportController.class);
 
   @Autowired
   public AdminCleanerReportController(
@@ -37,12 +40,12 @@ public class AdminCleanerReportController implements ReportsController {
       DocumentService documentService,
       BlockchainService blockchainService,
       DocumentContractService documentContractService,
-      Credentials blockchainCredentials) {
+      BlockchainDeploymentInformation deploymentInformation) {
     this.roomService = roomService;
     this.documentService = documentService;
     this.blockchainService = blockchainService;
     this.documentContractService = documentContractService;
-    this.blockchainCredentials = blockchainCredentials;
+    this.deploymentInformation = deploymentInformation;
   }
 
   @GetMapping(value = "/cleaner", produces = MediaType.APPLICATION_PDF_VALUE)
@@ -63,8 +66,22 @@ public class AdminCleanerReportController implements ReportsController {
     try {
       String path = documentService.generateCleanerReport(roomService.getAllRooms());
       DocumentContract contract =
-          documentContractService.getContractByAccount(blockchainCredentials);
-      blockchainService.registerReport(contract, new FileInputStream(path));
+          documentContractService.getContractByAccountAndNetwork(
+              deploymentInformation.getAccount(),
+              deploymentInformation.getNetwork(),
+              deploymentInformation.getContract());
+      logger.info("file saved at path " + path);
+      Thread registrationThread =
+          new Thread(
+              () -> {
+                try {
+                  blockchainService.registerReport(contract, new FileInputStream(path));
+                  documentService.setAsVerified(path);
+                } catch (Exception exception) {
+                  logger.error("Unable to open file stream for file at path: " + path);
+                }
+              });
+      registrationThread.start();
       return documentService.readReport(path);
     } catch (IOException e) {
       throw new ResponseStatusException(

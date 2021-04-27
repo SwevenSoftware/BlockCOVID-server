@@ -6,6 +6,9 @@ networks:
   blockchain-net:
     driver: "bridge"
 
+volumes:
+  reports:
+
 services:
 
   mongo:
@@ -32,3 +35,5 @@ services:
     networks:
       - db-net
       - blockchain-net
+    volumes:
+      - "./reports:/reports"

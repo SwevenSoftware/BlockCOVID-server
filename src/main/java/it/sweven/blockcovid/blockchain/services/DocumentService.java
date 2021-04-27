@@ -1,5 +1,7 @@
 package it.sweven.blockcovid.blockchain.services;
 
+import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
+
 import it.sweven.blockcovid.blockchain.documents.PdfReport;
 import it.sweven.blockcovid.rooms.entities.Room;
 import java.io.FileInputStream;
@@ -65,5 +67,11 @@ public class DocumentService {
 
   protected String pathReport(String id) {
     return DESTINATION_DIR + "/Report_" + id + ".pdf";
+  }
+
+  public void setAsVerified(String path) throws IOException {
+    Path src = Path.of(path);
+    Path dest = Path.of(DESTINATION_DIR + "Registered_" + src.getFileName());
+    Files.move(src, dest, ATOMIC_MOVE);
   }
 }
