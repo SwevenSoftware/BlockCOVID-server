@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.sweven.blockcovid.blockchain.entities.BlockchainDeploymentInformation;
-import it.sweven.blockcovid.blockchain.services.BlockchainService;
+import it.sweven.blockcovid.blockchain.services.DeploymentService;
 import it.sweven.blockcovid.blockchain.services.DocumentService;
 import it.sweven.blockcovid.rooms.services.RoomService;
 import it.sweven.blockcovid.users.entities.User;
@@ -28,7 +28,7 @@ import org.web3j.documentcontract.DocumentContract;
 public class AdminCleanerReportController implements ReportsController {
   private final RoomService roomService;
   private final DocumentService documentService;
-  private final BlockchainService blockchainService;
+  private final DeploymentService deploymentService;
   private final BlockchainDeploymentInformation deploymentInformation;
   private final Logger logger = LoggerFactory.getLogger(AdminCleanerReportController.class);
 
@@ -36,11 +36,11 @@ public class AdminCleanerReportController implements ReportsController {
   public AdminCleanerReportController(
       RoomService roomService,
       DocumentService documentService,
-      BlockchainService blockchainService,
+      DeploymentService deploymentService,
       BlockchainDeploymentInformation deploymentInformation) {
     this.roomService = roomService;
     this.documentService = documentService;
-    this.blockchainService = blockchainService;
+    this.deploymentService = deploymentService;
     this.deploymentInformation = deploymentInformation;
   }
 
@@ -61,13 +61,13 @@ public class AdminCleanerReportController implements ReportsController {
   public byte[] report(@AuthenticationPrincipal User submitter) {
     try {
       String path = documentService.generateCleanerReport(roomService.getAllRooms());
-      DocumentContract contract = blockchainService.loadContract(deploymentInformation);
+      DocumentContract contract = deploymentService.loadContract(deploymentInformation);
       logger.info("file saved at path " + path);
       Thread registrationThread =
           new Thread(
               () -> {
                 try {
-                  blockchainService.registerReport(contract, new FileInputStream(path));
+                  deploymentService.registerReport(contract, new FileInputStream(path));
                   documentService.setAsVerified(path);
                 } catch (Exception exception) {
                   logger.error("Unable to open file stream for file at path: " + path);

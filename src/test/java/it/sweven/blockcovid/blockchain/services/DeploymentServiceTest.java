@@ -17,14 +17,14 @@ import org.web3j.protocol.core.RemoteFunctionCall;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.gas.ContractGasProvider;
 
-class BlockchainServiceTest {
+class DeploymentServiceTest {
   private DocumentContract contract;
-  private BlockchainService service;
+  private DeploymentService service;
 
   @BeforeEach
   void init() {
     this.contract = mock(DocumentContract.class);
-    this.service = new BlockchainService(mock(Web3j.class), mock(ContractGasProvider.class));
+    this.service = new DeploymentService(mock(Web3j.class), mock(ContractGasProvider.class));
   }
 
   @Test

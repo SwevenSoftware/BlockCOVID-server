@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import it.sweven.blockcovid.blockchain.entities.BlockchainDeploymentInformation;
-import it.sweven.blockcovid.blockchain.services.BlockchainService;
+import it.sweven.blockcovid.blockchain.services.DeploymentService;
 import it.sweven.blockcovid.blockchain.services.DocumentService;
 import it.sweven.blockcovid.rooms.entities.Room;
 import it.sweven.blockcovid.rooms.services.RoomService;
@@ -24,19 +24,19 @@ class AdminCleanerReportControllerTest {
   private RoomService roomService;
   private DocumentService documentService;
   private AdminCleanerReportController controller;
-  private BlockchainService blockchainService;
+  private DeploymentService deploymentService;
 
   @BeforeEach
   void setUp() {
     roomService = mock(RoomService.class);
     documentService = mock(DocumentService.class);
-    blockchainService = mock(BlockchainService.class);
+    deploymentService = mock(DeploymentService.class);
     BlockchainDeploymentInformation credentials = mock(BlockchainDeploymentInformation.class);
     when(roomService.getAllRooms()).thenReturn(Collections.emptyList());
     controller =
         spy(
             new AdminCleanerReportController(
-                roomService, documentService, blockchainService, credentials));
+                roomService, documentService, deploymentService, credentials));
   }
 
   @Test
@@ -69,7 +69,7 @@ class AdminCleanerReportControllerTest {
 
   @Test
   void report_errorLoadingContract() throws Exception {
-    when(blockchainService.loadContract(any())).thenThrow(new Exception());
+    when(deploymentService.loadContract(any())).thenThrow(new Exception());
     ResponseStatusException thrown =
         assertThrows(ResponseStatusException.class, () -> controller.report(mock(User.class)));
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, thrown.getStatus());

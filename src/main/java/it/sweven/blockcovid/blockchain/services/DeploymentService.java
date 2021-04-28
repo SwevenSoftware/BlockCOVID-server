@@ -16,14 +16,14 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.gas.ContractGasProvider;
 
 @Service
-public class BlockchainService {
+public class DeploymentService {
 
   private final Web3j connection;
   private final ContractGasProvider gasProvider;
-  private final Logger logger = LoggerFactory.getLogger(BlockchainService.class);
+  private final Logger logger = LoggerFactory.getLogger(DeploymentService.class);
 
   @Autowired
-  public BlockchainService(Web3j connection, ContractGasProvider gasProvider) {
+  public DeploymentService(Web3j connection, ContractGasProvider gasProvider) {
     this.connection = connection;
     this.gasProvider = gasProvider;
   }

@@ -1,8 +1,8 @@
 package it.sweven.blockcovid.blockchain.controllers;
 
 import it.sweven.blockcovid.blockchain.entities.BlockchainDeploymentInformation;
-import it.sweven.blockcovid.blockchain.services.BlockchainDeploymentInformationService;
-import it.sweven.blockcovid.blockchain.services.BlockchainService;
+import it.sweven.blockcovid.blockchain.services.DeploymentInformationService;
+import it.sweven.blockcovid.blockchain.services.DeploymentService;
 import it.sweven.blockcovid.blockchain.services.DocumentService;
 import it.sweven.blockcovid.rooms.services.RoomService;
 import java.io.FileInputStream;
@@ -17,8 +17,8 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 @Controller
 public class BlockchainController {
-  private final BlockchainService blockchainService;
-  private final BlockchainDeploymentInformationService blockchainDeploymentInformationService;
+  private final DeploymentService deploymentService;
+  private final DeploymentInformationService deploymentInformationService;
   private final DocumentService documentService;
   private final RoomService roomService;
   private final BlockchainDeploymentInformation deploymentInformation;
@@ -26,25 +26,25 @@ public class BlockchainController {
 
   @Autowired
   public BlockchainController(
-      BlockchainService blockchainService,
-      BlockchainDeploymentInformationService blockchainDeploymentInformationService,
+      DeploymentService deploymentService,
+      DeploymentInformationService deploymentInformationService,
       DocumentService documentService,
       RoomService roomService,
       BlockchainDeploymentInformation deploymentInformation) {
-    this.blockchainService = blockchainService;
-    this.blockchainDeploymentInformationService = blockchainDeploymentInformationService;
+    this.deploymentService = deploymentService;
+    this.deploymentInformationService = deploymentInformationService;
     this.documentService = documentService;
     this.roomService = roomService;
     this.deploymentInformation = deploymentInformation;
   }
 
-  @Scheduled(cron = "0 0 0 * * *")
+  @Scheduled(cron = "0 0 * * * *")
   public void run() throws Exception {
     String savedPath = documentService.generateCleanerReport(roomService.getAllRooms());
     try {
-      DocumentContract contract = blockchainService.loadContract(deploymentInformation);
+      DocumentContract contract = deploymentService.loadContract(deploymentInformation);
       TransactionReceipt receipt =
-          blockchainService.registerReport(contract, new FileInputStream(savedPath));
+          deploymentService.registerReport(contract, new FileInputStream(savedPath));
       String newPath = documentService.setAsVerified(savedPath);
       logger.info(
           "registered file "

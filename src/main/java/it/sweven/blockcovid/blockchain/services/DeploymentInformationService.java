@@ -8,11 +8,11 @@ import org.springframework.stereotype.Service;
 import org.web3j.crypto.Credentials;
 
 @Service
-public class BlockchainDeploymentInformationService {
+public class DeploymentInformationService {
   private final BlockchainDeploymentInformationRepository blockchainDeploymentInformationRepository;
 
   @Autowired
-  public BlockchainDeploymentInformationService(
+  public DeploymentInformationService(
       BlockchainDeploymentInformationRepository blockchainDeploymentInformationRepository) {
     this.blockchainDeploymentInformationRepository = blockchainDeploymentInformationRepository;
   }

@@ -6,8 +6,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import it.sweven.blockcovid.blockchain.entities.BlockchainDeploymentInformation;
-import it.sweven.blockcovid.blockchain.services.BlockchainDeploymentInformationService;
-import it.sweven.blockcovid.blockchain.services.BlockchainService;
+import it.sweven.blockcovid.blockchain.services.DeploymentInformationService;
+import it.sweven.blockcovid.blockchain.services.DeploymentService;
 import it.sweven.blockcovid.blockchain.services.DocumentService;
 import it.sweven.blockcovid.rooms.services.RoomService;
 import java.io.IOException;
@@ -19,24 +19,24 @@ import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 class BlockchainControllerTest {
-  private BlockchainService blockchainService;
+  private DeploymentService deploymentService;
   private DocumentService documentService;
   private BlockchainController controller;
 
   @BeforeEach
   void setUp() throws IOException {
-    blockchainService = mock(BlockchainService.class);
+    deploymentService = mock(DeploymentService.class);
     documentService = mock(DocumentService.class);
     when(documentService.generateCleanerReport(any())).thenReturn("");
     RoomService roomService = mock(RoomService.class);
-    BlockchainDeploymentInformationService blockchainDeploymentInformationService =
-        mock(BlockchainDeploymentInformationService.class);
+    DeploymentInformationService deploymentInformationService =
+        mock(DeploymentInformationService.class);
     BlockchainDeploymentInformation deploymentInformation =
         mock(BlockchainDeploymentInformation.class);
     controller =
         new BlockchainController(
-            blockchainService,
-            blockchainDeploymentInformationService,
+            deploymentService,
+            deploymentInformationService,
             documentService,
             roomService,
             deploymentInformation);
@@ -54,7 +54,7 @@ class BlockchainControllerTest {
     TransactionReceipt receipt = mock(TransactionReceipt.class);
     when(receipt.getBlockNumber()).thenReturn(BigInteger.ZERO);
     when(documentService.generateCleanerReport(any())).thenReturn(path);
-    when(blockchainService.registerReport(any(), any())).thenReturn(receipt);
+    when(deploymentService.registerReport(any(), any())).thenReturn(receipt);
     Files.createFile(Path.of(path));
     when(documentService.setAsVerified(any())).thenReturn(path);
     assertDoesNotThrow(() -> controller.run());
@@ -67,7 +67,7 @@ class BlockchainControllerTest {
     TransactionReceipt receipt = mock(TransactionReceipt.class);
     when(receipt.getBlockNumber()).thenReturn(BigInteger.ZERO);
     when(documentService.generateCleanerReport(any())).thenReturn(path);
-    when(blockchainService.registerReport(any(), any())).thenReturn(receipt);
+    when(deploymentService.registerReport(any(), any())).thenReturn(receipt);
     when(documentService.setAsVerified(any())).thenReturn(path);
     assertDoesNotThrow(() -> controller.run());
   }
@@ -78,9 +78,9 @@ class BlockchainControllerTest {
     TransactionReceipt receipt = mock(TransactionReceipt.class);
     when(receipt.getBlockNumber()).thenReturn(BigInteger.ZERO);
     when(documentService.generateCleanerReport(any())).thenReturn(path);
-    when(blockchainService.registerReport(any(), any())).thenReturn(receipt);
+    when(deploymentService.registerReport(any(), any())).thenReturn(receipt);
     when(documentService.setAsVerified(any())).thenReturn(path);
-    when(blockchainService.loadContract(any())).thenThrow(new Exception());
+    when(deploymentService.loadContract(any())).thenThrow(new Exception());
     assertDoesNotThrow(() -> controller.run());
   }
 }

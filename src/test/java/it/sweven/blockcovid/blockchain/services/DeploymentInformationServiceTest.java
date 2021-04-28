@@ -14,14 +14,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.web3j.crypto.Credentials;
 
-class BlockchainDeploymentInformationServiceTest {
+class DeploymentInformationServiceTest {
   private BlockchainDeploymentInformationRepository repository;
-  private BlockchainDeploymentInformationService service;
+  private DeploymentInformationService service;
 
   @BeforeEach
   void setUp() {
     repository = mock(BlockchainDeploymentInformationRepository.class);
-    service = new BlockchainDeploymentInformationService(repository);
+    service = new DeploymentInformationService(repository);
   }
 
   @Test
