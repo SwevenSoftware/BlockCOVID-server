@@ -5,8 +5,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import it.sweven.blockcovid.blockchain.entities.DeploymentInformation;
-import it.sweven.blockcovid.blockchain.services.DeploymentService;
 import it.sweven.blockcovid.blockchain.services.DocumentService;
 import it.sweven.blockcovid.reservations.servicies.ReservationService;
 import it.sweven.blockcovid.users.entities.User;
@@ -37,9 +35,9 @@ public class UsageReportController implements ReportsController {
 
   @Autowired
   public UsageReportController(
-          ReservationService reservationService,
-          DocumentService documentService,
-          DocumentContract contract) {
+      ReservationService reservationService,
+      DocumentService documentService,
+      DocumentContract contract) {
     this.reservationService = reservationService;
     this.documentService = documentService;
     this.contract = contract;

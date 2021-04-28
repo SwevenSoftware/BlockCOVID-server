@@ -43,7 +43,7 @@ class UsageReportControllerTest {
         new UsageReportController(
             reservationService,
             documentService,
-                deploymentService,
+            deploymentService,
             documentContractService,
             credentials);
   }
