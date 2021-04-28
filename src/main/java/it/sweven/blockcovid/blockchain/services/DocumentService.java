@@ -1,5 +1,7 @@
 package it.sweven.blockcovid.blockchain.services;
 
+import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
+
 import it.sweven.blockcovid.blockchain.documents.PdfReport;
 import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.rooms.entities.Room;
@@ -13,6 +15,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import javax.management.BadAttributeValueExpException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.DigestUtils;
 
 @Service
 public class DocumentService {
@@ -103,5 +106,16 @@ public class DocumentService {
 
   protected String pathReport(String id) {
     return DESTINATION_DIR + "/Report_" + id + ".pdf";
+  }
+
+  public String setAsVerified(String path) throws IOException {
+    Path src = Path.of(path);
+    Path dest = Path.of(DESTINATION_DIR + "/Registered_" + src.getFileName());
+    Files.move(src, dest, ATOMIC_MOVE);
+    return dest.toString();
+  }
+
+  public String hashOf(String path) throws IOException {
+    return DigestUtils.md5DigestAsHex(readReport(path));
   }
 }
