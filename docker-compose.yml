@@ -32,3 +32,7 @@ services:
     networks:
       - db-net
       - blockchain-net
+    volumes:
+      - type: bind
+        source: ${REPORT_DIR}
+        target: /reports

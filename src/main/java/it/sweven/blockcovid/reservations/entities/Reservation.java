@@ -38,20 +38,6 @@ public class Reservation implements Comparable<Reservation> {
     this.deskCleaned = deskCleaned;
   }
 
-  public Reservation(
-      String deskId,
-      String username,
-      LocalDateTime start,
-      LocalDateTime end,
-      LocalDateTime realStart) {
-    this.deskId = deskId;
-    this.username = username;
-    this.start = start;
-    this.end = end;
-    this.realStart = realStart;
-    this.deskCleaned = false;
-  }
-
   @Override
   public int compareTo(Reservation other) {
     return start.compareTo(other.getStart());
@@ -68,13 +54,10 @@ public class Reservation implements Comparable<Reservation> {
         && intervalInsideReservation(other.getStart(), other.getEnd());
   }
 
-  public LocalDateTime getStart() {
-    if (realStart != null) return realStart;
-    return start;
-  }
-
-  public LocalDateTime getEnd() {
-    if (realEnd != null) return realEnd;
-    return end;
+  public LocalDateTime getRealEnd() {
+    if (realStart != null && realEnd == null && LocalDateTime.now().isAfter(end)) {
+      return end;
+    }
+    return realEnd;
   }
 }

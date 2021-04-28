@@ -22,10 +22,10 @@ import org.slf4j.event.LoggingEvent;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
-class BlockchainControllerTest {
+class BlockchainCleanerControllerTest {
   private BlockchainService blockchainService;
   private DocumentService documentService;
-  private BlockchainController controller;
+  private BlockchainCleanerController controller;
   ListAppender<LoggingEvent> listAppender;
 
   @BeforeEach
@@ -38,14 +38,14 @@ class BlockchainControllerTest {
     listAppender = new ListAppender<>();
     listAppender.start();
     controller =
-        new BlockchainController(
+        new BlockchainCleanerController(
             blockchainService,
             documentContractService,
             documentService,
             roomService,
             accountCredentials);
-    Logger logger = LoggerFactory.getLogger(BlockchainController.class);
-    LogManager.getLogger("BlockchainController");
+    Logger logger = LoggerFactory.getLogger(BlockchainCleanerController.class);
+    LogManager.getLogger("BlockchainCleanerController");
   }
 
   @Test

@@ -268,54 +268,54 @@ class ReservationTest {
   }
 
   @Test
-  void getStartReturnsRealStartIfSet() {
-    LocalDateTime start = LocalDateTime.now().withHour(10);
-    LocalDateTime realStart = LocalDateTime.now().withHour(11);
-    Reservation testReservation =
+  void getRealEnd() {
+    Reservation res1 =
         new Reservation(
-            "id",
-            "deskId",
-            "username",
-            start,
-            LocalDateTime.now().withHour(12),
-            realStart,
+            "id1",
+            "deskId1",
+            "username2",
+            LocalDateTime.MIN.withHour(15),
+            LocalDateTime.MIN.withHour(16),
+            null,
             null,
             false);
-    assertEquals(realStart, testReservation.getStart());
-  }
+    assertNull(res1.getRealEnd());
 
-  @Test
-  void getEndReturnsRealEndIfSet() {
-    LocalDateTime end = LocalDateTime.now().withHour(12);
-    LocalDateTime realEnd = LocalDateTime.now().withHour(13);
-    Reservation testReservation =
+    Reservation res2 =
         new Reservation(
-            "id",
-            "deskId",
-            "username",
-            LocalDateTime.now().withHour(10),
-            end,
+            "id1",
+            "deskId1",
+            "username2",
+            LocalDateTime.MIN.withHour(10),
+            LocalDateTime.MIN.withHour(17),
+            LocalDateTime.MIN.withHour(11),
             null,
-            realEnd,
             false);
-    assertEquals(realEnd, testReservation.getEnd());
-  }
+    assertEquals(LocalDateTime.MIN.withHour(17), res2.getRealEnd());
 
-  @Test
-  void getStartReturnsStartIfRealStartNotSet() {
-    LocalDateTime start = LocalDateTime.now().withHour(10);
-    Reservation testReservation =
+    Reservation res3 =
         new Reservation(
-            "id", "deskId", "username", start, LocalDateTime.now().withHour(12), null, null, false);
-    assertEquals(start, testReservation.getStart());
-  }
+            "id1",
+            "deskId1",
+            "username2",
+            LocalDateTime.now().minusHours(3),
+            LocalDateTime.now().plusHours(2),
+            LocalDateTime.now().minusHours(2),
+            null,
+            false);
+    assertNull(res3.getRealEnd());
 
-  @Test
-  void getEndReturnsEndIfRealEndNotSet() {
-    LocalDateTime end = LocalDateTime.now().withHour(12);
-    Reservation testReservation =
+    LocalDateTime realEnd4 = LocalDateTime.now().plusHours(1);
+    Reservation res4 =
         new Reservation(
-            "id", "deskId", "username", LocalDateTime.now().withHour(10), end, null, null, false);
-    assertEquals(end, testReservation.getEnd());
+            "id1",
+            "deskId1",
+            "username2",
+            LocalDateTime.now().minusHours(3),
+            LocalDateTime.now().plusHours(2),
+            LocalDateTime.now().minusHours(2),
+            realEnd4,
+            false);
+    assertEquals(realEnd4, res4.getRealEnd());
   }
 }

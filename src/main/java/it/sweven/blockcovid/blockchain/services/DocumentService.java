@@ -1,6 +1,7 @@
 package it.sweven.blockcovid.blockchain.services;
 
 import it.sweven.blockcovid.blockchain.documents.PdfReport;
+import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.rooms.entities.Room;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -26,6 +27,43 @@ public class DocumentService {
         .setTimestamp(timestamp)
         .setHeaderTable(List.of("Room name", "Status"));
     rooms.forEach(r -> report.addRowTable(List.of(r.getName(), r.getRoomStatus().toString())));
+    try {
+      report.create(destination);
+    } catch (BadAttributeValueExpException e) {
+      throw new IOException();
+    }
+    return destination;
+  }
+
+  public String generateUsageReport(List<ReservationWithRoom> reservations) throws IOException {
+    LocalDateTime timestamp = LocalDateTime.now();
+    String destination = initializeReport(timestamp);
+    PdfReport report = createNewReport();
+    report
+        .setTitle("Usage Report")
+        .setTimestamp(timestamp)
+        .setHeaderTable(
+            List.of(
+                "Reservation ID",
+                "User",
+                "Desk ID",
+                "Room name",
+                "Start usage",
+                "End usage",
+                "Desk cleaned after usage"));
+    reservations.stream()
+        .filter(r -> r.getUsageStart() != null && r.getUsageEnd() != null)
+        .forEach(
+            r ->
+                report.addRowTable(
+                    List.of(
+                        r.getId(),
+                        r.getUsername(),
+                        r.getDeskId(),
+                        r.getRoom(),
+                        r.getUsageStart().format(DateTimeFormatter.ISO_DATE_TIME),
+                        r.getUsageEnd().format(DateTimeFormatter.ISO_DATE_TIME),
+                        r.getDeskCleaned().toString())));
     try {
       report.create(destination);
     } catch (BadAttributeValueExpException e) {
