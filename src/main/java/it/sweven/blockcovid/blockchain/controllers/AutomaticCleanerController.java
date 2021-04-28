@@ -28,7 +28,7 @@ public class AutomaticCleanerController {
     this.roomService = roomService;
   }
 
-  @Scheduled(cron = "0 0 * * * *")
+  @Scheduled(cron = "0 0 0 * * *")
   public void run() throws Exception {
     String savedPath = documentService.generateCleanerReport(roomService.getAllRooms());
     try {
