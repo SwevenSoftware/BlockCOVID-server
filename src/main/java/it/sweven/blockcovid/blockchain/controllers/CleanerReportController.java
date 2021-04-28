@@ -1,5 +1,6 @@
 package it.sweven.blockcovid.blockchain.controllers;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -24,7 +25,7 @@ import org.web3j.crypto.Credentials;
 import org.web3j.documentcontract.DocumentContract;
 
 @RestController
-public class AdminCleanerReportController implements ReportsController {
+public class CleanerReportController implements ReportsController {
   private final RoomService roomService;
   private final DocumentService documentService;
   private final BlockchainService blockchainService;
@@ -32,7 +33,7 @@ public class AdminCleanerReportController implements ReportsController {
   private final Credentials blockchainCredentials;
 
   @Autowired
-  public AdminCleanerReportController(
+  public CleanerReportController(
       RoomService roomService,
       DocumentService documentService,
       BlockchainService blockchainService,
@@ -59,7 +60,7 @@ public class AdminCleanerReportController implements ReportsController {
         content = @Content(schema = @Schema(implementation = void.class)))
   })
   @PreAuthorize("#submitter.isAdmin()")
-  public byte[] report(@AuthenticationPrincipal User submitter) {
+  public byte[] report(@Parameter(hidden = true) @AuthenticationPrincipal User submitter) {
     try {
       String path = documentService.generateCleanerReport(roomService.getAllRooms());
       DocumentContract contract =

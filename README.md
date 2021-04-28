@@ -49,8 +49,10 @@ export KEYSTORE_PASSWORD=
 export KEYSTORE_ALIAS=
 export SSL_ENABLED=false
 # server port, this will only affect the container exposed port,
-# not he internal port
+# not the internal port
 export SERVER_PORT=8091
+# existing directory where reports will be saved
+export REPORT_DIR=
 ```
 
 ### Building

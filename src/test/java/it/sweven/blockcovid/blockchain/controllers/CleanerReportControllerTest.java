@@ -20,11 +20,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import org.web3j.crypto.Credentials;
 
-class AdminCleanerReportControllerTest {
+class CleanerReportControllerTest {
 
   private RoomService roomService;
   private DocumentService documentService;
-  private AdminCleanerReportController controller;
+  private CleanerReportController controller;
   private BlockchainService blockchainService;
   private DocumentContractService documentContractService;
 
@@ -38,7 +38,7 @@ class AdminCleanerReportControllerTest {
     when(roomService.getAllRooms()).thenReturn(Collections.emptyList());
     controller =
         spy(
-            new AdminCleanerReportController(
+            new CleanerReportController(
                 roomService,
                 documentService,
                 blockchainService,
