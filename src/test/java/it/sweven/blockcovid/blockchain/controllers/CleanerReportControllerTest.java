@@ -3,7 +3,7 @@ package it.sweven.blockcovid.blockchain.controllers;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import it.sweven.blockcovid.blockchain.entities.BlockchainDeploymentInformation;
+import it.sweven.blockcovid.blockchain.entities.DeploymentInformation;
 import it.sweven.blockcovid.blockchain.services.DeploymentService;
 import it.sweven.blockcovid.blockchain.services.DocumentService;
 import it.sweven.blockcovid.rooms.entities.Room;
@@ -19,11 +19,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-class AdminCleanerReportControllerTest {
+class CleanerReportControllerTest {
 
   private RoomService roomService;
   private DocumentService documentService;
-  private AdminCleanerReportController controller;
+  private CleanerReportController controller;
   private DeploymentService deploymentService;
 
   @BeforeEach
@@ -31,11 +31,11 @@ class AdminCleanerReportControllerTest {
     roomService = mock(RoomService.class);
     documentService = mock(DocumentService.class);
     deploymentService = mock(DeploymentService.class);
-    BlockchainDeploymentInformation credentials = mock(BlockchainDeploymentInformation.class);
+    DeploymentInformation credentials = mock(DeploymentInformation.class);
     when(roomService.getAllRooms()).thenReturn(Collections.emptyList());
     controller =
         spy(
-            new AdminCleanerReportController(
+            new CleanerReportController(
                 roomService, documentService, deploymentService, credentials));
   }
 

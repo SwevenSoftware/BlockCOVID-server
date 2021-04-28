@@ -1,6 +1,6 @@
 package it.sweven.blockcovid.configurations;
 
-import it.sweven.blockcovid.blockchain.entities.BlockchainDeploymentInformation;
+import it.sweven.blockcovid.blockchain.entities.DeploymentInformation;
 import it.sweven.blockcovid.blockchain.exceptions.BlockchainAccountNotFound;
 import it.sweven.blockcovid.blockchain.exceptions.ContractNotDeployed;
 import it.sweven.blockcovid.blockchain.exceptions.InvalidNetworkException;
@@ -11,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.web3j.crypto.Credentials;
+import org.web3j.documentcontract.DocumentContract;
 
 @Configuration
 public class BlockchainConfiguration {
@@ -35,17 +37,38 @@ public class BlockchainConfiguration {
   }
 
   @Bean
-  public BlockchainDeploymentInformation deploymentInformation()
+  public Credentials account() throws BlockchainAccountNotFound {
+    return Credentials.create(
+        Optional.ofNullable(this.account).orElseThrow(BlockchainAccountNotFound::new));
+  }
+
+  @Bean
+  public DeploymentInformation deploymentInformation()
       throws BlockchainAccountNotFound, InvalidNetworkException, Exception {
-    Credentials account =
-        Credentials.create(
-            Optional.ofNullable(this.account).orElseThrow(BlockchainAccountNotFound::new));
+    Credentials account = account();
     if (network == null || network.equals("")) throw new InvalidNetworkException();
-    try {
-      return deploymentInformationService.getByAccountAndNetwork(account, network);
-    } catch (ContractNotDeployed contractNotDeployed) {
-      return new BlockchainDeploymentInformation(
-          account, network, deploymentService.deployContract(account).getContractAddress());
-    }
+    if (contract == null || contract.equals("")) {
+      try {
+        return deploymentInformationService.getByAccountAndNetwork(account, network);
+      } catch (ContractNotDeployed contractNotDeployed) {
+        return deploymentInformationService.save(
+            new DeploymentInformation(
+                account, network, deploymentService.deployContract(account).getContractAddress()));
+      }
+    } else return new DeploymentInformation(account, contract, network);
+  }
+
+  @Bean
+  @Profile("ganache")
+  public DeploymentInformation ganacheDeploymentInformation()
+      throws InvalidNetworkException, BlockchainAccountNotFound {
+    if (network == null || network.equals("")) throw new InvalidNetworkException();
+    return new DeploymentInformation(account(), contract, network);
+  }
+
+  @Bean
+  public DocumentContract contract(DeploymentInformation information)
+      throws InvalidNetworkException, BlockchainAccountNotFound, Exception {
+    return deploymentService.loadContract(information);
   }
 }

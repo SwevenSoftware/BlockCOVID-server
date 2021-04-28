@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import it.sweven.blockcovid.blockchain.entities.BlockchainDeploymentInformation;
 import it.sweven.blockcovid.blockchain.services.DeploymentInformationService;
 import it.sweven.blockcovid.blockchain.services.DeploymentService;
 import it.sweven.blockcovid.blockchain.services.DocumentService;
@@ -16,12 +15,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.web3j.documentcontract.DocumentContract;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
-class BlockchainControllerTest {
+class AutomaticCleanerControllerTest {
   private DeploymentService deploymentService;
   private DocumentService documentService;
-  private BlockchainController controller;
+  private AutomaticCleanerController controller;
 
   @BeforeEach
   void setUp() throws IOException {
@@ -31,15 +31,9 @@ class BlockchainControllerTest {
     RoomService roomService = mock(RoomService.class);
     DeploymentInformationService deploymentInformationService =
         mock(DeploymentInformationService.class);
-    BlockchainDeploymentInformation deploymentInformation =
-        mock(BlockchainDeploymentInformation.class);
+    DocumentContract contract = mock(DocumentContract.class);
     controller =
-        new BlockchainController(
-            deploymentService,
-            deploymentInformationService,
-            documentService,
-            roomService,
-            deploymentInformation);
+        new AutomaticCleanerController(deploymentService, documentService, roomService, contract);
   }
 
   @Test

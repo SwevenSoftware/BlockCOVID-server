@@ -5,12 +5,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import it.sweven.blockcovid.blockchain.documents.PdfReport;
+import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.rooms.entities.Room;
 import it.sweven.blockcovid.rooms.entities.Status;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import javax.management.BadAttributeValueExpException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,16 +39,8 @@ class DocumentServiceTest {
     when(mockReport.setTimestamp(any())).thenReturn(mockReport);
     when(mockReport.setHeaderTable(any())).thenReturn(mockReport);
     when(mockReport.addRowTable(any())).thenReturn(mockReport);
-    AtomicBoolean reportCreated = new AtomicBoolean(false);
-    doAnswer(
-            invocation -> {
-              reportCreated.set(true);
-              return null;
-            })
-        .when(mockReport)
-        .create("pathFile");
     assertEquals("pathFile", service.generateCleanerReport(List.of(mockRoom1, mockRoom2)));
-    assertTrue(reportCreated.get());
+    verify(mockReport).create("pathFile");
   }
 
   @Test
@@ -69,6 +61,106 @@ class DocumentServiceTest {
     doThrow(new BadAttributeValueExpException(null)).when(mockReport).create(any());
     assertThrows(
         IOException.class, () -> service.generateCleanerReport(List.of(mockRoom1, mockRoom2)));
+  }
+
+  @Test
+  void generateUsageReport_reportCorrectlyCreated()
+      throws BadAttributeValueExpException, IOException {
+    doReturn("pathFile").when(service).initializeReport(any());
+    ReservationWithRoom
+        reservation1 =
+            new ReservationWithRoom(
+                "id1",
+                "deskId1",
+                "room1",
+                "username",
+                LocalDateTime.MIN.withHour(10),
+                LocalDateTime.MIN.withHour(13),
+                LocalDateTime.MIN.withHour(11),
+                LocalDateTime.MIN.withHour(12),
+                true),
+        reservation2 =
+            new ReservationWithRoom(
+                "id2",
+                "deskId2",
+                "room1",
+                "username",
+                LocalDateTime.MIN.withHour(15),
+                LocalDateTime.MIN.withHour(18),
+                LocalDateTime.MIN.withHour(14),
+                LocalDateTime.MIN.withHour(17),
+                false),
+        reservation3 =
+            new ReservationWithRoom(
+                "id2",
+                "deskId2",
+                "room1",
+                "username",
+                LocalDateTime.MIN.withHour(15),
+                LocalDateTime.MIN.withHour(18),
+                null,
+                LocalDateTime.MIN.withHour(17),
+                false),
+        reservation4 =
+            new ReservationWithRoom(
+                "id2",
+                "deskId2",
+                "room1",
+                "username",
+                LocalDateTime.MIN.withHour(15),
+                LocalDateTime.MIN.withHour(18),
+                LocalDateTime.MIN.withHour(14),
+                null,
+                false);
+    PdfReport mockReport = mock(PdfReport.class);
+    doReturn(mockReport).when(service).createNewReport();
+    when(mockReport.setTitle(any())).thenReturn(mockReport);
+    when(mockReport.setTimestamp(any())).thenReturn(mockReport);
+    when(mockReport.setHeaderTable(any())).thenReturn(mockReport);
+    when(mockReport.addRowTable(any())).thenReturn(mockReport);
+    assertEquals(
+        "pathFile",
+        service.generateUsageReport(
+            List.of(reservation1, reservation2, reservation3, reservation4)));
+    verify(mockReport).create("pathFile");
+  }
+
+  @Test
+  void generateUsageReport_errorWhileCreatingReport_throwsIOException()
+      throws IOException, BadAttributeValueExpException {
+    doReturn("pathFile").when(service).initializeReport(any());
+    ReservationWithRoom
+        reservation1 =
+            new ReservationWithRoom(
+                "id1",
+                "deskId1",
+                "room1",
+                "username",
+                LocalDateTime.MIN.withHour(10),
+                LocalDateTime.MIN.withHour(13),
+                LocalDateTime.MIN.withHour(11),
+                LocalDateTime.MIN.withHour(12),
+                true),
+        reservation2 =
+            new ReservationWithRoom(
+                "id2",
+                "deskId2",
+                "room1",
+                "username",
+                LocalDateTime.MIN.withHour(15),
+                LocalDateTime.MIN.withHour(18),
+                LocalDateTime.MIN.withHour(14),
+                LocalDateTime.MIN.withHour(17),
+                false);
+    PdfReport mockReport = mock(PdfReport.class);
+    doReturn(mockReport).when(service).createNewReport();
+    when(mockReport.setTitle(any())).thenReturn(mockReport);
+    when(mockReport.setTimestamp(any())).thenReturn(mockReport);
+    when(mockReport.setHeaderTable(any())).thenReturn(mockReport);
+    when(mockReport.addRowTable(any())).thenReturn(mockReport);
+    doThrow(new BadAttributeValueExpException(null)).when(mockReport).create(any());
+    assertThrows(
+        IOException.class, () -> service.generateUsageReport(List.of(reservation1, reservation2)));
   }
 
   @Test

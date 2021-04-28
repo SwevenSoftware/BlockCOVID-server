@@ -1,9 +1,10 @@
 package it.sweven.blockcovid.blockchain.services;
 
-import it.sweven.blockcovid.blockchain.entities.BlockchainDeploymentInformation;
+import it.sweven.blockcovid.blockchain.entities.DeploymentInformation;
 import it.sweven.blockcovid.blockchain.exceptions.HashNotRegistered;
 import java.io.FileInputStream;
 import java.math.BigInteger;
+import java.nio.file.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +29,10 @@ public class DeploymentService {
     this.gasProvider = gasProvider;
   }
 
-  public TransactionReceipt registerReport(DocumentContract contract, FileInputStream reportFile)
+  public TransactionReceipt registerReport(DocumentContract contract, Path reportFile)
       throws Exception {
-    byte[] reportBytes = reportFile.readAllBytes();
+    FileInputStream fileInputStream = new FileInputStream(reportFile.toFile());
+    byte[] reportBytes = fileInputStream.readAllBytes();
     String reportHash = DigestUtils.md5DigestAsHex(reportBytes);
     TransactionReceipt receipt = contract.add(reportHash).send();
     BigInteger verify = contract.verify(reportHash).send();
@@ -41,7 +43,7 @@ public class DeploymentService {
     return receipt;
   }
 
-  public DocumentContract loadContract(BlockchainDeploymentInformation deploymentInformation)
+  public DocumentContract loadContract(DeploymentInformation deploymentInformation)
       throws Exception {
     return DocumentContract.load(
         deploymentInformation.getContract(),

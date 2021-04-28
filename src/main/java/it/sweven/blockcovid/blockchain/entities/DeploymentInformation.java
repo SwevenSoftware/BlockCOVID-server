@@ -10,7 +10,7 @@ import org.web3j.crypto.Credentials;
 @AllArgsConstructor
 @Getter
 @ToString
-public class BlockchainDeploymentInformation {
+public class DeploymentInformation {
   Credentials account;
   String contract, network;
 }
