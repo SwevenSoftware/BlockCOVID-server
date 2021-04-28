@@ -6,10 +6,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.sweven.blockcovid.blockchain.services.DocumentService;
+import it.sweven.blockcovid.blockchain.services.SignRegistrationService;
 import it.sweven.blockcovid.reservations.servicies.ReservationService;
 import it.sweven.blockcovid.users.entities.User;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,23 +24,22 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-import org.web3j.documentcontract.DocumentContract;
 
 @RestController
 public class UsageReportController implements ReportsController {
   private final ReservationService reservationService;
   private final DocumentService documentService;
-  private final DocumentContract contract;
+  private final SignRegistrationService signRegistrationService;
   private final Logger logger = LoggerFactory.getLogger(UsageReportController.class);
 
   @Autowired
   public UsageReportController(
       ReservationService reservationService,
       DocumentService documentService,
-      DocumentContract contract) {
+      SignRegistrationService signRegistrationService) {
     this.reservationService = reservationService;
     this.documentService = documentService;
-    this.contract = contract;
+    this.signRegistrationService = signRegistrationService;
   }
 
   @GetMapping(value = "/usage", produces = MediaType.APPLICATION_PDF_VALUE)
@@ -64,12 +63,12 @@ public class UsageReportController implements ReportsController {
     try {
       String path =
           documentService.generateUsageReport(reservationService.findByTimeInterval(from, to));
-      logger.info("file saved at path " + path);
+      logger.info("New usage report generated at path " + path);
       Thread registrationThread =
           new Thread(
               () -> {
                 try {
-                  deploymentService.registerReport(contract, Path.of(path));
+                  signRegistrationService.registerString(documentService.hashOf(path));
                   documentService.setAsVerified(path);
                 } catch (Exception exception) {
                   logger.error("Unable to open file stream for file at path: " + path);
@@ -80,10 +79,6 @@ public class UsageReportController implements ReportsController {
     } catch (IOException e) {
       throw new ResponseStatusException(
           HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred while creating the report");
-    } catch (Exception e) {
-      throw new ResponseStatusException(
-          HttpStatus.INTERNAL_SERVER_ERROR,
-          "An error occurred while registering the document on the provided blockchain");
     }
   }
 }

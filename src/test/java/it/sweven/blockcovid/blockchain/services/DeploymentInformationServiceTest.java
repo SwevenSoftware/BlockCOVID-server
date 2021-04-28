@@ -1,7 +1,6 @@
 package it.sweven.blockcovid.blockchain.services;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -39,5 +38,10 @@ class DeploymentInformationServiceTest {
     assertThrows(
         ContractNotDeployed.class,
         () -> service.getByAccountAndNetwork(mock(Credentials.class), "network"));
+  }
+
+  @Test
+  void save() {
+    assertNull(service.save(mock(DeploymentInformation.class)));
   }
 }

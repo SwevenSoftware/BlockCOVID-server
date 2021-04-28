@@ -3,8 +3,8 @@ package it.sweven.blockcovid.blockchain.controllers;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import it.sweven.blockcovid.blockchain.services.DeploymentService;
 import it.sweven.blockcovid.blockchain.services.DocumentService;
+import it.sweven.blockcovid.blockchain.services.SignRegistrationService;
 import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.reservations.servicies.ReservationService;
 import it.sweven.blockcovid.users.entities.User;
@@ -18,7 +18,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
-import org.web3j.crypto.Credentials;
 import org.web3j.documentcontract.DocumentContract;
 
 class UsageReportControllerTest {
@@ -26,26 +25,17 @@ class UsageReportControllerTest {
   private ReservationService reservationService;
   private DocumentService documentService;
   private UsageReportController controller;
-  private DeploymentService deploymentService;
 
   private final DocumentContract documentContract = mock(DocumentContract.class);
 
   @BeforeEach
-  void setUp() throws Exception {
+  void setUp() {
     reservationService = mock(ReservationService.class);
     documentService = mock(DocumentService.class);
-    deploymentService = mock(BlockchainService.class);
-    documentContractService = mock(DocumentContractService.class);
-    Credentials credentials = mock(Credentials.class);
-    when(documentContractService.getContractByAccount(credentials)).thenReturn(documentContract);
+    SignRegistrationService signRegistrationService = mock((SignRegistrationService.class));
     when(reservationService.findByTimeInterval(any(), any())).thenReturn(Collections.emptyList());
     controller =
-        new UsageReportController(
-            reservationService,
-            documentService,
-            deploymentService,
-            documentContractService,
-            credentials);
+        new UsageReportController(reservationService, documentService, signRegistrationService);
   }
 
   @Test
@@ -60,7 +50,6 @@ class UsageReportControllerTest {
     byte[] expectedBytes = "correct report".getBytes();
     when(documentService.readReport("pathReport")).thenReturn(expectedBytes);
     assertEquals(expectedBytes, controller.report(mock(User.class), from, to));
-    verify(deploymentService).registerReport(eq(documentContract), any());
     Files.deleteIfExists(Path.of("pathReport"));
   }
 
@@ -76,8 +65,7 @@ class UsageReportControllerTest {
 
   @Test
   void report_contractCreationFails_throwsResponseStatusException() throws Exception {
-    when(documentService.generateUsageReport(any())).thenReturn("pathReport");
-    when(documentContractService.getContractByAccount(any())).thenThrow(new Exception());
+    when(documentService.generateUsageReport(any())).thenThrow(new IOException());
     ResponseStatusException thrown =
         assertThrows(
             ResponseStatusException.class,
@@ -86,14 +74,11 @@ class UsageReportControllerTest {
   }
 
   @Test
-  void report_reportRegistrationFails_throwsResponseStatusException() throws Exception {
+  void report_reportRegistrationFails_doesNotThrow() throws Exception {
     when(documentService.generateUsageReport(any())).thenReturn("pathReport");
-    when(deploymentService.registerReport(any(), any())).thenThrow(new Exception());
-    ResponseStatusException thrown =
-        assertThrows(
-            ResponseStatusException.class,
-            () -> controller.report(mock(User.class), LocalDateTime.now(), LocalDateTime.now()));
-    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, thrown.getStatus());
+    when(documentService.hashOf(any())).thenThrow(new IOException());
+    assertDoesNotThrow(
+        () -> controller.report(mock(User.class), LocalDateTime.now(), LocalDateTime.now()));
   }
 
   @Test

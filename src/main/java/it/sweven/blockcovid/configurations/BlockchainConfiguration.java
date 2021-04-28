@@ -43,6 +43,7 @@ public class BlockchainConfiguration {
   }
 
   @Bean
+  @Profile("!ganache")
   public DeploymentInformation deploymentInformation()
       throws BlockchainAccountNotFound, InvalidNetworkException, Exception {
     Credentials account = account();
@@ -61,14 +62,14 @@ public class BlockchainConfiguration {
   @Bean
   @Profile("ganache")
   public DeploymentInformation ganacheDeploymentInformation()
-      throws InvalidNetworkException, BlockchainAccountNotFound {
+      throws InvalidNetworkException, BlockchainAccountNotFound, Exception {
     if (network == null || network.equals("")) throw new InvalidNetworkException();
-    return new DeploymentInformation(account(), contract, network);
+    return new DeploymentInformation(
+        account(), deploymentService.deployContract(account()).getContractAddress(), network);
   }
 
   @Bean
-  public DocumentContract contract(DeploymentInformation information)
-      throws InvalidNetworkException, BlockchainAccountNotFound, Exception {
+  public DocumentContract contract(DeploymentInformation information) throws Exception {
     return deploymentService.loadContract(information);
   }
 }

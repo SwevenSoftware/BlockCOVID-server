@@ -5,50 +5,42 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import ch.qos.logback.core.read.ListAppender;
-import it.sweven.blockcovid.blockchain.services.DeploymentService;
 import it.sweven.blockcovid.blockchain.services.DocumentService;
+import it.sweven.blockcovid.blockchain.services.SignRegistrationService;
 import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.reservations.servicies.ReservationService;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.math.BigInteger;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.event.LoggingEvent;
-import org.web3j.documentcontract.DocumentContract;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 class AutomaticUsageControllerTest {
-  private DeploymentService deploymentService;
+  private SignRegistrationService signRegistrationService;
   private ReservationService reservationService;
   private DocumentService documentService;
   private AutomaticUsageController controller;
-  ListAppender<LoggingEvent> listAppender;
 
   @BeforeEach
   void setUp() {
-    deploymentService = mock(DeploymentService.class);
     documentService = mock(DocumentService.class);
     reservationService = mock(ReservationService.class);
-    DocumentContract contract = mock(DocumentContract.class);
+    signRegistrationService = mock(SignRegistrationService.class);
     controller =
-        new AutomaticUsageController(
-            deploymentService, documentService, reservationService, contract);
+        new AutomaticUsageController(documentService, signRegistrationService, reservationService);
   }
 
   @Test
   void runWithNoProblemsShouldNotThrowException() throws Exception {
-    TransactionReceipt fakeReceipt = mock(TransactionReceipt.class);
     List<ReservationWithRoom> listReservations =
         List.of(mock(ReservationWithRoom.class), mock(ReservationWithRoom.class));
     when(reservationService.findByTimeInterval(any(), any())).thenReturn(listReservations);
     when(documentService.generateUsageReport(listReservations)).thenReturn("path");
-    when(deploymentService.registerReport(any(), any())).thenReturn(fakeReceipt);
-    Files.createFile(Path.of("path"));
+    TransactionReceipt receipt = mock(TransactionReceipt.class);
+    when(receipt.getBlockNumber()).thenReturn(BigInteger.ONE);
+    when(signRegistrationService.registerString(any())).thenReturn(receipt);
     assertDoesNotThrow(controller::run);
-    Files.delete(Path.of("path"));
   }
 
   @Test
@@ -58,17 +50,18 @@ class AutomaticUsageControllerTest {
   }
 
   @Test
-  void invalidSavedPath_throwsIoException() throws IOException {
+  void invalidSavedPath_doesNotThrow() throws Exception {
     when(documentService.generateUsageReport(any())).thenReturn("InvalidPath");
-    assertThrows(IOException.class, controller::run);
+    when(documentService.hashOf(any())).thenThrow(new IOException());
+    assertDoesNotThrow(controller::run);
   }
 
   @Test
-  void registerReportFails_throwsException() throws Exception {
+  void registerReportFails_doesNotThrow() throws Exception {
     when(documentService.generateUsageReport(any())).thenReturn("path");
-    when(deploymentService.registerReport(any(), any())).thenThrow(new Exception());
-    Files.createFile(Path.of("path"));
-    assertThrows(Exception.class, controller::run);
-    Files.delete(Path.of("path"));
+    TransactionReceipt receipt = mock(TransactionReceipt.class);
+    when(receipt.getBlockNumber()).thenReturn(BigInteger.ONE);
+    when(signRegistrationService.registerString(any())).thenReturn(receipt);
+    assertDoesNotThrow(controller::run);
   }
 }

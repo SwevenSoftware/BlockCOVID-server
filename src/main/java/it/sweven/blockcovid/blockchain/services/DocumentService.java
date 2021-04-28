@@ -15,6 +15,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import javax.management.BadAttributeValueExpException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.DigestUtils;
 
 @Service
 public class DocumentService {
@@ -112,5 +113,9 @@ public class DocumentService {
     Path dest = Path.of(DESTINATION_DIR + "/Registered_" + src.getFileName());
     Files.move(src, dest, ATOMIC_MOVE);
     return dest.toString();
+  }
+
+  public String hashOf(String path) throws IOException {
+    return DigestUtils.md5DigestAsHex(readReport(path));
   }
 }
