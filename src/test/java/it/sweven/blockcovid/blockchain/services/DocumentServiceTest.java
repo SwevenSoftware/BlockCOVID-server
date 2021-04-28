@@ -114,6 +114,7 @@ class DocumentServiceTest {
                 false);
     PdfReport mockReport = mock(PdfReport.class);
     doReturn(mockReport).when(service).createNewReport();
+    when(mockReport.landscape()).thenReturn(mockReport);
     when(mockReport.setTitle(any())).thenReturn(mockReport);
     when(mockReport.setTimestamp(any())).thenReturn(mockReport);
     when(mockReport.setHeaderTable(any())).thenReturn(mockReport);
@@ -154,6 +155,7 @@ class DocumentServiceTest {
                 false);
     PdfReport mockReport = mock(PdfReport.class);
     doReturn(mockReport).when(service).createNewReport();
+    when(mockReport.landscape()).thenReturn(mockReport);
     when(mockReport.setTitle(any())).thenReturn(mockReport);
     when(mockReport.setTimestamp(any())).thenReturn(mockReport);
     when(mockReport.setHeaderTable(any())).thenReturn(mockReport);

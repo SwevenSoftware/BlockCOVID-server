@@ -43,6 +43,7 @@ public class DocumentService {
     String destination = initializeReport(timestamp);
     PdfReport report = createNewReport();
     report
+        .landscape()
         .setTitle("Usage Report")
         .setTimestamp(timestamp)
         .setHeaderTable(

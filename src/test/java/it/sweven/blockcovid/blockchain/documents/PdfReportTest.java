@@ -3,6 +3,7 @@ package it.sweven.blockcovid.blockchain.documents;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.IBlockElement;
@@ -114,18 +115,13 @@ public class PdfReportTest {
   void create() throws FileNotFoundException, BadAttributeValueExpException {
     Document mockDocument = mock(Document.class);
     doReturn(mockDocument).when(report).createNewDocument("path");
+    PdfDocument mockPdfDocument = mock(PdfDocument.class);
+    when(mockDocument.getPdfDocument()).thenReturn(mockPdfDocument);
     doNothing().when(report).addTitle(any());
     doNothing().when(report).addTimestamp(any());
     doNothing().when(report).addTable(any());
-    AtomicBoolean closeCalled = new AtomicBoolean(false);
-    doAnswer(
-            invocation -> {
-              closeCalled.set(true);
-              return null;
-            })
-        .when(mockDocument)
-        .close();
-    report.create("path");
-    assertTrue(closeCalled.get());
+    report.landscape().create("path");
+    verify(mockDocument).close();
+    verify(mockPdfDocument).setDefaultPageSize(any());
   }
 }
