@@ -8,13 +8,12 @@ import static org.mockito.Mockito.*;
 
 import it.sweven.blockcovid.reservations.assemblers.ReservationWithRoomAssembler;
 import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
-import it.sweven.blockcovid.reservations.exceptions.BadTimeIntervals;
 import it.sweven.blockcovid.reservations.exceptions.NoSuchReservation;
 import it.sweven.blockcovid.reservations.exceptions.ReservationClash;
 import it.sweven.blockcovid.reservations.exceptions.StartingTooEarly;
 import it.sweven.blockcovid.reservations.servicies.ReservationService;
 import it.sweven.blockcovid.users.entities.User;
-import javax.management.BadAttributeValueExpException;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.EntityModel;
@@ -28,8 +27,7 @@ class StartReservationControllerTest {
   private User fakeUser;
 
   @BeforeEach
-  void setUp()
-      throws ReservationClash, BadTimeIntervals, BadAttributeValueExpException, StartingTooEarly {
+  void setUp() throws ReservationClash, StartingTooEarly {
 
     fakeUser = mock(User.class);
     when(fakeUser.getUsername()).thenReturn("user");
@@ -37,6 +35,7 @@ class StartReservationControllerTest {
     fakeReservation = mock(ReservationWithRoom.class);
     when(fakeReservation.getId()).thenReturn("id1");
     when(fakeReservation.getUsername()).thenReturn("user");
+    when(fakeReservation.getUsageEnd()).thenReturn(LocalDateTime.MAX);
 
     reservationService = mock(ReservationService.class);
     when(reservationService.findById(any())).thenReturn(fakeReservation);
@@ -86,5 +85,21 @@ class StartReservationControllerTest {
     ResponseStatusException thrown =
         assertThrows(ResponseStatusException.class, () -> controller.start(fakeUser, "id1"));
     assertEquals(HttpStatus.CONFLICT, thrown.getStatus());
+  }
+
+  @Test
+  void startingAlreadyStartedReservation_throwsResponseStatusException() {
+    when(fakeReservation.getUsageStart()).thenReturn(LocalDateTime.now().minusMinutes(15));
+    ResponseStatusException thrown =
+        assertThrows(ResponseStatusException.class, () -> controller.start(fakeUser, "id1"));
+    assertEquals(HttpStatus.BAD_REQUEST, thrown.getStatus());
+  }
+
+  @Test
+  void startingAlreadyEndedReservation_throwsResponseStatusException() {
+    when(fakeReservation.getUsageEnd()).thenReturn(LocalDateTime.now().minusMinutes(15));
+    ResponseStatusException thrown =
+        assertThrows(ResponseStatusException.class, () -> controller.start(fakeUser, "id1"));
+    assertEquals(HttpStatus.BAD_REQUEST, thrown.getStatus());
   }
 }

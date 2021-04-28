@@ -35,12 +35,18 @@ public class StartReservationController implements ReservationController {
   public EntityModel<ReservationWithRoom> start(
       @AuthenticationPrincipal User submitter, @PathVariable String reservationID) {
     try {
+      LocalDateTime now = LocalDateTime.now();
       ReservationWithRoom reservation = reservationService.findById(reservationID);
+      if (reservation.getUsageStart() != null)
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST, "Trying to start an already started reservation");
+      if (now.isAfter(reservation.getUsageEnd()))
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST, "Trying to start an already ended reservation");
       if (!reservation.getUsername().equals(submitter.getUsername()))
         throw new ResponseStatusException(
             HttpStatus.UNAUTHORIZED, "You must be the owner of a reservation in order to start it");
-      return reservationWithRoomAssembler.toModel(
-          reservationService.start(reservationID, LocalDateTime.now()));
+      return reservationWithRoomAssembler.toModel(reservationService.start(reservationID, now));
     } catch (NoSuchReservation noSuchReservation) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such reservation");
     } catch (ReservationClash reservationClash) {
