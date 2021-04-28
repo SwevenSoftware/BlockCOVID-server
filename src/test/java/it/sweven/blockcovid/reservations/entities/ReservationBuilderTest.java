@@ -1,7 +1,10 @@
 package it.sweven.blockcovid.reservations.entities;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import java.time.LocalDateTime;
 import javax.management.BadAttributeValueExpException;
 import org.junit.jupiter.api.BeforeEach;
@@ -124,5 +127,58 @@ class ReservationBuilderTest {
     assertEquals(reservation.getStart(), LocalDateTime.MIN.withHour(13));
     assertEquals(reservation.getEnd(), LocalDateTime.MIN.withHour(15));
     assertEquals(reservation.getRealStart(), LocalDateTime.MIN.withHour(13));
+  }
+
+  @Test
+  void from_getDeskCleanedNull() throws BadAttributeValueExpException {
+    LocalDateTime now = LocalDateTime.now();
+    ReservationWithRoom reservationWithRoom = mock(ReservationWithRoom.class);
+    when(reservationWithRoom.getId()).thenReturn("id1");
+    when(reservationWithRoom.getUsername()).thenReturn("user");
+    when(reservationWithRoom.getDeskId()).thenReturn("deskId1");
+    when(reservationWithRoom.getStart()).thenReturn(now);
+    when(reservationWithRoom.getEnd()).thenReturn(now.plusMinutes(10));
+    when(reservationWithRoom.getUsageStart()).thenReturn(now.minusMinutes(10));
+    when(reservationWithRoom.getUsageEnd()).thenReturn(null);
+    when(reservationWithRoom.getDeskCleaned()).thenReturn(null);
+
+    Reservation fakeRes = new ReservationBuilder().from(reservationWithRoom).build();
+
+    assertEquals(reservationWithRoom.getId(), fakeRes.getId());
+    assertEquals(reservationWithRoom.getUsername(), fakeRes.getUsername());
+    assertEquals(reservationWithRoom.getDeskId(), fakeRes.getDeskId());
+    assertEquals(reservationWithRoom.getStart(), fakeRes.getStart());
+    assertEquals(reservationWithRoom.getEnd(), fakeRes.getEnd());
+    assertEquals(reservationWithRoom.getEnd(), fakeRes.getEnd());
+    assertEquals(reservationWithRoom.getUsageEnd(), fakeRes.getRealEnd());
+    assertEquals(reservationWithRoom.getUsageStart(), fakeRes.getRealStart());
+    assertFalse(fakeRes.getDeskCleaned());
+  }
+
+  @Test
+  void from_deskCleanedWithoutEnd_throwsBadAttributeValueExpException()
+      throws BadAttributeValueExpException {
+    LocalDateTime now = LocalDateTime.now();
+    ReservationWithRoom reservationWithRoom = mock(ReservationWithRoom.class);
+    when(reservationWithRoom.getId()).thenReturn("id1");
+    when(reservationWithRoom.getUsername()).thenReturn("user");
+    when(reservationWithRoom.getDeskId()).thenReturn("deskId1");
+    when(reservationWithRoom.getStart()).thenReturn(now);
+    when(reservationWithRoom.getEnd()).thenReturn(now.plusMinutes(10));
+    when(reservationWithRoom.getUsageStart()).thenReturn(now.minusMinutes(10));
+    when(reservationWithRoom.getUsageEnd()).thenReturn(now.plusMinutes(11));
+    when(reservationWithRoom.getDeskCleaned()).thenReturn(true);
+
+    Reservation fakeRes = new ReservationBuilder().from(reservationWithRoom).build();
+
+    assertEquals(reservationWithRoom.getId(), fakeRes.getId());
+    assertEquals(reservationWithRoom.getUsername(), fakeRes.getUsername());
+    assertEquals(reservationWithRoom.getDeskId(), fakeRes.getDeskId());
+    assertEquals(reservationWithRoom.getStart(), fakeRes.getStart());
+    assertEquals(reservationWithRoom.getEnd(), fakeRes.getEnd());
+    assertEquals(reservationWithRoom.getEnd(), fakeRes.getEnd());
+    assertEquals(reservationWithRoom.getUsageEnd(), fakeRes.getRealEnd());
+    assertEquals(reservationWithRoom.getUsageStart(), fakeRes.getRealStart());
+    assertTrue(fakeRes.getDeskCleaned());
   }
 }

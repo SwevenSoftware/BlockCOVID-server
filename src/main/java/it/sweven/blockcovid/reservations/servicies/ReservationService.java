@@ -7,9 +7,11 @@ import it.sweven.blockcovid.reservations.entities.ReservationBuilder;
 import it.sweven.blockcovid.reservations.exceptions.BadTimeIntervals;
 import it.sweven.blockcovid.reservations.exceptions.NoSuchReservation;
 import it.sweven.blockcovid.reservations.exceptions.ReservationClash;
+import it.sweven.blockcovid.reservations.exceptions.StartingTooEarly;
 import it.sweven.blockcovid.reservations.repositories.ReservationRepository;
 import it.sweven.blockcovid.rooms.entities.Desk;
 import it.sweven.blockcovid.rooms.entities.Room;
+import it.sweven.blockcovid.rooms.entities.Status;
 import it.sweven.blockcovid.rooms.exceptions.DeskNotFoundException;
 import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.rooms.repositories.DeskRepository;
@@ -216,5 +218,18 @@ public class ReservationService {
     Optional<Room> room = roomRepository.findById(desk.get().getRoomId());
     if (room.isEmpty()) return null;
     return room.get().getName();
+  }
+
+  public ReservationWithRoom start(String id, LocalDateTime time)
+      throws NoSuchReservation, StartingTooEarly, ReservationClash {
+    Reservation toStart =
+        reservationRepository.findReservationById(id).orElseThrow(NoSuchReservation::new);
+    if (time.isBefore(toStart.getStart().minusMinutes(30))) throw new StartingTooEarly();
+    toStart.setRealStart(time);
+    ReservationWithRoom toReturn = save(toStart);
+    deskRepository
+        .findById(toReturn.getDeskId())
+        .ifPresent(desk -> desk.setDeskStatus(Status.DIRTY));
+    return toReturn;
   }
 }
