@@ -97,7 +97,7 @@ class StartReservationControllerTest {
 
   @Test
   void startingAlreadyEndedReservation_throwsResponseStatusException() {
-    when(fakeReservation.getUsageEnd()).thenReturn(LocalDateTime.now().minusMinutes(15));
+    when(fakeReservation.isEnded()).thenReturn(true);
     ResponseStatusException thrown =
         assertThrows(ResponseStatusException.class, () -> controller.start(fakeUser, "id1"));
     assertEquals(HttpStatus.BAD_REQUEST, thrown.getStatus());

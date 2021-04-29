@@ -1,5 +1,6 @@
 package it.sweven.blockcovid.reservations.controllers;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import it.sweven.blockcovid.reservations.assemblers.ReservationWithRoomAssembler;
 import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.reservations.exceptions.NoSuchReservation;
@@ -33,14 +34,15 @@ public class StartReservationController implements ReservationController {
 
   @PutMapping("start/{reservationID}")
   public EntityModel<ReservationWithRoom> start(
-      @AuthenticationPrincipal User submitter, @PathVariable String reservationID) {
+      @Parameter(hidden = true) @AuthenticationPrincipal User submitter,
+      @PathVariable String reservationID) {
     try {
       LocalDateTime now = LocalDateTime.now();
       ReservationWithRoom reservation = reservationService.findById(reservationID);
       if (reservation.getUsageStart() != null)
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST, "Trying to start an already started reservation");
-      if (now.isAfter(reservation.getUsageEnd()))
+      if (reservation.isEnded())
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST, "Trying to start an already ended reservation");
       if (!reservation.getUsername().equals(submitter.getUsername()))

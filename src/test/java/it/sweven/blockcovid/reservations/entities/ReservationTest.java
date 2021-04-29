@@ -268,30 +268,30 @@ class ReservationTest {
   }
 
   @Test
-  void getRealEnd() {
+  void isEnded() {
     Reservation res1 =
         new Reservation(
             "id1",
             "deskId1",
             "username2",
-            LocalDateTime.MIN.withHour(15),
-            LocalDateTime.MIN.withHour(16),
-            null,
+            LocalDateTime.now().minusHours(3),
+            LocalDateTime.now().minusHours(1),
+            LocalDateTime.now().minusHours(2),
             null,
             false);
-    assertNull(res1.getRealEnd());
+    assertTrue(res1.isEnded());
 
     Reservation res2 =
         new Reservation(
             "id1",
             "deskId1",
             "username2",
-            LocalDateTime.MIN.withHour(10),
-            LocalDateTime.MIN.withHour(17),
-            LocalDateTime.MIN.withHour(11),
-            null,
+            LocalDateTime.now().minusHours(3),
+            LocalDateTime.now().plusHours(2),
+            LocalDateTime.now().minusHours(2),
+            LocalDateTime.now().plusHours(1),
             false);
-    assertEquals(LocalDateTime.MIN.withHour(17), res2.getRealEnd());
+    assertTrue(res2.isEnded());
 
     Reservation res3 =
         new Reservation(
@@ -303,19 +303,6 @@ class ReservationTest {
             LocalDateTime.now().minusHours(2),
             null,
             false);
-    assertNull(res3.getRealEnd());
-
-    LocalDateTime realEnd4 = LocalDateTime.now().plusHours(1);
-    Reservation res4 =
-        new Reservation(
-            "id1",
-            "deskId1",
-            "username2",
-            LocalDateTime.now().minusHours(3),
-            LocalDateTime.now().plusHours(2),
-            LocalDateTime.now().minusHours(2),
-            realEnd4,
-            false);
-    assertEquals(realEnd4, res4.getRealEnd());
+    assertFalse(res3.isEnded());
   }
 }

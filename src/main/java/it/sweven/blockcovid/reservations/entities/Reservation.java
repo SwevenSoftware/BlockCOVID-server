@@ -54,10 +54,7 @@ public class Reservation implements Comparable<Reservation> {
         && intervalInsideReservation(other.getStart(), other.getEnd());
   }
 
-  public LocalDateTime getRealEnd() {
-    if (realStart != null && realEnd == null && LocalDateTime.now().isAfter(end)) {
-      return end;
-    }
-    return realEnd;
+  public Boolean isEnded() {
+    return LocalDateTime.now().isAfter(end) || realEnd != null;
   }
 }

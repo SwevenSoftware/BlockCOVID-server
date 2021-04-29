@@ -1,5 +1,6 @@
 package it.sweven.blockcovid.reservations.controllers;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import it.sweven.blockcovid.reservations.assemblers.ReservationWithRoomAssembler;
 import it.sweven.blockcovid.reservations.dto.ReservationInfo;
 import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
@@ -35,7 +36,8 @@ public class StartNewReservationController implements ReservationController {
 
   @PostMapping("start")
   public EntityModel<ReservationWithRoom> start(
-      @AuthenticationPrincipal User submitter, @RequestBody ReservationInfo reservationInfo) {
+      @Parameter(hidden = true) @AuthenticationPrincipal User submitter,
+      @RequestBody ReservationInfo reservationInfo) {
     LocalDateTime now = LocalDateTime.now();
     if (reservationInfo.getEnd() == null || reservationInfo.getDeskId() == null)
       throw new ResponseStatusException(

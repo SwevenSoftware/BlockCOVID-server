@@ -55,7 +55,7 @@ public class DocumentService {
                 "End usage",
                 "Desk cleaned after usage"));
     reservations.stream()
-        .filter(r -> r.getUsageStart() != null && r.getUsageEnd() != null)
+        .filter(r -> r.getUsageStart() != null && r.isEnded())
         .forEach(
             r ->
                 report.addRowTable(
@@ -65,7 +65,9 @@ public class DocumentService {
                         r.getDeskId(),
                         r.getRoom(),
                         r.getUsageStart().format(DateTimeFormatter.ISO_DATE_TIME),
-                        r.getUsageEnd().format(DateTimeFormatter.ISO_DATE_TIME),
+                        r.getUsageEnd() != null
+                            ? r.getUsageEnd().format(DateTimeFormatter.ISO_DATE_TIME)
+                            : r.getEnd().format(DateTimeFormatter.ISO_DATE_TIME),
                         r.getDeskCleaned().toString())));
     try {
       report.create(destination);

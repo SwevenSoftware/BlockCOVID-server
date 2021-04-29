@@ -74,10 +74,10 @@ class DocumentServiceTest {
                 "deskId1",
                 "room1",
                 "username",
-                LocalDateTime.MIN.withHour(10),
-                LocalDateTime.MIN.withHour(13),
-                LocalDateTime.MIN.withHour(11),
-                LocalDateTime.MIN.withHour(12),
+                LocalDateTime.now().minusHours(3),
+                LocalDateTime.now().plusHours(3),
+                LocalDateTime.now().minusHours(2),
+                LocalDateTime.now().minusHours(1),
                 true),
         reservation2 =
             new ReservationWithRoom(
@@ -85,10 +85,10 @@ class DocumentServiceTest {
                 "deskId2",
                 "room1",
                 "username",
-                LocalDateTime.MIN.withHour(15),
-                LocalDateTime.MIN.withHour(18),
-                LocalDateTime.MIN.withHour(14),
-                LocalDateTime.MIN.withHour(17),
+                LocalDateTime.now().minusHours(6),
+                LocalDateTime.now().minusHours(2),
+                LocalDateTime.now().minusHours(4),
+                null,
                 false),
         reservation3 =
             new ReservationWithRoom(
@@ -96,10 +96,10 @@ class DocumentServiceTest {
                 "deskId2",
                 "room1",
                 "username",
-                LocalDateTime.MIN.withHour(15),
-                LocalDateTime.MIN.withHour(18),
+                LocalDateTime.now().minusHours(6),
+                LocalDateTime.now().minusHours(2),
                 null,
-                LocalDateTime.MIN.withHour(17),
+                null,
                 false),
         reservation4 =
             new ReservationWithRoom(
@@ -107,9 +107,9 @@ class DocumentServiceTest {
                 "deskId2",
                 "room1",
                 "username",
-                LocalDateTime.MIN.withHour(15),
-                LocalDateTime.MIN.withHour(18),
-                LocalDateTime.MIN.withHour(14),
+                LocalDateTime.now().minusHours(6),
+                LocalDateTime.now().plusHours(2),
+                LocalDateTime.now().minusHours(4),
                 null,
                 false);
     PdfReport mockReport = mock(PdfReport.class);
@@ -119,9 +119,7 @@ class DocumentServiceTest {
     when(mockReport.setHeaderTable(any())).thenReturn(mockReport);
     when(mockReport.addRowTable(any())).thenReturn(mockReport);
     assertEquals(
-        "pathFile",
-        service.generateUsageReport(
-            List.of(reservation1, reservation2, reservation3, reservation4)));
+        "pathFile", service.generateUsageReport(List.of(reservation1, reservation2, reservation3)));
     verify(mockReport).create("pathFile");
   }
 
@@ -136,10 +134,10 @@ class DocumentServiceTest {
                 "deskId1",
                 "room1",
                 "username",
-                LocalDateTime.MIN.withHour(10),
-                LocalDateTime.MIN.withHour(13),
-                LocalDateTime.MIN.withHour(11),
-                LocalDateTime.MIN.withHour(12),
+                LocalDateTime.now().withHour(10),
+                LocalDateTime.now().withHour(13),
+                LocalDateTime.now().withHour(11),
+                LocalDateTime.now().withHour(12),
                 true),
         reservation2 =
             new ReservationWithRoom(
@@ -147,10 +145,10 @@ class DocumentServiceTest {
                 "deskId2",
                 "room1",
                 "username",
-                LocalDateTime.MIN.withHour(15),
-                LocalDateTime.MIN.withHour(18),
-                LocalDateTime.MIN.withHour(14),
-                LocalDateTime.MIN.withHour(17),
+                LocalDateTime.now().withHour(15),
+                LocalDateTime.now().withHour(18),
+                LocalDateTime.now().withHour(14),
+                LocalDateTime.now().withHour(17),
                 false);
     PdfReport mockReport = mock(PdfReport.class);
     doReturn(mockReport).when(service).createNewReport();
