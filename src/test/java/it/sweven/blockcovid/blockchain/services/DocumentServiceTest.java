@@ -97,6 +97,17 @@ class DocumentServiceTest {
                 "room1",
                 "username",
                 LocalDateTime.now().minusHours(6),
+                LocalDateTime.now().minusHours(2),
+                null,
+                null,
+                false),
+        reservation4 =
+            new ReservationWithRoom(
+                "id2",
+                "deskId2",
+                "room1",
+                "username",
+                LocalDateTime.now().minusHours(6),
                 LocalDateTime.now().plusHours(2),
                 LocalDateTime.now().minusHours(4),
                 null,

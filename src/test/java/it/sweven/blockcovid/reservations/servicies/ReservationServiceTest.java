@@ -427,7 +427,8 @@ class ReservationServiceTest {
   }
 
   @Test
-  void end_reservationCorrectlySaved() throws ReservationClash, AlreadyEnded, BadTimeIntervals {
+  void end_reservationCorrectlySaved_deskCleaned()
+      throws ReservationClash, AlreadyEnded, BadTimeIntervals {
     Reservation mockReservation = mock(Reservation.class);
     when(reservationRepository.findReservationById("reservationId"))
         .thenReturn(Optional.of(mockReservation));
@@ -443,5 +444,25 @@ class ReservationServiceTest {
     verify(mockReservation).setRealEnd(LocalDateTime.MIN.withHour(18));
     verify(mockReservation).setDeskCleaned(true);
     verify(mockDesk).setDeskStatus(Status.CLEAN);
+  }
+
+  @Test
+  void end_reservationCorrectlySaved_deskNotCleaned()
+      throws ReservationClash, AlreadyEnded, BadTimeIntervals {
+    Reservation mockReservation = mock(Reservation.class);
+    when(reservationRepository.findReservationById("reservationId"))
+        .thenReturn(Optional.of(mockReservation));
+    when(mockReservation.getRealEnd()).thenReturn(null);
+    when(mockReservation.getRealStart()).thenReturn(LocalDateTime.MIN.withHour(13));
+    when(mockReservation.getDeskId()).thenReturn("deskId");
+    Desk mockDesk = mock(Desk.class);
+    when(deskRepository.findById("deskId")).thenReturn(Optional.of(mockDesk));
+    ReservationWithRoom expectedReservation = mock(ReservationWithRoom.class);
+    doReturn(expectedReservation).when(service).save(mockReservation);
+    assertEquals(
+        expectedReservation, service.end("reservationId", LocalDateTime.MIN.withHour(18), false));
+    verify(mockReservation).setRealEnd(LocalDateTime.MIN.withHour(18));
+    verify(mockReservation).setDeskCleaned(false);
+    verify(mockDesk, never()).setDeskStatus(Status.CLEAN);
   }
 }
