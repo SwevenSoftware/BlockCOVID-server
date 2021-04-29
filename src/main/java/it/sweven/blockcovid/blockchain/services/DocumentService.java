@@ -55,7 +55,7 @@ public class DocumentService {
                 "End usage",
                 "Desk cleaned after usage"));
     reservations.stream()
-        .filter(r -> r.getUsageStart() != null && r.getUsageEnd() != null)
+        .filter(ReservationWithRoom::isEnded)
         .forEach(
             r ->
                 report.addRowTable(

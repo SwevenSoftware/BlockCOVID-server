@@ -17,4 +17,8 @@ public class ReservationWithRoom {
     }
     return usageEnd;
   }
+
+  public Boolean isEnded() {
+    return LocalDateTime.now().isAfter(end) || usageEnd != null;
+  }
 }

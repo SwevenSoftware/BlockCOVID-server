@@ -4,10 +4,7 @@ import it.sweven.blockcovid.reservations.dto.ReservationInfo;
 import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.reservations.entities.Reservation;
 import it.sweven.blockcovid.reservations.entities.ReservationBuilder;
-import it.sweven.blockcovid.reservations.exceptions.BadTimeIntervals;
-import it.sweven.blockcovid.reservations.exceptions.NoSuchReservation;
-import it.sweven.blockcovid.reservations.exceptions.ReservationClash;
-import it.sweven.blockcovid.reservations.exceptions.StartingTooEarly;
+import it.sweven.blockcovid.reservations.exceptions.*;
 import it.sweven.blockcovid.reservations.repositories.ReservationRepository;
 import it.sweven.blockcovid.rooms.entities.Desk;
 import it.sweven.blockcovid.rooms.entities.Room;
@@ -231,5 +228,19 @@ public class ReservationService {
         .findById(toReturn.getDeskId())
         .ifPresent(desk -> desk.setDeskStatus(Status.DIRTY));
     return toReturn;
+  }
+
+  public ReservationWithRoom end(String id, LocalDateTime time, Boolean deskCleaned)
+      throws BadTimeIntervals, NoSuchReservation, AlreadyEnded, ReservationClash {
+    Reservation toEnd =
+        reservationRepository.findReservationById(id).orElseThrow(NoSuchReservation::new);
+    if (toEnd.getRealEnd() != null) throw new AlreadyEnded();
+    if (toEnd.getRealStart() == null || toEnd.getRealStart().isAfter(time))
+      throw new BadTimeIntervals();
+    toEnd.setRealEnd(time);
+    toEnd.setDeskCleaned(deskCleaned);
+    if (deskCleaned)
+      deskRepository.findById(toEnd.getDeskId()).ifPresent(d -> d.setDeskStatus(Status.CLEAN));
+    return save(toEnd);
   }
 }
