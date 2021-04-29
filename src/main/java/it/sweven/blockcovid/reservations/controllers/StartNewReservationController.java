@@ -58,10 +58,6 @@ public class StartNewReservationController implements ReservationController {
     @ApiResponse(
         responseCode = "409",
         description = "Another reservation conflicts with yours",
-        content = @Content(schema = @Schema(implementation = void.class))),
-    @ApiResponse(
-        responseCode = "50",
-        description = "Your reservation starts too early (max: 30 min)",
         content = @Content(schema = @Schema(implementation = void.class)))
   })
   @PreAuthorize("#submitter.isEnabled() and #submitter.isUser() or #submitter.isAdmin()")
@@ -92,7 +88,7 @@ public class StartNewReservationController implements ReservationController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "bad input values");
     } catch (StartingTooEarly startingTooEarly) {
       throw new ResponseStatusException(
-          HttpStatus.TOO_EARLY,
+          HttpStatus.BAD_REQUEST,
           "You can start your reservation maximum 30 minutes before the starting time");
     } catch (NoSuchReservation noSuchReservation) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "reservation not found");

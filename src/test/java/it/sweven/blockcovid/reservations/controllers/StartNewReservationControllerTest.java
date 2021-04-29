@@ -150,13 +150,13 @@ class StartNewReservationControllerTest {
   }
 
   @Test
-  void serviceThrowsStartingTooEarly_throwsResponseStatusException_TOO_EARLY()
+  void serviceThrowsStartingTooEarly_throwsResponseStatusException_BAD_REQUEST()
       throws ReservationClash, StartingTooEarly, NoSuchReservation {
     when(reservationService.start(any(), any())).thenThrow(new StartingTooEarly());
     ResponseStatusException thrown =
         assertThrows(
             ResponseStatusException.class, () -> controller.start(mock(User.class), fakeInfo));
-    assertEquals(HttpStatus.TOO_EARLY, thrown.getStatus());
+    assertEquals(HttpStatus.BAD_REQUEST, thrown.getStatus());
   }
 
   @Test

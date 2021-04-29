@@ -76,7 +76,7 @@ class StartReservationControllerTest {
     when(reservationService.start(any(), any())).thenThrow(new StartingTooEarly());
     ResponseStatusException thrown =
         assertThrows(ResponseStatusException.class, () -> controller.start(fakeUser, "id1"));
-    assertEquals(HttpStatus.TOO_EARLY, thrown.getStatus());
+    assertEquals(HttpStatus.BAD_REQUEST, thrown.getStatus());
   }
 
   @Test

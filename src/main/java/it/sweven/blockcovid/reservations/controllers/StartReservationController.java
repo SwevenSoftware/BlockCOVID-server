@@ -56,10 +56,6 @@ public class StartReservationController implements ReservationController {
     @ApiResponse(
         responseCode = "409",
         description = "Another reservation conflicts with yours",
-        content = @Content(schema = @Schema(implementation = void.class))),
-    @ApiResponse(
-        responseCode = "50",
-        description = "Your reservation starts too early (max: 30 min)",
         content = @Content(schema = @Schema(implementation = void.class)))
   })
   @PreAuthorize("#submitter.isEnabled() and #submitter.isUser() or #submitter.isAdmin()")
@@ -87,7 +83,7 @@ public class StartReservationController implements ReservationController {
           HttpStatus.CONFLICT, "your reservation conflict with another one");
     } catch (StartingTooEarly startingTooEarly) {
       throw new ResponseStatusException(
-          HttpStatus.TOO_EARLY, "you can start at maximum 30 minutes early");
+          HttpStatus.BAD_REQUEST, "you can start at maximum 30 minutes early");
     }
   }
 }
