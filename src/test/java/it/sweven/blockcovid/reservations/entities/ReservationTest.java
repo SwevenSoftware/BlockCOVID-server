@@ -268,6 +268,119 @@ class ReservationTest {
   }
 
   @Test
+  void clashesWith_realStartAndRealEndNotNull() {
+    Reservation res1 =
+        new Reservation(
+            null,
+            "deskId1",
+            "username1",
+            LocalDateTime.MIN.withHour(14),
+            LocalDateTime.MIN.withHour(18),
+            LocalDateTime.MIN.withHour(15),
+            LocalDateTime.MIN.withHour(17),
+            false);
+    Reservation res2 =
+        new Reservation(
+            "id2",
+            "deskId1",
+            "username2",
+            LocalDateTime.MIN.withHour(14),
+            LocalDateTime.MIN.withHour(16),
+            null,
+            null,
+            false);
+    assertTrue(res1.clashesWith(res2));
+
+    Reservation res3 =
+        new Reservation(
+            "id1",
+            "deskId1",
+            "username1",
+            LocalDateTime.MIN.withHour(14),
+            LocalDateTime.MIN.withHour(16),
+            null,
+            null,
+            false);
+    Reservation res4 =
+        new Reservation(
+            null,
+            "deskId1",
+            "username2",
+            LocalDateTime.MIN.withHour(15),
+            LocalDateTime.MIN.withHour(16),
+            LocalDateTime.MIN.withHour(15),
+            LocalDateTime.MIN.withHour(17),
+            false);
+    assertTrue(res3.clashesWith(res4));
+
+    Reservation res5 =
+        new Reservation(
+            null,
+            "deskId1",
+            "username1",
+            LocalDateTime.now().withHour(14),
+            LocalDateTime.now().withHour(17),
+            LocalDateTime.MIN.withHour(13),
+            LocalDateTime.MIN.withHour(16),
+            false);
+    Reservation res6 =
+        new Reservation(
+            null,
+            "deskId1",
+            "username2",
+            LocalDateTime.now().withHour(18),
+            LocalDateTime.now().withHour(19),
+            LocalDateTime.MIN.withHour(16),
+            LocalDateTime.MIN.withHour(18),
+            false);
+    assertFalse(res5.clashesWith(res6));
+
+    Reservation res7 =
+        new Reservation(
+            null,
+            "deskId1",
+            "username1",
+            LocalDateTime.now().withHour(14),
+            LocalDateTime.now().withHour(17),
+            LocalDateTime.MIN.withHour(13),
+            LocalDateTime.MIN.withHour(16),
+            false);
+    Reservation res8 =
+        new Reservation(
+            null,
+            "deskId1",
+            "username2",
+            LocalDateTime.now().withHour(11),
+            LocalDateTime.now().withHour(14),
+            LocalDateTime.MIN.withHour(12),
+            LocalDateTime.MIN.withHour(13),
+            false);
+    assertFalse(res7.clashesWith(res8));
+
+    Reservation res9 =
+        new Reservation(
+            null,
+            "deskId1",
+            "username1",
+            null,
+            null,
+            LocalDateTime.MIN.withHour(13),
+            LocalDateTime.MIN.withHour(16),
+            false);
+    Reservation res10 =
+        new Reservation(
+            null,
+            "deskId1",
+            "username2",
+            null,
+            null,
+            LocalDateTime.MIN.withHour(12),
+            LocalDateTime.MIN.withHour(14),
+            false);
+    assertTrue(res9.clashesWith(res10));
+  }
+
+  @Test
   void isEnded() {
     Reservation res1 =
         new Reservation(
