@@ -12,13 +12,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.management.BadAttributeValueExpException;
 import org.springframework.beans.factory.annotation.Value;
@@ -97,6 +100,24 @@ public class DocumentService {
   public byte[] readReport(String path) throws IOException {
     InputStream inputStream = new FileInputStream(path);
     return inputStream.readAllBytes();
+  }
+
+  public byte[] findReport(String filename) throws IOException, IllegalArgumentException {
+    if (validFilename(filename)) {
+      String filePath = DESTINATION_DIR + "/" + filename;
+      if (!fileExists(filePath)) throw new NoSuchFileException("file " + filePath + " not found");
+      return readReport(filePath);
+    } else throw new IllegalArgumentException();
+  }
+
+  protected boolean validFilename(String filename) {
+    String typesRegex =
+        Arrays.stream(ReportType.values())
+            .parallel()
+            .map(i -> i.toString().toLowerCase(Locale.ROOT))
+            .collect(Collectors.joining("|"));
+    String regex = "^(Registered_)?Report_(" + typesRegex + ")_\\d{1,8}_\\d{1,6}\\.pdf$";
+    return Pattern.compile(regex).matcher(filename).matches();
   }
 
   protected boolean fileExists(String path) {
