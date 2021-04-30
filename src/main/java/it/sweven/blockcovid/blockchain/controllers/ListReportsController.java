@@ -1,5 +1,6 @@
 package it.sweven.blockcovid.blockchain.controllers;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -46,7 +47,7 @@ public class ListReportsController implements ReportsController {
   @PreAuthorize("#submitter.isAdmin()")
   @ResponseBody
   public CollectionModel<EntityModel<ReportInformation>> listReports(
-      @AuthenticationPrincipal User submitter) {
+      @Parameter(hidden = true) @AuthenticationPrincipal User submitter) {
     try {
       return assembler.toCollectionModel(documentService.getAllReports());
     } catch (IOException e) {
