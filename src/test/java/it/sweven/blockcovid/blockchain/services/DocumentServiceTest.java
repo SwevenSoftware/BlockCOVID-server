@@ -10,6 +10,7 @@ import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.rooms.entities.Room;
 import it.sweven.blockcovid.rooms.entities.Status;
 import java.io.IOException;
+import java.nio.file.NoSuchFileException;
 import java.time.LocalDateTime;
 import java.util.List;
 import javax.management.BadAttributeValueExpException;
@@ -180,5 +181,48 @@ class DocumentServiceTest {
     String pathReport = service.pathReport("idPath", ReportType.USAGE);
     assertTrue(pathReport.contains("idPath"));
     assertTrue(pathReport.contains("usage"));
+  }
+
+  @Test
+  void findReport_correctlyFound() throws IOException {
+    doReturn(true).when(service).validFilename("reportFilename");
+    doReturn(true).when(service).fileExists(contains("reportFilename.pdf"));
+    byte[] expectedBytes = "correct report".getBytes();
+    doReturn(expectedBytes).when(service).readReport(contains("reportFilename.pdf"));
+    assertEquals(expectedBytes, service.findReport("reportFilename"));
+  }
+
+  @Test
+  void findReport_invalidFilename() {
+    doReturn(false).when(service).validFilename(any());
+    assertThrows(IllegalArgumentException.class, () -> service.findReport("reportFilename"));
+  }
+
+  @Test
+  void findReport_fileNotFound() throws IOException {
+    doReturn(true).when(service).validFilename("reportFilename");
+    doReturn(false).when(service).fileExists(any());
+    assertThrows(NoSuchFileException.class, () -> service.findReport("reportFilename"));
+  }
+
+  @Test
+  void findReport_fileNotRead() throws IOException {
+    doReturn(true).when(service).validFilename("reportFilename");
+    doReturn(true).when(service).fileExists(contains("reportFilename.pdf"));
+    doThrow(new IOException()).when(service).readReport(any());
+    assertThrows(IOException.class, () -> service.findReport("reportFilename"));
+  }
+
+  @Test
+  void validFilename() {
+    assertTrue(service.validFilename("Registered_Report_usage_20210101_103050"));
+    assertTrue(service.validFilename("Registered_Report_cleaner_20210101_103050"));
+    assertTrue(service.validFilename("Report_usage_20210101_103050"));
+    assertTrue(service.validFilename("Report_cleaner_20210101_103050"));
+    assertFalse(service.validFilename("Report_20210101_103050"));
+    assertFalse(service.validFilename("Registered_Report_20210101_103050"));
+    assertFalse(service.validFilename("Registered_Report_20210101"));
+    assertFalse(service.validFilename("Registered_Report"));
+    assertFalse(service.validFilename("Report"));
   }
 }
