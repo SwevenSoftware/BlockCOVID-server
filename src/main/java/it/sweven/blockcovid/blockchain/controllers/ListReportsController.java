@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -43,6 +44,7 @@ public class ListReportsController implements ReportsController {
         content = @Content(schema = @Schema(implementation = void.class)))
   })
   @PreAuthorize("#submitter.isAdmin()")
+  @ResponseBody
   public CollectionModel<EntityModel<ReportInformation>> listReports(
       @AuthenticationPrincipal User submitter) {
     try {

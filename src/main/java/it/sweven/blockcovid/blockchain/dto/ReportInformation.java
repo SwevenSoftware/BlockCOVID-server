@@ -1,6 +1,6 @@
 package it.sweven.blockcovid.blockchain.dto;
 
-import java.nio.file.attribute.FileTime;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -8,8 +8,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public class ReportInformation {
   private final String name;
-  private final FileTime creationDate;
-  private final FileTime registrationDate;
+  private final LocalDateTime creationDate;
+  private final LocalDateTime registrationDate;
 
   public ReportInformation(String name) {
     this.name = name;

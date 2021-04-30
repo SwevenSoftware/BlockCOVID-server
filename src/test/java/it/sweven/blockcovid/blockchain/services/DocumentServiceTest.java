@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
 import javax.management.BadAttributeValueExpException;
@@ -207,8 +208,12 @@ class DocumentServiceTest {
     ReportInformation info =
         service.getAllReports().stream().findFirst().orElseThrow(IOException::new);
     BasicFileAttributes attributes = Files.readAttributes(newFile, BasicFileAttributes.class);
-    assertEquals(info.getCreationDate(), attributes.creationTime());
-    assertEquals(info.getRegistrationDate(), attributes.lastModifiedTime());
+    assertEquals(
+        info.getCreationDate(),
+        LocalDateTime.ofInstant(attributes.creationTime().toInstant(), ZoneId.systemDefault()));
+    assertEquals(
+        info.getRegistrationDate(),
+        LocalDateTime.ofInstant(attributes.lastModifiedTime().toInstant(), ZoneId.systemDefault()));
     Files.deleteIfExists(newFile);
   }
 

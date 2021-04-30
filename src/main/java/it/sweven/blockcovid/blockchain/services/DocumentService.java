@@ -15,6 +15,7 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
@@ -147,7 +148,11 @@ public class DocumentService {
                     Files.readAttributes(
                         path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
                 return new ReportInformation(
-                    path.getFileName().toString(), attrs.creationTime(), attrs.lastModifiedTime());
+                    path.getFileName().toString(),
+                    LocalDateTime.ofInstant(
+                        attrs.creationTime().toInstant(), ZoneId.systemDefault()),
+                    LocalDateTime.ofInstant(
+                        attrs.lastModifiedTime().toInstant(), ZoneId.systemDefault()));
               } catch (IOException e) {
                 return new ReportInformation(path.getFileName().toString());
               }
