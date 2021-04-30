@@ -20,12 +20,17 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 import javax.management.BadAttributeValueExpException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 @Service
 public class DocumentService {
-  private final String DESTINATION_DIR = "reports";
+  private final String DESTINATION_DIR;
+
+  public DocumentService(@Value("#{environment.REPORT_DIR}") String destination_dir) {
+    DESTINATION_DIR = destination_dir;
+  }
 
   public String generateCleanerReport(List<Room> rooms) throws IOException {
     LocalDateTime timestamp = LocalDateTime.now();

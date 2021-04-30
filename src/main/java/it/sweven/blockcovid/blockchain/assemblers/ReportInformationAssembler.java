@@ -3,7 +3,7 @@ package it.sweven.blockcovid.blockchain.assemblers;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-import it.sweven.blockcovid.blockchain.controllers.ListReportController;
+import it.sweven.blockcovid.blockchain.controllers.ListReportsController;
 import it.sweven.blockcovid.blockchain.dto.ReportInformation;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -19,7 +19,8 @@ public class ReportInformationAssembler
   public EntityModel<ReportInformation> toModel(ReportInformation entity) {
     return EntityModel.of(
         entity,
-        linkTo(methodOn(ListReportController.class).listReports(null)).withRel("list_all_reports"));
+        linkTo(methodOn(ListReportsController.class).listReports(null))
+            .withRel("list_all_reports"));
   }
 
   @Override
@@ -29,6 +30,6 @@ public class ReportInformationAssembler
         StreamSupport.stream(entities.spliterator(), true)
             .map(this::toModel)
             .collect(Collectors.toList()),
-        linkTo(methodOn(ListReportController.class).listReports(null)).withSelfRel());
+        linkTo(methodOn(ListReportsController.class).listReports(null)).withSelfRel());
   }
 }

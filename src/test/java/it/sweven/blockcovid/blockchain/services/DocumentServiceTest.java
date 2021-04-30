@@ -6,23 +6,37 @@ import static org.mockito.Mockito.*;
 
 import it.sweven.blockcovid.blockchain.documents.PdfReport;
 import it.sweven.blockcovid.blockchain.documents.ReportType;
+import it.sweven.blockcovid.blockchain.dto.ReportInformation;
 import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.rooms.entities.Room;
 import it.sweven.blockcovid.rooms.entities.Status;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import javax.management.BadAttributeValueExpException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class DocumentServiceTest {
 
   private DocumentService service;
+  private String destination_dir;
 
   @BeforeEach
-  void setUp() {
-    service = spy(new DocumentService());
+  void setUp() throws IOException {
+    destination_dir = "report_tests" + LocalDateTime.now();
+    Files.createDirectory(Path.of(destination_dir));
+    service = spy(new DocumentService(destination_dir));
+  }
+
+  @AfterEach
+  void tearDown() throws IOException {
+    Files.deleteIfExists(Path.of(destination_dir));
   }
 
   @Test
@@ -180,5 +194,31 @@ class DocumentServiceTest {
     String pathReport = service.pathReport("idPath", ReportType.USAGE);
     assertTrue(pathReport.contains("idPath"));
     assertTrue(pathReport.contains("usage"));
+  }
+
+  @Test
+  void emptyDestDir() throws IOException {
+    assertEquals(Collections.emptyList(), service.getAllReports());
+  }
+
+  @Test
+  void validFileMeansValidInformation() throws IOException {
+    Path newFile = Files.createFile(Path.of(destination_dir + "/report.pdf"));
+    ReportInformation info =
+        service.getAllReports().stream().findFirst().orElseThrow(IOException::new);
+    BasicFileAttributes attributes = Files.readAttributes(newFile, BasicFileAttributes.class);
+    assertEquals(info.getCreationDate(), attributes.creationTime());
+    assertEquals(info.getRegistrationDate(), attributes.lastModifiedTime());
+    Files.deleteIfExists(newFile);
+  }
+
+  @Test
+  void SetRegisteredPrependsInformation() throws IOException {
+    Path newFile = Files.createFile(Path.of(destination_dir + "/report.pdf"));
+    service.setAsVerified(newFile.toString());
+    Path movedFile = Path.of(destination_dir + "/Registered_" + newFile.getFileName());
+    assertFalse(Files.exists(newFile));
+    assertTrue(Files.exists(movedFile));
+    Files.deleteIfExists(movedFile);
   }
 }

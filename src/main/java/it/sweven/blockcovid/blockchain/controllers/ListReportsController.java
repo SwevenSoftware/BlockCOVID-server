@@ -20,13 +20,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-public class ListReportController implements ReportsController {
+public class ListReportsController implements ReportsController {
 
   private final DocumentService documentService;
   private final ReportInformationAssembler assembler;
 
   @Autowired
-  public ListReportController(
+  public ListReportsController(
       DocumentService documentService, ReportInformationAssembler assembler) {
     this.documentService = documentService;
     this.assembler = assembler;
