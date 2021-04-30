@@ -3,6 +3,7 @@ package it.sweven.blockcovid.blockchain.services;
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 
 import it.sweven.blockcovid.blockchain.documents.PdfReport;
+import it.sweven.blockcovid.blockchain.documents.ReportType;
 import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.rooms.entities.Room;
 import java.io.FileInputStream;
@@ -13,6 +14,7 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import javax.management.BadAttributeValueExpException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
@@ -23,7 +25,7 @@ public class DocumentService {
 
   public String generateCleanerReport(List<Room> rooms) throws IOException {
     LocalDateTime timestamp = LocalDateTime.now();
-    String destination = initializeReport(timestamp);
+    String destination = initializeReport(timestamp, ReportType.CLEANER);
     PdfReport report = createNewReport();
     report
         .setTitle("Cleaner Report")
@@ -40,7 +42,7 @@ public class DocumentService {
 
   public String generateUsageReport(List<ReservationWithRoom> reservations) throws IOException {
     LocalDateTime timestamp = LocalDateTime.now();
-    String destination = initializeReport(timestamp);
+    String destination = initializeReport(timestamp, ReportType.USAGE);
     PdfReport report = createNewReport();
     report
         .landscape()
@@ -99,16 +101,21 @@ public class DocumentService {
     Files.createFile(Path.of(path));
   }
 
-  protected String initializeReport(LocalDateTime timestamp) throws IOException {
+  protected String initializeReport(LocalDateTime timestamp, ReportType type) throws IOException {
     String destination =
-        pathReport(timestamp.format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")));
+        pathReport(timestamp.format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")), type);
     if (!fileExists(DESTINATION_DIR + "/")) createDirectory(DESTINATION_DIR);
     createFile(destination);
     return destination;
   }
 
-  protected String pathReport(String id) {
-    return DESTINATION_DIR + "/Report_" + id + ".pdf";
+  protected String pathReport(String id, ReportType type) {
+    return DESTINATION_DIR
+        + "/Report_"
+        + type.toString().toLowerCase(Locale.ROOT)
+        + "_"
+        + id
+        + ".pdf";
   }
 
   public String setAsVerified(String path) throws IOException {

@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import it.sweven.blockcovid.blockchain.documents.PdfReport;
+import it.sweven.blockcovid.blockchain.documents.ReportType;
 import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.rooms.entities.Room;
 import it.sweven.blockcovid.rooms.entities.Status;
@@ -27,7 +28,7 @@ class DocumentServiceTest {
   @Test
   void generateCleanerReport_reportCorrectlyCreated()
       throws IOException, BadAttributeValueExpException {
-    doReturn("pathFile").when(service).initializeReport(any());
+    doReturn("pathFile").when(service).initializeReport(any(), eq(ReportType.CLEANER));
     Room mockRoom1 = mock(Room.class), mockRoom2 = mock(Room.class);
     when(mockRoom1.getName()).thenReturn("room1");
     when(mockRoom1.getRoomStatus()).thenReturn(Status.CLEAN);
@@ -46,7 +47,7 @@ class DocumentServiceTest {
   @Test
   void generateCleanerReport_errorWhileCreatingReport_throwsIOException()
       throws IOException, BadAttributeValueExpException {
-    doReturn("pathFile").when(service).initializeReport(any());
+    doReturn("pathFile").when(service).initializeReport(any(), eq(ReportType.CLEANER));
     Room mockRoom1 = mock(Room.class), mockRoom2 = mock(Room.class);
     when(mockRoom1.getName()).thenReturn("room1");
     when(mockRoom1.getRoomStatus()).thenReturn(Status.CLEAN);
@@ -66,7 +67,7 @@ class DocumentServiceTest {
   @Test
   void generateUsageReport_reportCorrectlyCreated()
       throws BadAttributeValueExpException, IOException {
-    doReturn("pathFile").when(service).initializeReport(any());
+    doReturn("pathFile").when(service).initializeReport(any(), eq(ReportType.USAGE));
     ReservationWithRoom
         reservation1 =
             new ReservationWithRoom(
@@ -127,7 +128,7 @@ class DocumentServiceTest {
   @Test
   void generateUsageReport_errorWhileCreatingReport_throwsIOException()
       throws IOException, BadAttributeValueExpException {
-    doReturn("pathFile").when(service).initializeReport(any());
+    doReturn("pathFile").when(service).initializeReport(any(), eq(ReportType.USAGE));
     ReservationWithRoom
         reservation1 =
             new ReservationWithRoom(
@@ -165,15 +166,19 @@ class DocumentServiceTest {
 
   @Test
   void initializeReport() throws IOException {
-    doReturn("pathFile").when(service).pathReport(any());
+    doReturn("pathFile").when(service).pathReport(any(), any());
     doReturn(false).when(service).fileExists(any());
     doNothing().when(service).createDirectory(any());
     doNothing().when(service).createFile(any());
-    assertEquals("pathFile", service.initializeReport(LocalDateTime.of(2021, 1, 1, 20, 0)));
+    assertEquals(
+        "pathFile",
+        service.initializeReport(LocalDateTime.of(2021, 1, 1, 20, 0), ReportType.CLEANER));
   }
 
   @Test
   void pathReport() {
-    assertTrue(service.pathReport("idPath").contains("idPath"));
+    String pathReport = service.pathReport("idPath", ReportType.USAGE);
+    assertTrue(pathReport.contains("idPath"));
+    assertTrue(pathReport.contains("usage"));
   }
 }
