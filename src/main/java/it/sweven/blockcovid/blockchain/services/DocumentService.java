@@ -4,6 +4,7 @@ import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 
 import it.sweven.blockcovid.blockchain.documents.PdfReport;
 import it.sweven.blockcovid.blockchain.documents.ReportType;
+import it.sweven.blockcovid.blockchain.dto.ReportInformation;
 import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.rooms.entities.Room;
 import java.io.FileInputStream;
@@ -11,21 +12,28 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.management.BadAttributeValueExpException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 @Service
 public class DocumentService {
-  private final String DESTINATION_DIR = "reports";
+  private final String DESTINATION_DIR;
+
+  public DocumentService(@Value("#{environment.REPORT_DIR}") String destination_dir) {
+    DESTINATION_DIR = destination_dir;
+  }
 
   public String generateCleanerReport(List<Room> rooms) throws IOException {
     LocalDateTime timestamp = LocalDateTime.now();
@@ -149,5 +157,26 @@ public class DocumentService {
 
   public String hashOf(String path) throws IOException {
     return DigestUtils.md5DigestAsHex(readReport(path));
+  }
+
+  public List<ReportInformation> getAllReports() throws IOException {
+    return Files.list(Path.of(DESTINATION_DIR))
+        .map(
+            path -> {
+              try {
+                BasicFileAttributes attrs =
+                    Files.readAttributes(
+                        path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+                return new ReportInformation(
+                    path.getFileName().toString(),
+                    LocalDateTime.ofInstant(
+                        attrs.creationTime().toInstant(), ZoneId.systemDefault()),
+                    LocalDateTime.ofInstant(
+                        attrs.lastModifiedTime().toInstant(), ZoneId.systemDefault()));
+              } catch (IOException e) {
+                return new ReportInformation(path.getFileName().toString());
+              }
+            })
+        .collect(Collectors.toList());
   }
 }
