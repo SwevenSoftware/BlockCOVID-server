@@ -62,4 +62,9 @@ public class DeskService {
   public Desk getDeskById(String deskId) throws DeskNotFoundException {
     return deskRepository.findById(deskId).orElseThrow(DeskNotFoundException::new);
   }
+
+  public Room getRoom(String deskId) throws DeskNotFoundException, RoomNotFoundException {
+    String roomId = getDeskById(deskId).getRoomId();
+    return roomRepository.findById(roomId).orElseThrow(RoomNotFoundException::new);
+  }
 }
