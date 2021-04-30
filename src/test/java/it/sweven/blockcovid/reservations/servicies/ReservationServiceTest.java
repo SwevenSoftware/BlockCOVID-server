@@ -205,11 +205,11 @@ class ReservationServiceTest {
                 "username",
                 LocalDateTime.now().plusMinutes(40),
                 LocalDateTime.now().plusMinutes(60)));
-    when(reservationRepository.findReservationsByUsernameAndStartIsGreaterThanEqual(
+    when(reservationRepository.findReservationsByUsernameAndEndIsGreaterThanEqual(
             anyString(), any()))
         .thenReturn(new ArrayList<>(expectedList));
     List<ReservationWithRoom> actualList =
-        service.findByUsernameAndStart("user", LocalDateTime.now());
+        service.findByUsernameAndEnd("user", LocalDateTime.now());
     assertEquals(expectedList.size(), actualList.size());
     for (int i = 0; i < actualList.size(); i++) {
       reservationsEquals(expectedList.get(i), actualList.get(i));
@@ -218,11 +218,11 @@ class ReservationServiceTest {
 
   @Test
   void findByUsernameAndStart_noReservationsFound() {
-    when(reservationRepository.findReservationsByUsernameAndStartIsGreaterThanEqual(
+    when(reservationRepository.findReservationsByUsernameAndEndIsGreaterThanEqual(
             anyString(), any()))
         .thenReturn(new ArrayList<>());
     assertEquals(
-        Collections.emptyList(), service.findByUsernameAndStart("user", LocalDateTime.now()));
+        Collections.emptyList(), service.findByUsernameAndEnd("user", LocalDateTime.now()));
   }
 
   @Test

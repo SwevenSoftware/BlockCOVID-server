@@ -57,7 +57,7 @@ public class ViewPersonalDeskReservationsController implements ReservationContro
           LocalDateTime timestamp,
       @PathVariable String deskId) {
     return assembler.toCollectionModel(
-        service.findByUsernameAndStart(submitter.getUsername(), timestamp).stream()
+        service.findByUsernameAndEnd(submitter.getUsername(), timestamp).stream()
             .filter(reservationWithRoom -> reservationWithRoom.getDeskId().equals(deskId))
             .collect(Collectors.toList()));
   }

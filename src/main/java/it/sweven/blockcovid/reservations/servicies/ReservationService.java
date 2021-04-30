@@ -169,9 +169,9 @@ public class ReservationService {
         .anyMatch(reservation -> reservation.intervalInsideReservation(from, to));
   }
 
-  public List<ReservationWithRoom> findByUsernameAndStart(String username, LocalDateTime start) {
+  public List<ReservationWithRoom> findByUsernameAndEnd(String username, LocalDateTime end) {
     return reservationRepository
-        .findReservationsByUsernameAndStartIsGreaterThanEqual(username, start)
+        .findReservationsByUsernameAndEndIsGreaterThanEqual(username, end)
         .stream()
         .map(
             r ->

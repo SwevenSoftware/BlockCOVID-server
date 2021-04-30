@@ -58,6 +58,6 @@ public class ViewPersonalReservationsController implements ReservationController
       @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
           LocalDateTime timestamp) {
     return assembler.toCollectionModel(
-        service.findByUsernameAndStart(submitter.getUsername(), timestamp));
+        service.findByUsernameAndEnd(submitter.getUsername(), timestamp));
   }
 }
