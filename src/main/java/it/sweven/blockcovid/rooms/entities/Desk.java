@@ -18,15 +18,17 @@ public class Desk {
   private Status deskStatus;
 
   @PersistenceConstructor
-  public Desk(String id, int x, int y, String roomId) {
+  public Desk(String id, int x, int y, String roomId, Status deskStatus) {
     this(x, y, roomId);
     this.id = id;
+    this.deskStatus = deskStatus;
   }
 
   public Desk(int x, int y, String roomId) {
     setX(x);
     setY(y);
     this.roomId = roomId;
+    this.deskStatus = Status.CLEAN;
   }
 
   public void setX(int x) {

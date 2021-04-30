@@ -444,6 +444,7 @@ class ReservationServiceTest {
     verify(mockReservation).setRealEnd(LocalDateTime.MIN.withHour(18));
     verify(mockReservation).setDeskCleaned(true);
     verify(mockDesk).setDeskStatus(Status.CLEAN);
+    verify(deskRepository).save(mockDesk);
   }
 
   @Test

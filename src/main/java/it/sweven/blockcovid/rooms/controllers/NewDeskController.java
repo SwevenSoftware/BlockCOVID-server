@@ -86,7 +86,10 @@ public class NewDeskController implements RoomsController {
         .setAuthorities(submitter.getAuthorities())
         .toCollectionModel(
             addedDesks.stream()
-                .map(d -> new DeskWithRoomName(nameRoom, d.getId(), d.getX(), d.getY()))
+                .map(
+                    d ->
+                        new DeskWithRoomName(
+                            nameRoom, d.getId(), d.getX(), d.getY(), d.getDeskStatus()))
                 .collect(Collectors.toList()));
   }
 }

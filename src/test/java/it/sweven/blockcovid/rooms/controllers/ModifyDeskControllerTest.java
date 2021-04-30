@@ -11,6 +11,7 @@ import it.sweven.blockcovid.rooms.dto.DeskInfo;
 import it.sweven.blockcovid.rooms.dto.DeskModifyInfo;
 import it.sweven.blockcovid.rooms.dto.DeskWithRoomName;
 import it.sweven.blockcovid.rooms.entities.Desk;
+import it.sweven.blockcovid.rooms.entities.Status;
 import it.sweven.blockcovid.rooms.exceptions.DeskNotFoundException;
 import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.rooms.services.DeskService;
@@ -39,11 +40,12 @@ class ModifyDeskControllerTest {
   void modifyDesk() {
     DeskModifyInfo providedInfo =
         new DeskModifyInfo(new DeskInfo("id1", 5, 10), new DeskInfo("id1", 8, 7));
-    Desk savedDesk = new Desk("id1", 5, 10, "roomName");
+    Desk savedDesk = new Desk("id1", 5, 10, "roomName", Status.CLEAN);
+    savedDesk.setDeskStatus(Status.CLEAN);
     when(service.getDeskByInfoAndRoomName(providedInfo.getOldInfo(), "roomName"))
         .thenReturn(savedDesk);
     when(service.update(savedDesk)).thenReturn(savedDesk);
-    DeskWithRoomName expectedDesk = new DeskWithRoomName("roomName", "id1", 8, 7);
+    DeskWithRoomName expectedDesk = new DeskWithRoomName("roomName", "id1", 8, 7, Status.CLEAN);
     assertEquals(
         expectedDesk,
         controller.modifyDesk(mock(User.class), "roomName", providedInfo).getContent());
