@@ -226,7 +226,11 @@ public class ReservationService {
     ReservationWithRoom toReturn = save(toStart);
     deskRepository
         .findById(toReturn.getDeskId())
-        .ifPresent(desk -> desk.setDeskStatus(Status.DIRTY));
+        .ifPresent(
+            desk -> {
+              desk.setDeskStatus(Status.DIRTY);
+              deskRepository.save(desk);
+            });
     return toReturn;
   }
 
@@ -240,7 +244,13 @@ public class ReservationService {
     toEnd.setRealEnd(time);
     toEnd.setDeskCleaned(deskCleaned);
     if (deskCleaned)
-      deskRepository.findById(toEnd.getDeskId()).ifPresent(d -> d.setDeskStatus(Status.CLEAN));
+      deskRepository
+          .findById(toEnd.getDeskId())
+          .ifPresent(
+              d -> {
+                d.setDeskStatus(Status.CLEAN);
+                deskRepository.save(d);
+              });
     return save(toEnd);
   }
 }

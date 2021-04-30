@@ -40,7 +40,7 @@ class ModifyDeskControllerTest {
   void modifyDesk() {
     DeskModifyInfo providedInfo =
         new DeskModifyInfo(new DeskInfo("id1", 5, 10), new DeskInfo("id1", 8, 7));
-    Desk savedDesk = new Desk("id1", 5, 10, "roomName");
+    Desk savedDesk = new Desk("id1", 5, 10, "roomName", Status.CLEAN);
     savedDesk.setDeskStatus(Status.CLEAN);
     when(service.getDeskByInfoAndRoomName(providedInfo.getOldInfo(), "roomName"))
         .thenReturn(savedDesk);

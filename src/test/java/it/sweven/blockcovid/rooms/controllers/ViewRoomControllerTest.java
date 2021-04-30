@@ -12,6 +12,7 @@ import it.sweven.blockcovid.rooms.dto.DeskInfoAvailability;
 import it.sweven.blockcovid.rooms.dto.RoomWithDesks;
 import it.sweven.blockcovid.rooms.entities.Desk;
 import it.sweven.blockcovid.rooms.entities.Room;
+import it.sweven.blockcovid.rooms.entities.Status;
 import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.rooms.services.DeskService;
 import it.sweven.blockcovid.rooms.services.RoomService;
@@ -45,7 +46,9 @@ class ViewRoomControllerTest {
     Room expectedRoom = mock(Room.class);
     when(roomService.getByName("roomName")).thenReturn(expectedRoom);
     List<Desk> expectedDesks =
-        List.of(new Desk("desk0", 3, 45, "roomId"), new Desk("desk1", 20, 11, "roomId"));
+        List.of(
+            new Desk("desk0", 3, 45, "roomId", Status.CLEAN),
+            new Desk("desk1", 20, 11, "roomId", Status.CLEAN));
     when(deskService.getDesksByRoom("roomName")).thenReturn(expectedDesks);
     when(reservationService.timeConflict(eq("desk0"), any(), any())).thenReturn(true);
     when(reservationService.timeConflict(eq("desk1"), any(), any())).thenReturn(false);
