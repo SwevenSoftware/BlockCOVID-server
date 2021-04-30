@@ -34,7 +34,7 @@ class ViewPersonalDeskReservationsControllerTest {
     when(fakeRes2.getDeskId()).thenReturn(deskId);
 
     List<ReservationWithRoom> fakeList = List.of(fakeRes1, fakeRes2);
-    when(service.findByUsernameAndStart(any(), any())).thenReturn(fakeList);
+    when(service.findByUsernameAndEnd(any(), any())).thenReturn(fakeList);
   }
 
   @Test

@@ -36,7 +36,7 @@ class ViewPersonalReservationsControllerTest {
         List.of(mock(ReservationWithRoom.class), mock(ReservationWithRoom.class));
     CollectionModel<EntityModel<ReservationWithRoom>> fakeCollectionModel =
         CollectionModel.of(fakeList.stream().map(EntityModel::of).collect(Collectors.toList()));
-    when(service.findByUsernameAndStart(anyString(), any())).thenReturn(fakeList);
+    when(service.findByUsernameAndEnd(anyString(), any())).thenReturn(fakeList);
     when(assembler.toCollectionModel(any())).thenReturn(fakeCollectionModel);
     assertEquals(fakeCollectionModel, controller.viewAll(mock(User.class), LocalDateTime.now()));
   }
