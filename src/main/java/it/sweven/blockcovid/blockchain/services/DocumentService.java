@@ -3,16 +3,20 @@ package it.sweven.blockcovid.blockchain.services;
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 
 import it.sweven.blockcovid.blockchain.documents.PdfReport;
+import it.sweven.blockcovid.blockchain.dto.ReportInformation;
 import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.rooms.entities.Room;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.management.BadAttributeValueExpException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
@@ -120,5 +124,22 @@ public class DocumentService {
 
   public String hashOf(String path) throws IOException {
     return DigestUtils.md5DigestAsHex(readReport(path));
+  }
+
+  public List<ReportInformation> getAllReports() throws IOException {
+    return Files.list(Path.of(DESTINATION_DIR))
+        .map(
+            path -> {
+              try {
+                BasicFileAttributes attrs =
+                    Files.readAttributes(
+                        path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+                return new ReportInformation(
+                    path.getFileName().toString(), attrs.creationTime(), attrs.lastModifiedTime());
+              } catch (IOException e) {
+                return new ReportInformation(path.getFileName().toString());
+              }
+            })
+        .collect(Collectors.toList());
   }
 }
