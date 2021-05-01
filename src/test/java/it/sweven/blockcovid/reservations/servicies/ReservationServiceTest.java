@@ -19,7 +19,6 @@ import it.sweven.blockcovid.rooms.repositories.RoomRepository;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import javax.management.BadAttributeValueExpException;
 import org.junit.jupiter.api.BeforeEach;
@@ -351,20 +350,17 @@ class ReservationServiceTest {
   @Test
   void startHappyPath() throws ReservationClash, StartingTooEarly {
     when(fakeReservation1.getStart()).thenReturn(LocalDateTime.now());
-    when(fakeReservation1.getDeskId()).thenReturn("");
     when(reservationRepository.findReservationById(any()))
         .thenReturn(Optional.of(fakeReservation1));
+    ReservationWithRoom expectedReservation = mock(ReservationWithRoom.class);
+    doReturn(expectedReservation).when(service).save(fakeReservation1);
+    when(expectedReservation.getDeskId()).thenReturn("deskId");
+    Desk mockDesk = mock(Desk.class);
+    when(deskRepository.findById("deskId")).thenReturn(Optional.of(mockDesk));
     LocalDateTime now = LocalDateTime.now();
-    AtomicBoolean correctTime = new AtomicBoolean(false);
-    doAnswer(
-            invocation -> {
-              correctTime.set(invocation.getArgument(0) == now);
-              return null;
-            })
-        .when(fakeReservation1)
-        .setRealStart(any());
-    service.start("id", now);
-    assertTrue(correctTime.get());
+    assertEquals(expectedReservation, service.start("id", now));
+    verify(fakeReservation1).setRealStart(now);
+    verify(service).setDeskDirty(mockDesk);
   }
 
   @Test
@@ -382,6 +378,20 @@ class ReservationServiceTest {
         .thenReturn(Optional.of(fakeReservation1));
     LocalDateTime now = LocalDateTime.now();
     assertThrows(StartingTooEarly.class, () -> service.start("id", now.minusMinutes(31)));
+  }
+
+  @Test
+  void setDeskDirty() {
+    Desk mockDesk = mock(Desk.class);
+    when(mockDesk.getRoomId()).thenReturn("roomId");
+    Room mockRoom = mock(Room.class);
+    when(mockRoom.getRoomStatus()).thenReturn(Status.CLEAN);
+    when(roomRepository.findById("roomId")).thenReturn(Optional.of(mockRoom));
+    service.setDeskDirty(mockDesk);
+    verify(mockDesk).setDeskStatus(Status.DIRTY);
+    verify(deskRepository).save(mockDesk);
+    verify(mockRoom).setRoomStatus(Status.DIRTY);
+    verify(roomRepository).save(mockRoom);
   }
 
   @Test
