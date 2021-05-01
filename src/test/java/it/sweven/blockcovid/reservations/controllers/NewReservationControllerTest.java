@@ -14,6 +14,7 @@ import it.sweven.blockcovid.rooms.exceptions.DeskNotFoundException;
 import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.users.entities.User;
 import java.time.LocalDateTime;
+import javax.management.BadAttributeValueExpException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.EntityModel;
@@ -27,7 +28,7 @@ class NewReservationControllerTest {
   private ReservationInfo info;
 
   @BeforeEach
-  void setUp() throws ReservationClash, BadTimeIntervals {
+  void setUp() throws ReservationClash, BadTimeIntervals, BadAttributeValueExpException {
     service = mock(ReservationService.class);
     when(service.addReservation(any(), any())).thenReturn(mock(ReservationWithRoom.class));
     ReservationWithRoomAssembler assembler = mock(ReservationWithRoomAssembler.class);
@@ -43,7 +44,7 @@ class NewReservationControllerTest {
   }
 
   @Test
-  void validReservation() throws ReservationClash, BadTimeIntervals {
+  void validReservation() throws ReservationClash, BadTimeIntervals, BadAttributeValueExpException {
     ReservationWithRoom fakeReservation = mock(ReservationWithRoom.class);
     when(service.addReservation(any(), any())).thenReturn(fakeReservation);
     assertEquals(fakeReservation, controller.book(testUser, info).getContent());
@@ -51,7 +52,7 @@ class NewReservationControllerTest {
 
   @Test
   void serviceSignalsConflict_throwsResponseStatusException()
-      throws ReservationClash, BadTimeIntervals {
+      throws ReservationClash, BadTimeIntervals, BadAttributeValueExpException {
     when(service.addReservation(any(), any())).thenThrow(ReservationClash.class);
     ResponseStatusException thrown =
         assertThrows(ResponseStatusException.class, () -> controller.book(testUser, info));
@@ -60,7 +61,7 @@ class NewReservationControllerTest {
 
   @Test
   void serviceThrowsBadTimeIntervals_throwsResponseStatusException()
-      throws ReservationClash, BadTimeIntervals {
+      throws ReservationClash, BadTimeIntervals, BadAttributeValueExpException {
     when(service.addReservation(any(), any())).thenThrow(BadTimeIntervals.class);
     ResponseStatusException thrown =
         assertThrows(ResponseStatusException.class, () -> controller.book(testUser, info));
@@ -69,7 +70,7 @@ class NewReservationControllerTest {
 
   @Test
   void serviceThrowsDeskNotFoundException_throwsResponseStatusException()
-      throws ReservationClash, BadTimeIntervals {
+      throws ReservationClash, BadTimeIntervals, BadAttributeValueExpException {
     when(service.addReservation(any(), any())).thenThrow(DeskNotFoundException.class);
     ResponseStatusException thrown =
         assertThrows(ResponseStatusException.class, () -> controller.book(testUser, info));
@@ -78,11 +79,20 @@ class NewReservationControllerTest {
 
   @Test
   void serviceThrowsRoomNotFoundException_throwsResponseStatusException()
-      throws ReservationClash, BadTimeIntervals {
+      throws ReservationClash, BadTimeIntervals, BadAttributeValueExpException {
     when(service.addReservation(any(), any())).thenThrow(RoomNotFoundException.class);
     ResponseStatusException thrown =
         assertThrows(ResponseStatusException.class, () -> controller.book(testUser, info));
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, thrown.getStatus());
+  }
+
+  @Test
+  void serviceThrowsBadAttributeValueExpException_throwsResponseStatusException()
+      throws ReservationClash, BadTimeIntervals, BadAttributeValueExpException {
+    when(service.addReservation(any(), any())).thenThrow(BadAttributeValueExpException.class);
+    ResponseStatusException thrown =
+        assertThrows(ResponseStatusException.class, () -> controller.book(testUser, info));
+    assertEquals(HttpStatus.BAD_REQUEST, thrown.getStatus());
   }
 
   @Test

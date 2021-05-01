@@ -8,7 +8,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ReservationBuilder {
   private String id, username, deskId;
-  private LocalDateTime start, end;
+  private LocalDateTime start, end, realStart, realEnd;
+  private Boolean deskCleaned = false;
 
   public ReservationBuilder id(String id) {
     this.id = id;
@@ -35,19 +36,40 @@ public class ReservationBuilder {
     return this;
   }
 
+  public ReservationBuilder realStart(LocalDateTime realStart) {
+    this.realStart = realStart;
+    return this;
+  }
+
+  public ReservationBuilder realEnd(LocalDateTime realEnd) {
+    this.realEnd = realEnd;
+    return this;
+  }
+
+  public ReservationBuilder deskCleaned(Boolean deskCleaned) {
+    this.deskCleaned = deskCleaned;
+    return this;
+  }
+
   public ReservationBuilder from(ReservationWithRoom reservation) {
     return id(reservation.getId())
         .username(reservation.getUsername())
         .deskId(reservation.getDeskId())
         .start(reservation.getStart())
-        .end(reservation.getEnd());
+        .end(reservation.getEnd())
+        .realStart(reservation.getUsageStart())
+        .realEnd(reservation.getUsageEnd())
+        .deskCleaned(reservation.getDeskCleaned() != null ? reservation.getDeskCleaned() : false);
   }
 
   public Reservation build() throws BadAttributeValueExpException {
     if (deskId == null || username == null || start == null || end == null)
       throw new BadAttributeValueExpException("fields not specified");
     if (start.isAfter(end)) throw new BadAttributeValueExpException("start may not be after end");
-    if (id == null) return new Reservation(deskId, username, start, end);
-    else return new Reservation(id, deskId, username, start, end);
+    if (realStart == null && realEnd != null)
+      throw new BadAttributeValueExpException("usage can't be ended without first be started");
+    if (realEnd == null && deskCleaned)
+      throw new BadAttributeValueExpException("desk can't be cleaned without first ending usage");
+    return new Reservation(id, deskId, username, start, end, realStart, realEnd, deskCleaned);
   }
 }

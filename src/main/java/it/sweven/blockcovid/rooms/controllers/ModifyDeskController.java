@@ -59,7 +59,12 @@ public class ModifyDeskController implements RoomsController {
       Optional.ofNullable(modifyInfo.getNewInfo().getY()).ifPresent(toModify::setY);
       toModify = deskService.update(toModify);
       DeskWithRoomName toReturn =
-          new DeskWithRoomName(roomName, toModify.getId(), toModify.getX(), toModify.getY());
+          new DeskWithRoomName(
+              roomName,
+              toModify.getId(),
+              toModify.getX(),
+              toModify.getY(),
+              toModify.getDeskStatus());
       return deskAssembler.toModel(toReturn);
     } catch (NoSuchElementException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND);

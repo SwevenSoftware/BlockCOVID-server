@@ -25,9 +25,10 @@ requests are handled properly. **Without a valid keystore the server will fail t
 #### Blockchain
 In order to save the hashes of generated reports on a blockchain network you need to:
 * Select a network to deploy your contract: you can simply use the provided *containered* solution and test the server
-  behavior trough *ganache*. Otherwise, there are a number of ethereum test network such as [Infura](https://infura.io/)
+  behavior trough *ganache*. Otherwise, you should have an endpoint to communicate to the selected ethereum network, 
+  such as [Infura](https://infura.io/);
 
-* Open an account on that particular network
+* Open an account on that particular network.
 
 once you have such information compile the file `.env`.
 An example could be the following (also included in the project)
@@ -49,8 +50,14 @@ export KEYSTORE_PASSWORD=
 export KEYSTORE_ALIAS=
 export SSL_ENABLED=false
 # server port, this will only affect the container exposed port,
-# not he internal port
+# not the internal port
 export SERVER_PORT=8091
+# existing directory where reports will be saved
+export REPORT_DIR=
+# This should be commented when deploying on a real network,
+# specifies the active profile of the application, the ganache profile is made
+# specifically to interact with ganache  
+export spring_profiles_active=ganache
 ```
 
 ### Building
@@ -66,8 +73,7 @@ Once all the prerequisites are satisfied, and the artifact is built the applicat
 #### Test container start
 This way you can test the application with a container version of mongodb and ganache cli
 ```shell
-sudo docker-compose build && \
-sudo docker-compose up
+sudo docker-compose up --build
 ```
 The containers will then be created and started. Eventually when the run ends you can dismantle the built containers 
 with

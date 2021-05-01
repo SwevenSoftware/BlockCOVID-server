@@ -34,7 +34,7 @@ public class ListUsersController implements UsersController {
     this.userAssembler = userAssembler;
   }
 
-  @GetMapping(value = "", consumes = "application/json", produces = "application/json")
+  @GetMapping("")
   @ResponseBody
   @ApiResponses({
     @ApiResponse(responseCode = "200", description = "List of existing users"),

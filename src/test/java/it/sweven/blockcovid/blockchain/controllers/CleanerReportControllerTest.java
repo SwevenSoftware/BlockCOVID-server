@@ -3,47 +3,32 @@ package it.sweven.blockcovid.blockchain.controllers;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import it.sweven.blockcovid.blockchain.services.BlockchainService;
-import it.sweven.blockcovid.blockchain.services.DocumentContractService;
 import it.sweven.blockcovid.blockchain.services.DocumentService;
+import it.sweven.blockcovid.blockchain.services.SignRegistrationService;
 import it.sweven.blockcovid.rooms.entities.Room;
 import it.sweven.blockcovid.rooms.services.RoomService;
 import it.sweven.blockcovid.users.entities.User;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
-import org.web3j.crypto.Credentials;
 
-class AdminCleanerReportControllerTest {
+class CleanerReportControllerTest {
 
   private RoomService roomService;
   private DocumentService documentService;
-  private AdminCleanerReportController controller;
-  private BlockchainService blockchainService;
-  private DocumentContractService documentContractService;
+  private CleanerReportController controller;
 
   @BeforeEach
   void setUp() {
     roomService = mock(RoomService.class);
     documentService = mock(DocumentService.class);
-    blockchainService = mock(BlockchainService.class);
-    documentContractService = mock(DocumentContractService.class);
-    Credentials credentials = mock(Credentials.class);
+    SignRegistrationService signRegistrationService = mock(SignRegistrationService.class);
     when(roomService.getAllRooms()).thenReturn(Collections.emptyList());
-    controller =
-        spy(
-            new AdminCleanerReportController(
-                roomService,
-                documentService,
-                blockchainService,
-                documentContractService,
-                credentials));
+    controller = new CleanerReportController(roomService, documentService, signRegistrationService);
   }
 
   @Test
@@ -53,9 +38,7 @@ class AdminCleanerReportControllerTest {
     when(documentService.generateCleanerReport(mockRooms)).thenReturn("reportPath");
     byte[] expectedBytes = "correct result".getBytes();
     when(documentService.readReport("reportPath")).thenReturn(expectedBytes);
-    Files.createFile(Path.of("reportPath"));
     assertEquals(expectedBytes, controller.report(mock(User.class)));
-    Files.deleteIfExists(Path.of("reportPath"));
   }
 
   @Test
@@ -75,24 +58,13 @@ class AdminCleanerReportControllerTest {
   }
 
   @Test
-  void report_errorWhileRegisteringReport() throws Exception {
+  void report_setAsVerifiedThrows_doesNotThrow() throws IOException {
     List<Room> mockRooms = List.of(mock(Room.class), mock(Room.class));
     when(roomService.getAllRooms()).thenReturn(mockRooms);
     when(documentService.generateCleanerReport(mockRooms)).thenReturn("reportPath");
-    when(blockchainService.registerReport(any(), any())).thenThrow(new Exception());
-    ResponseStatusException thrown =
-        assertThrows(ResponseStatusException.class, () -> controller.report(mock(User.class)));
-    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, thrown.getStatus());
-  }
-
-  @Test
-  void report_errorWhileRetrievingContract() throws Exception {
-    List<Room> mockRooms = List.of(mock(Room.class), mock(Room.class));
-    when(roomService.getAllRooms()).thenReturn(mockRooms);
-    when(documentService.generateCleanerReport(mockRooms)).thenReturn("reportPath");
-    when(documentContractService.getContractByAccount(any())).thenThrow(new Exception());
-    ResponseStatusException thrown =
-        assertThrows(ResponseStatusException.class, () -> controller.report(mock(User.class)));
-    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, thrown.getStatus());
+    byte[] expectedBytes = "correct result".getBytes();
+    when(documentService.readReport("reportPath")).thenReturn(expectedBytes);
+    when(documentService.setAsVerified(any())).thenThrow(new IOException());
+    assertEquals(expectedBytes, controller.report(mock(User.class)));
   }
 }

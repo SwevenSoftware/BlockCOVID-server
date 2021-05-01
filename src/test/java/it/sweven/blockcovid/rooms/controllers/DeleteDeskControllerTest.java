@@ -8,6 +8,7 @@ import it.sweven.blockcovid.rooms.assemblers.DeskAssembler;
 import it.sweven.blockcovid.rooms.dto.DeskInfo;
 import it.sweven.blockcovid.rooms.dto.DeskWithRoomName;
 import it.sweven.blockcovid.rooms.entities.Desk;
+import it.sweven.blockcovid.rooms.entities.Status;
 import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.rooms.services.DeskService;
 import it.sweven.blockcovid.users.entities.User;
@@ -37,7 +38,7 @@ class DeleteDeskControllerTest {
     Desk fakeDesk = mock(Desk.class);
     when(fakeDesk.getId()).thenReturn("idFakeDesk");
     DeskInfo providedDeskInfo = mock(DeskInfo.class);
-    DeskWithRoomName expected = new DeskWithRoomName("room", "id1", null, null);
+    DeskWithRoomName expected = new DeskWithRoomName("room", "id1", null, null, Status.CLEAN);
     when(deskService.getDeskByInfoAndRoomName(providedDeskInfo, "room")).thenReturn(fakeDesk);
     when(deskService.deleteDeskById("idFakeDesk")).thenReturn(fakeDesk);
     assertEquals(

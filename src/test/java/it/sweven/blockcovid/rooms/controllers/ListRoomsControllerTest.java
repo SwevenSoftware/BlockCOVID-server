@@ -12,6 +12,7 @@ import it.sweven.blockcovid.rooms.dto.DeskInfoAvailability;
 import it.sweven.blockcovid.rooms.dto.RoomWithDesks;
 import it.sweven.blockcovid.rooms.entities.Desk;
 import it.sweven.blockcovid.rooms.entities.Room;
+import it.sweven.blockcovid.rooms.entities.Status;
 import it.sweven.blockcovid.rooms.services.DeskService;
 import it.sweven.blockcovid.rooms.services.RoomService;
 import it.sweven.blockcovid.users.entities.User;
@@ -48,8 +49,10 @@ class ListRoomsControllerTest {
     when(rooms.get(0).getName()).thenReturn("room0");
     when(rooms.get(1).getName()).thenReturn("room1");
     when(roomService.getAllRooms()).thenReturn(rooms);
-    when(deskService.getDesksByRoom("room0")).thenReturn(List.of(new Desk("desk0", 2, 4, "room0")));
-    when(deskService.getDesksByRoom("room1")).thenReturn(List.of(new Desk("desk1", 3, 7, "room1")));
+    when(deskService.getDesksByRoom("room0"))
+        .thenReturn(List.of(new Desk("desk0", 2, 4, "room0", Status.CLEAN)));
+    when(deskService.getDesksByRoom("room1"))
+        .thenReturn(List.of(new Desk("desk1", 3, 7, "room1", Status.CLEAN)));
     when(reservationService.timeConflict(eq("desk0"), any(), any())).thenReturn(true);
     when(reservationService.timeConflict(eq("desk1"), any(), any())).thenReturn(false);
     List<RoomWithDesks> roomsWithDesks =

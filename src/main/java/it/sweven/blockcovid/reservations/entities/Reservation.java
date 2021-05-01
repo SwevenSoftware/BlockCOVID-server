@@ -15,22 +15,27 @@ public class Reservation implements Comparable<Reservation> {
   private String id;
 
   private String username, deskId;
-  private LocalDateTime start, end;
+  private LocalDateTime start, end, realStart, realEnd;
+  private Boolean deskCleaned;
 
   @PersistenceConstructor
-  Reservation(String id, String deskId, String username, LocalDateTime start, LocalDateTime end) {
+  Reservation(
+      String id,
+      String deskId,
+      String username,
+      LocalDateTime start,
+      LocalDateTime end,
+      LocalDateTime realStart,
+      LocalDateTime realEnd,
+      Boolean deskCleaned) {
     this.id = id;
     this.deskId = deskId;
     this.username = username;
     this.start = start;
     this.end = end;
-  }
-
-  public Reservation(String deskId, String username, LocalDateTime start, LocalDateTime end) {
-    this.deskId = deskId;
-    this.username = username;
-    this.start = start;
-    this.end = end;
+    this.realStart = realStart;
+    this.realEnd = realEnd;
+    this.deskCleaned = deskCleaned;
   }
 
   @Override
@@ -39,13 +44,28 @@ public class Reservation implements Comparable<Reservation> {
   }
 
   public boolean intervalInsideReservation(LocalDateTime start, LocalDateTime end) {
-    return (!start.isBefore(this.start) && this.end.isAfter(start))
-        || (start.isBefore(this.start) && this.start.isBefore(end));
+    LocalDateTime minStart = minBetween(getStart(), getRealStart()),
+        minEnd = minBetween(getEnd(), getRealEnd());
+    return (!start.isBefore(minStart) && minEnd.isAfter(start))
+        || (start.isBefore(minStart) && end.isAfter(minStart));
   }
 
   public boolean clashesWith(Reservation other) {
     return (other.getId() == null || getId() == null || !other.getId().equals(this.id))
         && deskId.equals(other.getDeskId())
-        && intervalInsideReservation(other.start, other.end);
+        && intervalInsideReservation(
+            minBetween(other.getStart(), other.getRealStart()),
+            minBetween(other.getEnd(), other.getRealEnd()));
+  }
+
+  private LocalDateTime minBetween(LocalDateTime timestamp1, LocalDateTime timestamp2) {
+    if (timestamp1 == null) return timestamp2;
+    if (timestamp2 == null) return timestamp1;
+    if (timestamp1.isBefore(timestamp2)) return timestamp1;
+    return timestamp2;
+  }
+
+  public Boolean isEnded() {
+    return LocalDateTime.now().isAfter(end) || realEnd != null;
   }
 }

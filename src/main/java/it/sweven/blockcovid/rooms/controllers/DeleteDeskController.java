@@ -57,7 +57,8 @@ public class DeleteDeskController implements RoomsController {
       String idDesk = deskService.getDeskByInfoAndRoomName(toDelete, roomName).getId();
       Desk deleted = deskService.deleteDeskById(idDesk);
       DeskWithRoomName toReturn =
-          new DeskWithRoomName(roomName, deleted.getId(), deleted.getX(), deleted.getY());
+          new DeskWithRoomName(
+              roomName, deleted.getId(), deleted.getX(), deleted.getY(), deleted.getDeskStatus());
       return deskAssembler.toModel(toReturn);
     } catch (NoSuchElementException exception) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND);

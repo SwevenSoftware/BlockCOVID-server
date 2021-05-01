@@ -9,6 +9,7 @@ import it.sweven.blockcovid.rooms.assemblers.DeskAssembler;
 import it.sweven.blockcovid.rooms.dto.DeskWithRoomName;
 import it.sweven.blockcovid.rooms.dto.NewDeskInfo;
 import it.sweven.blockcovid.rooms.entities.Desk;
+import it.sweven.blockcovid.rooms.entities.Status;
 import it.sweven.blockcovid.rooms.exceptions.DeskNotAvailable;
 import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.rooms.services.DeskService;
@@ -47,9 +48,9 @@ class NewDeskControllerTest {
     when(deskService.addDesk(any(), eq("roomName"))).thenReturn(mock(Desk.class));
     List<DeskWithRoomName> expectedList =
         List.of(
-            new DeskWithRoomName("roomName", "id1", 5, 10),
-            new DeskWithRoomName("roomName", "id2", 11, 40),
-            new DeskWithRoomName("roomName", "id3", 1, 1));
+            new DeskWithRoomName("roomName", "id1", 5, 10, Status.CLEAN),
+            new DeskWithRoomName("roomName", "id2", 11, 40, Status.DIRTY),
+            new DeskWithRoomName("roomName", "id3", 1, 1, Status.DIRTY));
     when(deskAssembler.toCollectionModel(any()))
         .thenAnswer(
             invocation ->

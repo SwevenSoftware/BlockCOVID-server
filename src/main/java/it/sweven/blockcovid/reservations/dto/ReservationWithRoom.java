@@ -8,5 +8,10 @@ import lombok.Getter;
 @Getter
 public class ReservationWithRoom {
   private final String id, deskId, room, username;
-  private final LocalDateTime start, end;
+  private final LocalDateTime start, end, usageStart, usageEnd;
+  private final Boolean deskCleaned;
+
+  public Boolean isEnded() {
+    return LocalDateTime.now().isAfter(end) || usageEnd != null;
+  }
 }

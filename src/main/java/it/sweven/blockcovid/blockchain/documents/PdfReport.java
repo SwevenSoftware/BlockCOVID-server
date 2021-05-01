@@ -1,5 +1,6 @@
 package it.sweven.blockcovid.blockchain.documents;
 
+import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
@@ -21,6 +22,7 @@ public class PdfReport {
   private LocalDateTime timestamp;
   private @Getter(AccessLevel.PROTECTED) List<Cell> tableHeader;
   private @Getter(AccessLevel.PROTECTED) final ArrayList<List<Cell>> rowsTable;
+  private Boolean landscape = false;
 
   public PdfReport() {
     rowsTable = new ArrayList<>();
@@ -64,6 +66,11 @@ public class PdfReport {
     return this;
   }
 
+  public PdfReport landscape() {
+    this.landscape = true;
+    return this;
+  }
+
   protected Document createNewDocument(String path) throws FileNotFoundException {
     return new Document(new PdfDocument(new PdfWriter(path)));
   }
@@ -90,6 +97,7 @@ public class PdfReport {
 
   public void create(String path) throws BadAttributeValueExpException, FileNotFoundException {
     Document document = createNewDocument(path);
+    if (landscape) document.getPdfDocument().setDefaultPageSize(PageSize.A4.rotate());
     addTitle(document);
     addTimestamp(document);
     addTable(document);
