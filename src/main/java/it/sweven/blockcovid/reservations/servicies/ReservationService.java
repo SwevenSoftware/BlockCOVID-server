@@ -224,14 +224,22 @@ public class ReservationService {
     if (time.isBefore(toStart.getStart().minusMinutes(30))) throw new StartingTooEarly();
     toStart.setRealStart(time);
     ReservationWithRoom toReturn = save(toStart);
-    deskRepository
-        .findById(toReturn.getDeskId())
-        .ifPresent(
-            desk -> {
-              desk.setDeskStatus(Status.DIRTY);
-              deskRepository.save(desk);
-            });
+    deskRepository.findById(toReturn.getDeskId()).ifPresent(this::setDeskDirty);
     return toReturn;
+  }
+
+  protected void setDeskDirty(Desk desk) {
+    desk.setDeskStatus(Status.DIRTY);
+    deskRepository.save(desk);
+    roomRepository
+        .findById(desk.getRoomId())
+        .ifPresent(
+            room -> {
+              if (room.getRoomStatus() != Status.DIRTY) {
+                room.setRoomStatus(Status.DIRTY);
+                roomRepository.save(room);
+              }
+            });
   }
 
   public ReservationWithRoom end(String id, LocalDateTime time, Boolean deskCleaned)
