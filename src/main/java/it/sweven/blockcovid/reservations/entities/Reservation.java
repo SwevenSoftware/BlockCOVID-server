@@ -44,14 +44,25 @@ public class Reservation implements Comparable<Reservation> {
   }
 
   public boolean intervalInsideReservation(LocalDateTime start, LocalDateTime end) {
-    return (!start.isBefore(getStart()) && getEnd().isAfter(start))
-        || (start.isBefore(getStart()) && getEnd().isBefore(end));
+    LocalDateTime minStart = minBetween(getStart(), getRealStart()),
+        minEnd = minBetween(getEnd(), getRealEnd());
+    return (!start.isBefore(minStart) && minEnd.isAfter(start))
+        || (start.isBefore(minStart) && end.isAfter(minStart));
   }
 
   public boolean clashesWith(Reservation other) {
     return (other.getId() == null || getId() == null || !other.getId().equals(this.id))
         && deskId.equals(other.getDeskId())
-        && intervalInsideReservation(other.getStart(), other.getEnd());
+        && intervalInsideReservation(
+            minBetween(other.getStart(), other.getRealStart()),
+            minBetween(other.getEnd(), other.getRealEnd()));
+  }
+
+  private LocalDateTime minBetween(LocalDateTime timestamp1, LocalDateTime timestamp2) {
+    if (timestamp1 == null) return timestamp2;
+    if (timestamp2 == null) return timestamp1;
+    if (timestamp1.isBefore(timestamp2)) return timestamp1;
+    return timestamp2;
   }
 
   public Boolean isEnded() {
