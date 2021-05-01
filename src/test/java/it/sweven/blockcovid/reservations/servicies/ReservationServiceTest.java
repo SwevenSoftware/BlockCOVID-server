@@ -381,7 +381,7 @@ class ReservationServiceTest {
   }
 
   @Test
-  void setDeskDirty() {
+  void setDeskDirty_roomStatusClean() {
     Desk mockDesk = mock(Desk.class);
     when(mockDesk.getRoomId()).thenReturn("roomId");
     Room mockRoom = mock(Room.class);
@@ -392,6 +392,18 @@ class ReservationServiceTest {
     verify(deskRepository).save(mockDesk);
     verify(mockRoom).setRoomStatus(Status.DIRTY);
     verify(roomRepository).save(mockRoom);
+  }
+
+  @Test
+  void setDeskDirty_roomStatusDirty() {
+    Desk mockDesk = mock(Desk.class);
+    when(mockDesk.getRoomId()).thenReturn("roomId");
+    Room mockRoom = mock(Room.class);
+    when(mockRoom.getRoomStatus()).thenReturn(Status.DIRTY);
+    when(roomRepository.findById("roomId")).thenReturn(Optional.of(mockRoom));
+    service.setDeskDirty(mockDesk);
+    verify(mockDesk).setDeskStatus(Status.DIRTY);
+    verify(deskRepository).save(mockDesk);
   }
 
   @Test
