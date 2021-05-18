@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import it.sweven.blockcovid.rooms.assemblers.RoomAssembler;
 import it.sweven.blockcovid.rooms.dto.RoomInfo;
 import it.sweven.blockcovid.rooms.entities.Room;
+import it.sweven.blockcovid.rooms.exceptions.RoomNameNotAvailable;
 import it.sweven.blockcovid.rooms.services.RoomService;
 import it.sweven.blockcovid.users.entities.Authority;
 import it.sweven.blockcovid.users.entities.User;
@@ -37,7 +38,8 @@ class NewRoomControllerTest {
   }
 
   @Test
-  void newRoom_requestWithValidRoomInfo() throws BadAttributeValueExpException {
+  void newRoom_requestWithValidRoomInfo()
+      throws BadAttributeValueExpException, RoomNameNotAvailable {
     RoomInfo roomInfo =
         new RoomInfo(
             "testRoom", LocalTime.of(8, 0), LocalTime.of(20, 0), Set.of(DayOfWeek.MONDAY), 10, 10);
@@ -50,17 +52,29 @@ class NewRoomControllerTest {
   }
 
   @Test
-  void newRoom_requestWithInvalidRoomInfo() throws BadAttributeValueExpException {
+  void newRoom_requestWithInvalidRoomInfo()
+      throws BadAttributeValueExpException, RoomNameNotAvailable {
     RoomInfo roomInfo =
         new RoomInfo(
             null, LocalTime.of(8, 0), LocalTime.of(20, 0), Set.of(DayOfWeek.MONDAY), 10, 10);
-
-    Room fakeRoom = mock(Room.class);
     EntityModel fakeModel = mock(EntityModel.class);
     when(roomService.createRoom(any())).thenThrow(new BadAttributeValueExpException(null));
     when(roomAssembler.toModel(any())).thenReturn(fakeModel);
     ResponseStatusException thrown =
         assertThrows(ResponseStatusException.class, () -> controller.newRoom(admin, roomInfo));
     assertEquals(HttpStatus.BAD_REQUEST, thrown.getStatus());
+  }
+
+  @Test
+  void newRoom_RoomNameNotAvailable() throws RoomNameNotAvailable, BadAttributeValueExpException {
+    RoomInfo roomInfo =
+        new RoomInfo(
+            "name", LocalTime.of(8, 0), LocalTime.of(20, 0), Set.of(DayOfWeek.MONDAY), 10, 10);
+    EntityModel fakeModel = mock(EntityModel.class);
+    when(roomService.createRoom(any())).thenThrow(new RoomNameNotAvailable());
+    when(roomAssembler.toModel(any())).thenReturn(fakeModel);
+    ResponseStatusException thrown =
+        assertThrows(ResponseStatusException.class, () -> controller.newRoom(admin, roomInfo));
+    assertEquals(HttpStatus.CONFLICT, thrown.getStatus());
   }
 }

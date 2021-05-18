@@ -10,6 +10,7 @@ import it.sweven.blockcovid.rooms.dto.RoomInfo;
 import it.sweven.blockcovid.rooms.entities.Desk;
 import it.sweven.blockcovid.rooms.entities.Room;
 import it.sweven.blockcovid.rooms.entities.Status;
+import it.sweven.blockcovid.rooms.exceptions.RoomNameNotAvailable;
 import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.rooms.repositories.DeskRepository;
 import it.sweven.blockcovid.rooms.repositories.RoomRepository;
@@ -58,12 +59,20 @@ class RoomServiceTest {
   }
 
   @Test
-  void createRoom_validRoomInfo() throws BadAttributeValueExpException {
+  void createRoom_validRoomInfo() throws BadAttributeValueExpException, RoomNameNotAvailable {
     RoomInfo info =
         new RoomInfo("", LocalTime.now(), LocalTime.now(), Set.of(DayOfWeek.MONDAY), 1, 2);
     Room testRoom = mock(Room.class);
     when(repository.save(any())).thenReturn(testRoom);
     assertEquals(testRoom, service.createRoom(info));
+  }
+
+  @Test
+  void createRoom_roomNameNotAvailable() {
+    RoomInfo info =
+        new RoomInfo("roomName", LocalTime.now(), LocalTime.now(), Set.of(DayOfWeek.MONDAY), 1, 2);
+    when(repository.findRoomByName("roomName")).thenReturn(Optional.of(mock(Room.class)));
+    assertThrows(RoomNameNotAvailable.class, () -> service.createRoom(info));
   }
 
   @Test

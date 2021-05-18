@@ -4,6 +4,7 @@ import it.sweven.blockcovid.rooms.dto.RoomInfo;
 import it.sweven.blockcovid.rooms.entities.Room;
 import it.sweven.blockcovid.rooms.entities.RoomBuilder;
 import it.sweven.blockcovid.rooms.entities.Status;
+import it.sweven.blockcovid.rooms.exceptions.RoomNameNotAvailable;
 import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.rooms.repositories.DeskRepository;
 import it.sweven.blockcovid.rooms.repositories.RoomRepository;
@@ -31,7 +32,10 @@ public class RoomService {
     return roomRepository.findRoomByName(roomName).orElseThrow(RoomNotFoundException::new);
   }
 
-  public Room createRoom(RoomInfo roomInfo) throws BadAttributeValueExpException {
+  public Room createRoom(RoomInfo roomInfo)
+      throws BadAttributeValueExpException, RoomNameNotAvailable {
+    if (roomRepository.findRoomByName(roomInfo.getName()).isPresent())
+      throw new RoomNameNotAvailable();
     Room toCreate =
         new RoomBuilder()
             .name(roomInfo.getName())
