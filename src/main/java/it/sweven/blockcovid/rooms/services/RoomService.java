@@ -9,6 +9,7 @@ import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.rooms.repositories.DeskRepository;
 import it.sweven.blockcovid.rooms.repositories.RoomRepository;
 import java.util.List;
+import java.util.Optional;
 import javax.management.BadAttributeValueExpException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,8 +25,26 @@ public class RoomService {
     this.deskRepository = deskRepository;
   }
 
-  public Room save(Room room) {
+  protected Room save(Room room) {
     return roomRepository.save(room);
+  }
+
+  public Room updateRoom(String roomName, RoomInfo newInfo)
+      throws RoomNameNotAvailable, RoomNotFoundException {
+    if (newInfo.getName() != null
+        && !roomName.equals(newInfo.getName())
+        && roomRepository.findRoomByName(newInfo.getName()).isPresent())
+      throw new RoomNameNotAvailable();
+
+    Room room = getByName(roomName);
+    Optional.ofNullable(newInfo.getName()).ifPresent(room::setName);
+    Optional.ofNullable(newInfo.getOpeningAt()).ifPresent(room::setOpeningTime);
+    Optional.ofNullable(newInfo.getClosingAt()).ifPresent(room::setClosingTime);
+    Optional.ofNullable(newInfo.getOpeningDays()).ifPresent(room::setOpeningDays);
+    Optional.ofNullable(newInfo.getWidth()).ifPresent(room::setWidth);
+    Optional.ofNullable(newInfo.getHeight()).ifPresent(room::setHeight);
+
+    return save(room);
   }
 
   public Room getByName(String roomName) throws RoomNotFoundException {
