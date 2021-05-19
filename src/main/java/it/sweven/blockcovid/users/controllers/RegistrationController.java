@@ -11,6 +11,8 @@ import it.sweven.blockcovid.users.entities.User;
 import it.sweven.blockcovid.users.services.UserRegistrationService;
 import javax.security.auth.login.CredentialException;
 import javax.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
@@ -24,6 +26,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class RegistrationController implements UsersController {
   private final UserRegistrationService registrationService;
   private final UserAssembler userAssembler;
+  private final Logger logger = LoggerFactory.getLogger(RegistrationController.class);
 
   @Autowired
   RegistrationController(UserRegistrationService registrationService, UserAssembler userAssembler) {
@@ -60,8 +63,10 @@ public class RegistrationController implements UsersController {
       User registeredUser = registrationService.register(credentials);
       return userAssembler.setAuthorities(submitter.getAuthorities()).toModel(registeredUser);
     } catch (CredentialException exception) {
+      logger.warn("Attempting to register a new user with same username as another one.");
       throw new ResponseStatusException(HttpStatus.CONFLICT, exception.getMessage());
     } catch (BadCredentialsException exception) {
+      logger.warn("invalid credentials supplied: " + credentials);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
   }

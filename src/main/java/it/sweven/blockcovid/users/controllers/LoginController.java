@@ -10,6 +10,8 @@ import it.sweven.blockcovid.users.dto.TokenWithAuthorities;
 import it.sweven.blockcovid.users.entities.Token;
 import it.sweven.blockcovid.users.entities.User;
 import it.sweven.blockcovid.users.services.UserAuthenticationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
@@ -22,6 +24,7 @@ public class LoginController implements AccountController {
 
   private final UserAuthenticationService authenticationService;
   private final UserAssembler assembler;
+  private final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
   @Autowired
   LoginController(UserAuthenticationService authenticationService, UserAssembler userAssembler) {
@@ -55,6 +58,7 @@ public class LoginController implements AccountController {
           toReturn,
           assembler.setAuthorities(loggedInUser.getAuthorities()).toModel(loggedInUser).getLinks());
     } catch (BadCredentialsException exception) {
+      logger.warn("invalid credentials supplied for user " + credentials.getUsername());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
   }

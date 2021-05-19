@@ -11,6 +11,8 @@ import it.sweven.blockcovid.users.entities.User;
 import it.sweven.blockcovid.users.services.UserService;
 import java.util.Optional;
 import javax.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
@@ -24,6 +26,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class ModifyUserController implements UsersController {
   private final UserAssembler userAssembler;
   private final UserService userService;
+  private final Logger logger = LoggerFactory.getLogger(ModifyUserController.class);
 
   @Autowired
   public ModifyUserController(UserAssembler userAssembler, UserService userService) {
@@ -67,6 +70,7 @@ public class ModifyUserController implements UsersController {
     try {
       user = userService.getByUsername(username);
     } catch (UsernameNotFoundException e) {
+      logger.warn("attempted to modify non existing user " + username);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User " + username + " not found");
     }
     Optional.ofNullable(newCredentials.getPassword())
