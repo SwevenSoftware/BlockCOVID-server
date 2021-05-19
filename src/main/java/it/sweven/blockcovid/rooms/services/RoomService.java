@@ -4,10 +4,12 @@ import it.sweven.blockcovid.rooms.dto.RoomInfo;
 import it.sweven.blockcovid.rooms.entities.Room;
 import it.sweven.blockcovid.rooms.entities.RoomBuilder;
 import it.sweven.blockcovid.rooms.entities.Status;
+import it.sweven.blockcovid.rooms.exceptions.RoomNameNotAvailable;
 import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.rooms.repositories.DeskRepository;
 import it.sweven.blockcovid.rooms.repositories.RoomRepository;
 import java.util.List;
+import java.util.Optional;
 import javax.management.BadAttributeValueExpException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,15 +25,36 @@ public class RoomService {
     this.deskRepository = deskRepository;
   }
 
-  public Room save(Room room) {
+  protected Room save(Room room) {
     return roomRepository.save(room);
+  }
+
+  public Room updateRoom(String roomName, RoomInfo newInfo)
+      throws RoomNameNotAvailable, RoomNotFoundException {
+    if (newInfo.getName() != null
+        && !roomName.equals(newInfo.getName())
+        && roomRepository.findRoomByName(newInfo.getName()).isPresent())
+      throw new RoomNameNotAvailable();
+
+    Room room = getByName(roomName);
+    Optional.ofNullable(newInfo.getName()).ifPresent(room::setName);
+    Optional.ofNullable(newInfo.getOpeningAt()).ifPresent(room::setOpeningTime);
+    Optional.ofNullable(newInfo.getClosingAt()).ifPresent(room::setClosingTime);
+    Optional.ofNullable(newInfo.getOpeningDays()).ifPresent(room::setOpeningDays);
+    Optional.ofNullable(newInfo.getWidth()).ifPresent(room::setWidth);
+    Optional.ofNullable(newInfo.getHeight()).ifPresent(room::setHeight);
+
+    return save(room);
   }
 
   public Room getByName(String roomName) throws RoomNotFoundException {
     return roomRepository.findRoomByName(roomName).orElseThrow(RoomNotFoundException::new);
   }
 
-  public Room createRoom(RoomInfo roomInfo) throws BadAttributeValueExpException {
+  public Room createRoom(RoomInfo roomInfo)
+      throws BadAttributeValueExpException, RoomNameNotAvailable {
+    if (roomRepository.findRoomByName(roomInfo.getName()).isPresent())
+      throw new RoomNameNotAvailable();
     Room toCreate =
         new RoomBuilder()
             .name(roomInfo.getName())

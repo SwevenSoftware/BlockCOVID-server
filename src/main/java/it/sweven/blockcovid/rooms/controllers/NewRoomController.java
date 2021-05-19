@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.sweven.blockcovid.rooms.assemblers.RoomAssembler;
 import it.sweven.blockcovid.rooms.dto.RoomInfo;
 import it.sweven.blockcovid.rooms.entities.Room;
+import it.sweven.blockcovid.rooms.exceptions.RoomNameNotAvailable;
 import it.sweven.blockcovid.rooms.services.RoomService;
 import it.sweven.blockcovid.users.entities.User;
 import javax.management.BadAttributeValueExpException;
@@ -44,6 +45,10 @@ public class NewRoomController implements RoomsController {
     @ApiResponse(
         responseCode = "400",
         description = "Missing or wrong-formatted arguments",
+        content = @Content(schema = @Schema(implementation = ResponseStatusException.class))),
+    @ApiResponse(
+        responseCode = "409",
+        description = "Room name not available",
         content = @Content(schema = @Schema(implementation = ResponseStatusException.class)))
   })
   @PreAuthorize("#submitter.isAdmin()")
@@ -56,6 +61,8 @@ public class NewRoomController implements RoomsController {
     } catch (BadAttributeValueExpException exception) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST, "Missing or wrong-formatted arguments");
+    } catch (RoomNameNotAvailable e) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "Room name not available");
     }
   }
 }

@@ -34,9 +34,8 @@ class MarkRoomAsCleanControllerTest {
   void validMark() {
     User cleaner = mock(User.class);
     Room room = mock(Room.class);
-    when(roomService.getByName("room")).thenReturn(room);
-    when(roomService.save(any())).thenReturn(room);
-    when(roomAssembler.toModel(any())).thenReturn(EntityModel.of(room));
+    when(roomService.setStatus("room", Status.CLEAN)).thenReturn(room);
+    when(roomAssembler.toModel(room)).thenReturn(EntityModel.of(room));
     assertEquals(room, controller.markAsClean(cleaner, "room").getContent());
   }
 

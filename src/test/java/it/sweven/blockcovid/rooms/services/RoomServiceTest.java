@@ -3,13 +3,14 @@ package it.sweven.blockcovid.rooms.services;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import it.sweven.blockcovid.rooms.dto.RoomInfo;
 import it.sweven.blockcovid.rooms.entities.Desk;
 import it.sweven.blockcovid.rooms.entities.Room;
+import it.sweven.blockcovid.rooms.entities.RoomBuilder;
 import it.sweven.blockcovid.rooms.entities.Status;
+import it.sweven.blockcovid.rooms.exceptions.RoomNameNotAvailable;
 import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.rooms.repositories.DeskRepository;
 import it.sweven.blockcovid.rooms.repositories.RoomRepository;
@@ -58,12 +59,20 @@ class RoomServiceTest {
   }
 
   @Test
-  void createRoom_validRoomInfo() throws BadAttributeValueExpException {
+  void createRoom_validRoomInfo() throws BadAttributeValueExpException, RoomNameNotAvailable {
     RoomInfo info =
         new RoomInfo("", LocalTime.now(), LocalTime.now(), Set.of(DayOfWeek.MONDAY), 1, 2);
     Room testRoom = mock(Room.class);
     when(repository.save(any())).thenReturn(testRoom);
     assertEquals(testRoom, service.createRoom(info));
+  }
+
+  @Test
+  void createRoom_roomNameNotAvailable() {
+    RoomInfo info =
+        new RoomInfo("roomName", LocalTime.now(), LocalTime.now(), Set.of(DayOfWeek.MONDAY), 1, 2);
+    when(repository.findRoomByName("roomName")).thenReturn(Optional.of(mock(Room.class)));
+    assertThrows(RoomNameNotAvailable.class, () -> service.createRoom(info));
   }
 
   @Test
@@ -103,6 +112,95 @@ class RoomServiceTest {
     RoomInfo info =
         new RoomInfo("", LocalTime.now(), LocalTime.now(), Set.of(DayOfWeek.MONDAY), 1, null);
     assertThrows(BadAttributeValueExpException.class, () -> service.createRoom(info));
+  }
+
+  @Test
+  void updateRoom_validUpdate_noNewName()
+      throws BadAttributeValueExpException, RoomNameNotAvailable {
+    RoomInfo updateInfo =
+        new RoomInfo(null, LocalTime.MIDNIGHT, LocalTime.NOON, Set.of(DayOfWeek.MONDAY), 10, 10);
+    Room expected =
+        new RoomBuilder()
+            .name("name")
+            .openingTime(LocalTime.MIDNIGHT)
+            .closingTime(LocalTime.MIDNIGHT)
+            .openingDays(Set.of(DayOfWeek.MONDAY))
+            .width(10)
+            .height(10)
+            .build();
+    Room previousRoom =
+        new RoomBuilder()
+            .name("name")
+            .openingTime(LocalTime.NOON)
+            .closingTime(LocalTime.NOON)
+            .openingDays(Set.of(DayOfWeek.THURSDAY))
+            .width(5)
+            .height(5)
+            .build();
+    when(repository.findRoomByName("name")).thenReturn(Optional.of(previousRoom));
+    when(repository.save(expected)).thenReturn(expected);
+    assertEquals(expected, service.updateRoom("name", updateInfo));
+  }
+
+  @Test
+  void updateRoom_validUpdate_sameName()
+      throws BadAttributeValueExpException, RoomNameNotAvailable {
+    RoomInfo updateInfo =
+        new RoomInfo("name", LocalTime.MIDNIGHT, LocalTime.NOON, Set.of(DayOfWeek.MONDAY), 10, 10);
+    Room expected =
+        new RoomBuilder()
+            .name("name")
+            .openingTime(LocalTime.MIDNIGHT)
+            .closingTime(LocalTime.MIDNIGHT)
+            .openingDays(Set.of(DayOfWeek.MONDAY))
+            .width(10)
+            .height(10)
+            .build();
+    Room previousRoom = new Room();
+    when(repository.findRoomByName("name")).thenReturn(Optional.of(previousRoom));
+    when(repository.save(expected)).thenReturn(expected);
+    when(repository.save(expected)).thenReturn(expected);
+    assertEquals(expected, service.updateRoom("name", updateInfo));
+  }
+
+  @Test
+  void updateRoom_validUpdate_differentName()
+      throws BadAttributeValueExpException, RoomNameNotAvailable {
+    RoomInfo updateInfo =
+        new RoomInfo(
+            "newName", LocalTime.MIDNIGHT, LocalTime.NOON, Set.of(DayOfWeek.MONDAY), 10, 10);
+    Room expected =
+        new RoomBuilder()
+            .name("newName")
+            .openingTime(LocalTime.MIDNIGHT)
+            .closingTime(LocalTime.MIDNIGHT)
+            .openingDays(Set.of(DayOfWeek.MONDAY))
+            .width(10)
+            .height(10)
+            .build();
+    Room previousRoom = new Room();
+    when(repository.findRoomByName("newName")).thenReturn(Optional.empty());
+    when(repository.findRoomByName("previousName")).thenReturn(Optional.of(previousRoom));
+    when(repository.save(expected)).thenReturn(expected);
+    assertEquals(expected, service.updateRoom("previousName", updateInfo));
+  }
+
+  @Test
+  void updateRoom_roomNotFound() {
+    RoomInfo updateInfo =
+        new RoomInfo("name", LocalTime.MIDNIGHT, LocalTime.NOON, Set.of(DayOfWeek.MONDAY), 10, 10);
+    when(repository.findRoomByName("name")).thenReturn(Optional.empty());
+    assertThrows(RoomNotFoundException.class, () -> service.updateRoom("name", updateInfo));
+  }
+
+  @Test
+  void updateRoom_roomNameNotAvailable() {
+    RoomInfo updateInfo =
+        new RoomInfo(
+            "newName", LocalTime.MIDNIGHT, LocalTime.NOON, Set.of(DayOfWeek.MONDAY), 10, 10);
+    when(repository.findRoomByName("newName")).thenReturn(Optional.of(mock(Room.class)));
+    when(repository.findRoomByName("previousName")).thenReturn(Optional.of(mock(Room.class)));
+    assertThrows(RoomNameNotAvailable.class, () -> service.updateRoom("previousName", updateInfo));
   }
 
   @Test
