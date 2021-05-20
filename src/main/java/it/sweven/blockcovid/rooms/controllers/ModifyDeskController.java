@@ -14,6 +14,8 @@ import it.sweven.blockcovid.users.entities.User;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import javax.validation.constraints.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
@@ -29,6 +31,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class ModifyDeskController implements RoomsController {
   private final DeskService deskService;
   private final DeskAssembler deskAssembler;
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Autowired
   public ModifyDeskController(DeskService deskService, DeskAssembler deskAssembler) {
@@ -67,6 +70,7 @@ public class ModifyDeskController implements RoomsController {
               toModify.getDeskStatus());
       return deskAssembler.toModel(toReturn);
     } catch (NoSuchElementException e) {
+      logger.warn("Can't find desk " + modifyInfo.getOldInfo() + " in room " + roomName);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
   }
