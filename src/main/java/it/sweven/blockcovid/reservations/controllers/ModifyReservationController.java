@@ -16,6 +16,8 @@ import it.sweven.blockcovid.reservations.servicies.ReservationService;
 import it.sweven.blockcovid.users.entities.User;
 import java.util.Optional;
 import javax.management.BadAttributeValueExpException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
@@ -29,6 +31,7 @@ public class ModifyReservationController implements ReservationController {
   private final ReservationService service;
   private final ReservationWithRoomAssembler assembler;
   private final ReservationBuilder reservationBuilder;
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Autowired
   public ModifyReservationController(
@@ -70,14 +73,24 @@ public class ModifyReservationController implements ReservationController {
     try {
       requested = service.findById(idReservation);
     } catch (NoSuchReservation e) {
+      logger.warn("No reservation with id " + idReservation);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
-    if (submitter.isUser() && !requested.getUsername().equals(submitter.getUsername()))
+    if (submitter.isUser() && !requested.getUsername().equals(submitter.getUsername())) {
+      logger.warn(
+          "User "
+              + submitter.getUsername()
+              + " tried to change the reservation of user "
+              + requested.getUsername());
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+    }
     Reservation toModify;
     try {
       toModify = reservationBuilder.from(requested).build();
     } catch (BadAttributeValueExpException e) {
+      logger.error(
+          "Inconsistent state of reservations! This may lead to further errors "
+              + "or the complete crash of the system, please contact the maintenance team");
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
     }
     Optional.ofNullable(reservationInfo.getDeskId()).ifPresent(toModify::setDeskId);
@@ -86,6 +99,10 @@ public class ModifyReservationController implements ReservationController {
     try {
       return assembler.toModel(service.save(toModify));
     } catch (ReservationClash reservationClash) {
+      logger.warn(
+          "A reservation conflict was detected and the reservation "
+              + idReservation
+              + " was not modified");
       throw new ResponseStatusException(HttpStatus.CONFLICT);
     }
   }
