@@ -67,6 +67,8 @@ public class UsageReportController implements ReportsController {
                 try {
                   signRegistrationService.registerString(documentService.hashOf(path));
                   documentService.setAsVerified(path);
+                  logger.info(
+                      "successfully registered the file " + path + " on the provided blockchain");
                 } catch (Exception exception) {
                   logger.error("Unable to open file stream for file at path: " + path);
                 }
@@ -74,6 +76,7 @@ public class UsageReportController implements ReportsController {
       registrationThread.start();
       return documentService.readReport(path);
     } catch (IOException e) {
+      logger.error("An error occurred while trying to create a report: " + e.getMessage());
       throw new ResponseStatusException(
           HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred while creating the report");
     }
