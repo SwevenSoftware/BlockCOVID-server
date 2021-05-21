@@ -9,6 +9,8 @@ import it.sweven.blockcovid.blockchain.services.DocumentService;
 import it.sweven.blockcovid.users.entities.User;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,7 +24,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class GetReportController implements ReportsController {
-  public DocumentService service;
+  private final DocumentService service;
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Autowired
   public GetReportController(DocumentService service) {
@@ -59,9 +62,18 @@ public class GetReportController implements ReportsController {
     } catch (NoSuchFileException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "file " + reportName + " not found");
     } catch (IOException e) {
+      logger.warn(
+          "An error occurred while trying to read file with name "
+              + reportName
+              + ": "
+              + e.getMessage());
       throw new ResponseStatusException(
           HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred while reading file " + reportName);
     } catch (IllegalArgumentException e) {
+      logger.warn(
+          "An error occurred while trying to read file with name "
+              + reportName
+              + ", not a valid file name");
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST, reportName + " is not a valid filename");
     }

@@ -19,6 +19,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
@@ -29,8 +31,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class NewDeskController implements RoomsController {
-  private DeskAssembler deskAssembler;
-  private DeskService deskService;
+  private final DeskAssembler deskAssembler;
+  private final DeskService deskService;
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   public NewDeskController(DeskAssembler deskAssembler, DeskService deskService) {
     this.deskAssembler = deskAssembler;
@@ -75,10 +78,13 @@ public class NewDeskController implements RoomsController {
       try {
         addedDesks.add(deskService.addDesk(desk, nameRoom));
       } catch (DeskNotAvailable e) {
+        logger.warn("Unable to create new desks, another desk already present in those places");
         throw new ResponseStatusException(HttpStatus.CONFLICT);
       } catch (RoomNotFoundException e) {
+        logger.warn("Unable to create new desks, room " + nameRoom + " not found");
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
       } catch (IllegalArgumentException e) {
+        logger.warn("Unable to create new desks, invalid information provided");
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
       }
     }

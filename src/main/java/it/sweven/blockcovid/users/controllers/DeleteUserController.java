@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.sweven.blockcovid.users.assemblers.UserAssembler;
 import it.sweven.blockcovid.users.entities.User;
 import it.sweven.blockcovid.users.services.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
@@ -21,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class DeleteUserController implements UsersController {
   private final UserAssembler userAssembler;
   private final UserService userService;
+  private final Logger logger = LoggerFactory.getLogger(DeleteUserController.class);
 
   @Autowired
   public DeleteUserController(UserAssembler userAssembler, UserService userService) {
@@ -49,6 +52,7 @@ public class DeleteUserController implements UsersController {
       User deletedUser = userService.deleteByUsername(username);
       return userAssembler.toModel(deletedUser);
     } catch (UsernameNotFoundException e) {
+      logger.warn("Error deleting user " + username + ": Not found");
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Username not found");
     }
   }

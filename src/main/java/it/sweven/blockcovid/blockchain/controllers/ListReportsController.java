@@ -10,6 +10,8 @@ import it.sweven.blockcovid.blockchain.dto.ReportInformation;
 import it.sweven.blockcovid.blockchain.services.DocumentService;
 import it.sweven.blockcovid.users.entities.User;
 import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -23,9 +25,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class ListReportsController implements ReportsController {
-
   private final DocumentService documentService;
   private final ReportInformationAssembler assembler;
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Autowired
   public ListReportsController(
@@ -51,6 +53,7 @@ public class ListReportsController implements ReportsController {
     try {
       return assembler.toCollectionModel(documentService.getAllReports());
     } catch (IOException e) {
+      logger.error("IOException thrown when trying to read all reports: " + e.getMessage());
       throw new ResponseStatusException(
           HttpStatus.INTERNAL_SERVER_ERROR,
           "An error occurred while listing all reports, contact the maintainer");

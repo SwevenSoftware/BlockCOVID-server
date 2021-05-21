@@ -12,6 +12,8 @@ import it.sweven.blockcovid.rooms.exceptions.RoomNameNotAvailable;
 import it.sweven.blockcovid.rooms.services.RoomService;
 import it.sweven.blockcovid.users.entities.User;
 import javax.management.BadAttributeValueExpException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class NewRoomController implements RoomsController {
   private final RoomService roomService;
   private final RoomAssembler roomAssembler;
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Autowired
   public NewRoomController(RoomAssembler roomAssembler, RoomService roomService) {
@@ -59,9 +62,11 @@ public class NewRoomController implements RoomsController {
       Room createdRoom = roomService.createRoom(newRoom);
       return roomAssembler.toModel(createdRoom);
     } catch (BadAttributeValueExpException exception) {
+      logger.warn("Unable to create new room, missing or wrong formatted arguments");
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST, "Missing or wrong-formatted arguments");
     } catch (RoomNameNotAvailable e) {
+      logger.warn("Unable to create new room, another room with that name already exists");
       throw new ResponseStatusException(HttpStatus.CONFLICT, "Room name not available");
     }
   }

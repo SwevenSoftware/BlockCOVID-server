@@ -11,6 +11,8 @@ import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.rooms.services.RoomService;
 import it.sweven.blockcovid.users.entities.User;
 import javax.validation.constraints.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,7 @@ public class ModifyRoomController implements RoomsController {
 
   private final RoomService roomService;
   private final RoomAssembler roomAssembler;
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Autowired
   public ModifyRoomController(RoomService roomService, RoomAssembler roomAssembler) {
@@ -49,8 +52,15 @@ public class ModifyRoomController implements RoomsController {
     try {
       return roomAssembler.toModel(roomService.updateRoom(roomName, roomInfo));
     } catch (RoomNotFoundException exception) {
+      logger.warn("room " + roomName + " not found");
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No room found with given name");
     } catch (RoomNameNotAvailable e) {
+      logger.warn(
+          "trying to change room name "
+              + roomName
+              + " to "
+              + roomInfo.getName()
+              + ", but that name is already taken");
       throw new ResponseStatusException(HttpStatus.CONFLICT, "New room name not available");
     }
   }

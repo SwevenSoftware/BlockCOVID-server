@@ -12,6 +12,8 @@ import it.sweven.blockcovid.users.dto.CredentialChangeRequestForm;
 import it.sweven.blockcovid.users.entities.User;
 import it.sweven.blockcovid.users.services.UserService;
 import javax.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
@@ -25,6 +27,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class ModifyPasswordController implements AccountController {
   private final UserAssembler assembler;
   private final UserService userService;
+  private final Logger logger = LoggerFactory.getLogger(ModifyPasswordController.class);
 
   @Autowired
   public ModifyPasswordController(UserAssembler assembler, UserService userService) {
@@ -56,6 +59,7 @@ public class ModifyPasswordController implements AccountController {
     try {
       userService.updatePassword(user, requestForm.getOldPassword(), requestForm.getNewPassword());
     } catch (BadCredentialsException exception) {
+      logger.warn("Bad old password provided for user " + user.getUsername());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong or missing credentials");
     }
     return assembler.setAuthorities(user.getAuthorities()).toModel(user);

@@ -13,6 +13,8 @@ import it.sweven.blockcovid.reservations.exceptions.StartingTooEarly;
 import it.sweven.blockcovid.reservations.servicies.ReservationService;
 import it.sweven.blockcovid.users.entities.User;
 import java.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
@@ -29,6 +31,7 @@ public class StartReservationController implements ReservationController {
 
   private final ReservationService reservationService;
   private final ReservationWithRoomAssembler reservationWithRoomAssembler;
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Autowired
   public StartReservationController(
@@ -66,22 +69,49 @@ public class StartReservationController implements ReservationController {
     try {
       LocalDateTime now = LocalDateTime.now();
       ReservationWithRoom reservation = reservationService.findById(reservationID);
-      if (reservation.getUsageStart() != null)
+      if (reservation.getUsageStart() != null) {
+        logger.warn(
+            "User "
+                + submitter.getUsername()
+                + " tried to start an already started reservation: "
+                + reservationID);
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST, "Trying to start an already started reservation");
-      if (reservation.isEnded())
+      }
+      if (reservation.isEnded()) {
+        logger.warn(
+            "User "
+                + submitter.getUsername()
+                + " tried to start an already ended reservation: "
+                + reservationID);
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST, "Trying to start an already ended reservation");
-      if (!reservation.getUsername().equals(submitter.getUsername()))
+      }
+      if (!reservation.getUsername().equals(submitter.getUsername())) {
+        logger.warn(
+            "User "
+                + submitter.getUsername()
+                + " tried to start a reservation of another user: "
+                + reservation.getUsername());
         throw new ResponseStatusException(
             HttpStatus.UNAUTHORIZED, "You must be the owner of a reservation in order to start it");
+      }
       return reservationWithRoomAssembler.toModel(reservationService.start(reservationID, now));
     } catch (NoSuchReservation noSuchReservation) {
+      logger.warn("Reservation " + reservationID + " not found");
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such reservation");
     } catch (ReservationClash reservationClash) {
+      logger.warn(
+          "Starting the reservation " + reservationID + " clashes with another reservation");
       throw new ResponseStatusException(
           HttpStatus.CONFLICT, "your reservation conflict with another one");
     } catch (StartingTooEarly startingTooEarly) {
+      logger.warn(
+          "user "
+              + submitter.getUsername()
+              + "tried to start the reservation "
+              + reservationID
+              + " too early");
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST, "you can start at maximum 30 minutes early");
     }

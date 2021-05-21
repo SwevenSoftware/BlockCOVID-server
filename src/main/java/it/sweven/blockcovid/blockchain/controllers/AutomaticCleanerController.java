@@ -43,7 +43,11 @@ public class AutomaticCleanerController {
               + ") on the blockchain on block "
               + receipt.getBlockNumber().toString());
     } catch (IOException exception) {
-      logger.error("Unable to open file stream for file at path: " + savedPath);
+      logger.error(
+          "Unable to open file stream for file at path: "
+              + savedPath
+              + ", nested exception message is: "
+              + exception.getMessage());
     }
   }
 }

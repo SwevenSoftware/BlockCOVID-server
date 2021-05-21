@@ -63,6 +63,8 @@ public class CleanerReportController implements ReportsController {
                 try {
                   signRegistrationService.registerString(documentService.hashOf(path));
                   documentService.setAsVerified(path);
+                  logger.info(
+                      "successfully registered file " + path + " on the provided blockchain");
                 } catch (Exception exception) {
                   logger.error("Unable to open file stream for file at path: " + path);
                 }
@@ -70,6 +72,8 @@ public class CleanerReportController implements ReportsController {
       registrationThread.start();
       return documentService.readReport(path);
     } catch (IOException e) {
+      logger.error(
+          "An error occurred while trying to create a new cleaner report: " + e.getMessage());
       throw new ResponseStatusException(
           HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred while creating the report");
     }

@@ -16,6 +16,8 @@ import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.users.entities.User;
 import java.time.LocalDateTime;
 import javax.management.BadAttributeValueExpException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
@@ -31,6 +33,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class NewReservationController implements ReservationController {
   private final ReservationService reservationService;
   private final ReservationWithRoomAssembler reservationWithRoomAssembler;
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Autowired
   public NewReservationController(
@@ -70,21 +73,42 @@ public class NewReservationController implements ReservationController {
         return reservationWithRoomAssembler.toModel(
             reservationService.addReservation(reservationInfo, submitter.getUsername()));
       } catch (ReservationClash reservationClash) {
+        logger.warn(
+            "A reservation clash was detected, therefore the reservation "
+                + reservationInfo
+                + " was not made for the user "
+                + submitter.getUsername());
         throw new ResponseStatusException(
             HttpStatus.CONFLICT, "Another reservation for the same desk clashes with yours");
       } catch (BadTimeIntervals badTimeIntervals) {
+        logger.warn(
+            "The reservation " + reservationInfo + "was not made due to bad time intervals");
         throw new ResponseStatusException(
             HttpStatus.BAD_REQUEST,
             "Your reservation must be inside the room opening time interval");
       } catch (DeskNotFoundException deskNotFoundException) {
+        logger.warn("The reservation " + reservationInfo + "was not made due an invalid deskId");
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid desk id");
       } catch (RoomNotFoundException roomNotFoundException) {
+        logger.error(
+            "The reservation "
+                + reservationInfo
+                + "was not made due to a deskID associated with no room. "
+                + "An inconsistent state of the server is hence detected");
         throw new ResponseStatusException(
             HttpStatus.INTERNAL_SERVER_ERROR, "desk associated with no room");
       } catch (BadAttributeValueExpException e) {
+        logger.warn(
+            "The reservation "
+                + reservationInfo
+                + " was not made  due to bad fields in the request");
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid fields in your request");
       }
     } else {
+      logger.warn(
+          "The reservation "
+              + reservationInfo
+              + " was not made  due to bad fields in the request caught inside the controller");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid fields in your request");
     }
   }

@@ -16,6 +16,8 @@ import it.sweven.blockcovid.reservations.servicies.ReservationService;
 import it.sweven.blockcovid.users.entities.User;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
@@ -28,6 +30,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class EndReservationController implements ReservationController {
   private final ReservationService reservationService;
   private final ReservationWithRoomAssembler reservationWithRoomAssembler;
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Autowired
   public EndReservationController(
@@ -71,11 +74,22 @@ public class EndReservationController implements ReservationController {
     try {
       reservation = reservationService.findById(reservationId);
     } catch (NoSuchReservation noSuchReservation) {
+      logger.warn(
+          "Could not find reservation with id "
+              + reservationId
+              + " requested by user "
+              + submitter.getUsername());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such reservation");
     }
-    if (!reservation.getUsername().equals(submitter.getUsername()))
+    if (!reservation.getUsername().equals(submitter.getUsername())) {
+      logger.warn(
+          "User "
+              + submitter.getUsername()
+              + " tried to end the reservation of another user, namely "
+              + reservation.getUsername());
       throw new ResponseStatusException(
           HttpStatus.UNAUTHORIZED, "You must be the owner of a reservation in order to end it");
+    }
     try {
       return reservationWithRoomAssembler.toModel(
           reservationService.end(
@@ -83,13 +97,25 @@ public class EndReservationController implements ReservationController {
               LocalDateTime.now(),
               Optional.ofNullable(endUsageInfo.getDeskCleaned()).orElse(false)));
     } catch (NoSuchReservation noSuchReservation) {
+      logger.warn(
+          "Could not find reservation with id "
+              + reservationId
+              + " requested by user "
+              + submitter.getUsername()
+              + " when trying to end it, inconsistent server state?");
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such reservation");
     } catch (BadTimeIntervals badTimeIntervals) {
+      logger.warn("reservation with id" + reservationId + " can not be ended before it starts");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usage can't end before its start");
     } catch (AlreadyEnded alreadyEnded) {
+      logger.warn("reservation with id" + reservationId + " has already ended");
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST, "End already requested for this reservation");
     } catch (ReservationClash reservationClash) {
+      logger.warn(
+          "reservation with id"
+              + reservationId
+              + " can not be ended at the provided time, clashes with another reservation");
       throw new ResponseStatusException(
           HttpStatus.CONFLICT, "Your reservation conflict with another one");
     }
