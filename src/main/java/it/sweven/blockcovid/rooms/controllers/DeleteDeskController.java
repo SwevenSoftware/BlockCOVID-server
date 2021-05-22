@@ -37,43 +37,43 @@ public class DeleteDeskController implements RoomsController {
 
   @DeleteMapping("/desks")
   @ApiResponses({
-          @ApiResponse(responseCode = "200", description = "Desk successfully deleted"),
-          @ApiResponse(
-                  responseCode = "403",
-                  description = "Method not allowed",
-                  content = @Content(schema = @Schema(implementation = void.class))),
-          @ApiResponse(
-                  responseCode = "404",
-                  description = "Room or desk not found",
-                  content = @Content(schema = @Schema(implementation = void.class)))
+    @ApiResponse(responseCode = "200", description = "Desk successfully deleted"),
+    @ApiResponse(
+        responseCode = "403",
+        description = "Method not allowed",
+        content = @Content(schema = @Schema(implementation = void.class))),
+    @ApiResponse(
+        responseCode = "404",
+        description = "Room or desk not found",
+        content = @Content(schema = @Schema(implementation = void.class)))
   })
   @PreAuthorize("#submitter.isEnabled() and #submitter.isAdmin()")
   public CollectionModel<EntityModel<DeskWithRoomName>> delete(
-          @Parameter(hidden = true) @AuthenticationPrincipal User submitter,
-          @NotNull @RequestBody List<String> deskIds) {
+      @Parameter(hidden = true) @AuthenticationPrincipal User submitter,
+      @NotNull @RequestBody List<String> deskIds) {
     List<DeskWithRoomName> deletedDesks =
-            deskIds.stream()
-                    .filter(
-                            id -> {
-                              try {
-                                deskService.getDeskById(id);
-                                return true;
-                              } catch (DeskNotFoundException e) {
-                                return false;
-                              }
-                            })
-                    .map(
-                            grantedId -> {
-                              String roomName = deskService.getRoom(grantedId).getName();
-                              Desk deleted = deskService.deleteDeskById(grantedId);
-                              return new DeskWithRoomName(
-                                      roomName,
-                                      deleted.getId(),
-                                      deleted.getX(),
-                                      deleted.getY(),
-                                      deleted.getDeskStatus());
-                            })
-                    .collect(Collectors.toList());
+        deskIds.stream()
+            .filter(
+                id -> {
+                  try {
+                    deskService.getDeskById(id);
+                    return true;
+                  } catch (DeskNotFoundException e) {
+                    return false;
+                  }
+                })
+            .map(
+                grantedId -> {
+                  String roomName = deskService.getRoom(grantedId).getName();
+                  Desk deleted = deskService.deleteDeskById(grantedId);
+                  return new DeskWithRoomName(
+                      roomName,
+                      deleted.getId(),
+                      deleted.getX(),
+                      deleted.getY(),
+                      deleted.getDeskStatus());
+                })
+            .collect(Collectors.toList());
     return deskAssembler.toCollectionModel(deletedDesks);
   }
 }

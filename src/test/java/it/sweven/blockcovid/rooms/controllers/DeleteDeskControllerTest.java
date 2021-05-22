@@ -29,18 +29,18 @@ class DeleteDeskControllerTest {
   void setUp() {
     deskAssembler = mock(DeskAssembler.class);
     doAnswer(invocation -> EntityModel.of(invocation.getArgument(0)))
-            .when(deskAssembler)
-            .toModel(any());
+        .when(deskAssembler)
+        .toModel(any());
     doAnswer(
             invocation -> {
               ArrayList<DeskWithRoomName> get = invocation.getArgument(0);
               return CollectionModel.of(
-                      get.stream()
-                              .map(desk -> deskAssembler.toModel(desk))
-                              .collect(Collectors.toList()));
+                  get.stream()
+                      .map(desk -> deskAssembler.toModel(desk))
+                      .collect(Collectors.toList()));
             })
-            .when(deskAssembler)
-            .toCollectionModel(any());
+        .when(deskAssembler)
+        .toCollectionModel(any());
     deskService = mock(DeskService.class);
     controller = new DeleteDeskController(deskService, deskAssembler);
   }
@@ -56,8 +56,8 @@ class DeleteDeskControllerTest {
     when(deskService.getRoom(any())).thenReturn(fakeRoom);
     when(deskService.deleteDeskById(any())).thenReturn(fakeDesk);
     assertTrue(
-            controller.delete(mock(User.class), List.of(fakeDesk.getId())).getContent().stream()
-                    .anyMatch(obj -> obj.getContent().getRoomName().equals(expected.getRoomName())));
+        controller.delete(mock(User.class), List.of(fakeDesk.getId())).getContent().stream()
+            .anyMatch(obj -> obj.getContent().getRoomName().equals(expected.getRoomName())));
   }
 
   @Test
