@@ -10,6 +10,7 @@ import it.sweven.blockcovid.rooms.entities.Desk;
 import it.sweven.blockcovid.rooms.entities.Room;
 import it.sweven.blockcovid.rooms.entities.Status;
 import it.sweven.blockcovid.rooms.exceptions.DeskNotFoundException;
+import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.rooms.services.DeskService;
 import it.sweven.blockcovid.users.entities.User;
 import java.util.ArrayList;
@@ -64,6 +65,13 @@ class DeleteDeskControllerTest {
   void deskNotFound() {
     when(deskService.getDeskByInfoAndRoomName(any(), any())).thenReturn(mock(Desk.class));
     when(deskService.getDeskById(any())).thenThrow(new DeskNotFoundException());
+    assertTrue(controller.delete(mock(User.class), List.of("WrongId")).getContent().isEmpty());
+  }
+
+  @Test
+  void roomNotFound() {
+    when(deskService.getDeskById(any())).thenReturn(mock(Desk.class));
+    when(deskService.getRoom(any())).thenThrow(new RoomNotFoundException());
     assertTrue(controller.delete(mock(User.class), List.of("WrongId")).getContent().isEmpty());
   }
 }
