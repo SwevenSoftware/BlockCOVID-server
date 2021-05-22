@@ -6,23 +6,23 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.sweven.blockcovid.rooms.assemblers.DeskAssembler;
-import it.sweven.blockcovid.rooms.dto.DeskInfo;
 import it.sweven.blockcovid.rooms.dto.DeskWithRoomName;
 import it.sweven.blockcovid.rooms.entities.Desk;
+import it.sweven.blockcovid.rooms.exceptions.DeskNotFoundException;
+import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.rooms.services.DeskService;
 import it.sweven.blockcovid.users.entities.User;
-import java.util.NoSuchElementException;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class DeleteDeskController implements RoomsController {
@@ -36,7 +36,7 @@ public class DeleteDeskController implements RoomsController {
     this.deskAssembler = deskAssembler;
   }
 
-  @DeleteMapping("/{roomName}/desks")
+  @DeleteMapping("/desks")
   @ApiResponses({
     @ApiResponse(responseCode = "200", description = "Desk successfully deleted"),
     @ApiResponse(
@@ -49,19 +49,36 @@ public class DeleteDeskController implements RoomsController {
         content = @Content(schema = @Schema(implementation = void.class)))
   })
   @PreAuthorize("#submitter.isEnabled() and #submitter.isAdmin()")
-  public EntityModel<DeskWithRoomName> delete(
+  public CollectionModel<EntityModel<DeskWithRoomName>> delete(
       @Parameter(hidden = true) @AuthenticationPrincipal User submitter,
-      @PathVariable String roomName,
-      @NotNull @RequestBody DeskInfo toDelete) {
-    try {
-      String idDesk = deskService.getDeskByInfoAndRoomName(toDelete, roomName).getId();
-      Desk deleted = deskService.deleteDeskById(idDesk);
-      DeskWithRoomName toReturn =
-          new DeskWithRoomName(
-              roomName, deleted.getId(), deleted.getX(), deleted.getY(), deleted.getDeskStatus());
-      return deskAssembler.toModel(toReturn);
-    } catch (NoSuchElementException exception) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-    }
+      @NotNull @RequestBody List<String> deskIds) {
+    List<DeskWithRoomName> deletedDesks =
+        deskIds.stream()
+            .filter(
+                id -> {
+                  try {
+                    deskService.getDeskById(id);
+                    deskService.getRoom(id);
+                    return true;
+                  } catch (DeskNotFoundException e) {
+                    return false;
+                  } catch (RoomNotFoundException e) {
+                    deskService.deleteDeskById(id);
+                    return false;
+                  }
+                })
+            .map(
+                grantedId -> {
+                  String roomName = deskService.getRoom(grantedId).getName();
+                  Desk deleted = deskService.deleteDeskById(grantedId);
+                  return new DeskWithRoomName(
+                      roomName,
+                      deleted.getId(),
+                      deleted.getX(),
+                      deleted.getY(),
+                      deleted.getDeskStatus());
+                })
+            .collect(Collectors.toList());
+    return deskAssembler.toCollectionModel(deletedDesks);
   }
 }

@@ -5,18 +5,21 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import it.sweven.blockcovid.rooms.assemblers.DeskAssembler;
-import it.sweven.blockcovid.rooms.dto.DeskInfo;
 import it.sweven.blockcovid.rooms.dto.DeskWithRoomName;
 import it.sweven.blockcovid.rooms.entities.Desk;
+import it.sweven.blockcovid.rooms.entities.Room;
 import it.sweven.blockcovid.rooms.entities.Status;
+import it.sweven.blockcovid.rooms.exceptions.DeskNotFoundException;
 import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.rooms.services.DeskService;
 import it.sweven.blockcovid.users.entities.User;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 class DeleteDeskControllerTest {
   private DeskAssembler deskAssembler;
@@ -29,6 +32,16 @@ class DeleteDeskControllerTest {
     doAnswer(invocation -> EntityModel.of(invocation.getArgument(0)))
         .when(deskAssembler)
         .toModel(any());
+    doAnswer(
+            invocation -> {
+              ArrayList<DeskWithRoomName> get = invocation.getArgument(0);
+              return CollectionModel.of(
+                  get.stream()
+                      .map(desk -> deskAssembler.toModel(desk))
+                      .collect(Collectors.toList()));
+            })
+        .when(deskAssembler)
+        .toCollectionModel(any());
     deskService = mock(DeskService.class);
     controller = new DeleteDeskController(deskService, deskAssembler);
   }
@@ -36,35 +49,29 @@ class DeleteDeskControllerTest {
   @Test
   void validRequest() {
     Desk fakeDesk = mock(Desk.class);
-    when(fakeDesk.getId()).thenReturn("idFakeDesk");
-    DeskInfo providedDeskInfo = mock(DeskInfo.class);
+    Room fakeRoom = mock(Room.class);
+    when(fakeRoom.getName()).thenReturn("room");
+    when(fakeDesk.getId()).thenReturn("id1");
     DeskWithRoomName expected = new DeskWithRoomName("room", "id1", null, null, Status.CLEAN);
-    when(deskService.getDeskByInfoAndRoomName(providedDeskInfo, "room")).thenReturn(fakeDesk);
-    when(deskService.deleteDeskById("idFakeDesk")).thenReturn(fakeDesk);
-    assertEquals(
-        expected.getRoomName(),
-        controller.delete(mock(User.class), "room", providedDeskInfo).getContent().getRoomName());
-  }
-
-  @Test
-  void roomNotFound() {
-    when(deskService.getDeskByInfoAndRoomName(any(), any())).thenReturn(mock(Desk.class));
-    when(deskService.deleteDeskById(any())).thenThrow(new RoomNotFoundException());
-    ResponseStatusException thrown =
-        assertThrows(
-            ResponseStatusException.class,
-            () -> controller.delete(mock(User.class), "room", mock(DeskInfo.class)));
-    assertEquals(HttpStatus.NOT_FOUND, thrown.getStatus());
+    when(deskService.getDeskById(any())).thenReturn(fakeDesk);
+    when(deskService.getRoom(any())).thenReturn(fakeRoom);
+    when(deskService.deleteDeskById(any())).thenReturn(fakeDesk);
+    assertTrue(
+        controller.delete(mock(User.class), List.of(fakeDesk.getId())).getContent().stream()
+            .anyMatch(obj -> obj.getContent().getRoomName().equals(expected.getRoomName())));
   }
 
   @Test
   void deskNotFound() {
     when(deskService.getDeskByInfoAndRoomName(any(), any())).thenReturn(mock(Desk.class));
-    when(deskService.deleteDeskById(any())).thenThrow(new RoomNotFoundException());
-    ResponseStatusException thrown =
-        assertThrows(
-            ResponseStatusException.class,
-            () -> controller.delete(mock(User.class), "room", mock(DeskInfo.class)));
-    assertEquals(HttpStatus.NOT_FOUND, thrown.getStatus());
+    when(deskService.getDeskById(any())).thenThrow(new DeskNotFoundException());
+    assertTrue(controller.delete(mock(User.class), List.of("WrongId")).getContent().isEmpty());
+  }
+
+  @Test
+  void roomNotFound() {
+    when(deskService.getDeskById(any())).thenReturn(mock(Desk.class));
+    when(deskService.getRoom(any())).thenThrow(new RoomNotFoundException());
+    assertTrue(controller.delete(mock(User.class), List.of("WrongId")).getContent().isEmpty());
   }
 }
