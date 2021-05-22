@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.sweven.blockcovid.rooms.assemblers.DeskAssembler;
 import it.sweven.blockcovid.rooms.dto.DeskWithRoomName;
 import it.sweven.blockcovid.rooms.entities.Desk;
+import it.sweven.blockcovid.rooms.exceptions.DeskNotFoundException;
+import it.sweven.blockcovid.rooms.exceptions.RoomNotFoundException;
 import it.sweven.blockcovid.rooms.services.DeskService;
 import it.sweven.blockcovid.users.entities.User;
 import java.util.List;
@@ -59,7 +61,10 @@ public class DeleteDeskController implements RoomsController {
                     deskService.getDeskById(id);
                     deskService.getRoom(id);
                     return true;
-                  } catch (NoSuchElementException e) {
+                  } catch (DeskNotFoundException e) {
+                    return false;
+                  } catch (RoomNotFoundException e) {
+                    deskService.deleteDeskById(id);
                     return false;
                   }
                 })
