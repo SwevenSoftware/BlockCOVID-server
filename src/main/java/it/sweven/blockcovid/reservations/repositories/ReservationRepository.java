@@ -23,4 +23,6 @@ public interface ReservationRepository extends MongoRepository<Reservation, Long
   Stream<Reservation> findReservationByStartIsGreaterThanEqual(LocalDateTime start);
 
   Stream<Reservation> findReservationsByDeskId(String deskId);
+
+  Stream<Reservation> findByUsername(String username);
 }
