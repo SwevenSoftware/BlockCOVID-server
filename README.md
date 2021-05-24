@@ -1,5 +1,7 @@
 ![Build status](https://github.com/SwevenSoftware/BlockCOVID-server/actions/workflows/build-server.yml/badge.svg)
 [![codecov](https://codecov.io/gh/SwevenSoftware/BlockCOVID-server/branch/develop/graph/badge.svg)](https://codecov.io/gh/SwevenSoftware/BlockCOVID-server)
+[![code style: spotless](https://img.shields.io/badge/code_style-spotless-ff69b4.svg)](https://github.com/diffplug/spotless)
+
 # BlockCOVID-server
 ## Description
 Server module for the project BlockCOVID.
