@@ -75,4 +75,13 @@ class UserReservationControllerTest {
         controller.userReservations(
             mock(User.class), LocalDateTime.MIN, LocalDateTime.MAX, "user"));
   }
+
+  @Test
+  void invalidTestReturnsEmptyList() {
+    assertTrue(
+        controller
+            .userReservations(mock(User.class), LocalDateTime.MIN, LocalDateTime.MAX, "admin")
+            .getContent()
+            .isEmpty());
+  }
 }
