@@ -31,7 +31,7 @@ public class ViewAllReservationsController implements ReservationController {
     this.assembler = assembler;
   }
 
-  @GetMapping("view/all")
+  @GetMapping("view")
   @ApiResponses({
     @ApiResponse(
         responseCode = "200",
