@@ -10,28 +10,29 @@ import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.reservations.servicies.ReservationService;
 import it.sweven.blockcovid.users.entities.User;
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-public class ViewAllReservationsController implements ReservationController {
-  private final ReservationService service;
-  private final ReservationWithRoomAssembler assembler;
+public class UserReservationController implements ReservationController {
+  private final ReservationService reservationService;
+  private final ReservationWithRoomAssembler reservationWithRoomAssembler;
 
-  public ViewAllReservationsController(
-      ReservationService service, ReservationWithRoomAssembler assembler) {
-    this.service = service;
-    this.assembler = assembler;
+  @Autowired
+  public UserReservationController(
+      ReservationService reservationService,
+      ReservationWithRoomAssembler reservationWithRoomAssembler) {
+    this.reservationService = reservationService;
+    this.reservationWithRoomAssembler = reservationWithRoomAssembler;
   }
 
-  @GetMapping("view")
+  @GetMapping("view/user/{username}")
   @ApiResponses({
     @ApiResponse(
         responseCode = "200",
@@ -45,12 +46,17 @@ public class ViewAllReservationsController implements ReservationController {
         description = "Method not allowed",
         content = @Content(schema = @Schema(implementation = void.class)))
   })
+  @PreAuthorize("#submitter.isAdmin()")
   @ResponseBody
-  @PreAuthorize("#submitter.isAdmin() and #submitter.isEnabled()")
-  public CollectionModel<EntityModel<ReservationWithRoom>> viewAll(
+  public CollectionModel<EntityModel<ReservationWithRoom>> userReservations(
       @Parameter(hidden = true) @AuthenticationPrincipal User submitter,
-      @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
-      @RequestParam("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
-    return assembler.toCollectionModel(service.findByTimeInterval(start, end));
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to,
+      @PathVariable String username) {
+    return reservationWithRoomAssembler.toCollectionModel(
+        reservationService.findByTimeInterval(from, to).stream()
+            .parallel()
+            .filter(reservationWithRoom -> reservationWithRoom.getUsername().equals(username))
+            .collect(Collectors.toList()));
   }
 }
