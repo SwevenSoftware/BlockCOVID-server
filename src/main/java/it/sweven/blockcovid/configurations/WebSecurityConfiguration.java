@@ -66,8 +66,6 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     http.sessionManagement()
         .sessionCreationPolicy(STATELESS)
         .and()
-        .cors()
-        .and()
         .exceptionHandling()
         .defaultAuthenticationEntryPointFor(forbiddenEntryPoint(), PROTECTED_URLS)
         .and()
@@ -85,6 +83,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         .disable()
         .logout()
         .disable();
+
+    http.cors();
 
     if (sslEnabled) {
       http.requiresChannel().anyRequest().requiresSecure();
