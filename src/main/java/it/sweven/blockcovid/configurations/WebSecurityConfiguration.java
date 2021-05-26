@@ -84,6 +84,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         .logout()
         .disable();
 
+    http.cors();
+
     if (sslEnabled) {
       http.requiresChannel().anyRequest().requiresSecure();
     }
