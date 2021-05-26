@@ -32,7 +32,7 @@ public class UserReservationController implements ReservationController {
     this.reservationWithRoomAssembler = reservationWithRoomAssembler;
   }
 
-  @GetMapping("view/{username}")
+  @GetMapping("view/user/{username}")
   @ApiResponses({
     @ApiResponse(
         responseCode = "200",
