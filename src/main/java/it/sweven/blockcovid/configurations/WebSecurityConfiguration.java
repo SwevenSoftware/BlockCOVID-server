@@ -66,6 +66,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     http.sessionManagement()
         .sessionCreationPolicy(STATELESS)
         .and()
+        .cors()
+        .and()
         .exceptionHandling()
         .defaultAuthenticationEntryPointFor(forbiddenEntryPoint(), PROTECTED_URLS)
         .and()
