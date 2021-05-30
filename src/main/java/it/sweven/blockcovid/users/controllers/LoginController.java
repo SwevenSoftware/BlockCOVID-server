@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -59,6 +60,9 @@ public class LoginController implements AccountController {
           assembler.setAuthorities(loggedInUser.getAuthorities()).toModel(loggedInUser).getLinks());
     } catch (BadCredentialsException exception) {
       logger.warn("invalid credentials supplied for user " + credentials.getUsername());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getMessage());
+    } catch (UsernameNotFoundException exception) {
+      logger.warn("Username " + credentials.getUsername() + " not found");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
   }

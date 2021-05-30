@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.server.ResponseStatusException;
 
 class LoginControllerTest {
@@ -50,6 +51,16 @@ class LoginControllerTest {
   @Test
   void login_invalidCredentials() {
     when(service.login("user", "password")).thenThrow(BadCredentialsException.class);
+    ResponseStatusException thrown =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> controller.login(new Credentials("user", "password")));
+    assertEquals(HttpStatus.BAD_REQUEST, thrown.getStatus());
+  }
+
+  @Test
+  void username_not_found() {
+    when(service.login(any(), any())).thenThrow(new UsernameNotFoundException(""));
     ResponseStatusException thrown =
         assertThrows(
             ResponseStatusException.class,
