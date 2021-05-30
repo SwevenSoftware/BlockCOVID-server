@@ -63,7 +63,7 @@ public class LoginController implements AccountController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getMessage());
     } catch (UsernameNotFoundException exception) {
       logger.warn("Username " + credentials.getUsername() + " not found");
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, exception.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
   }
 }

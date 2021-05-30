@@ -65,6 +65,6 @@ class LoginControllerTest {
         assertThrows(
             ResponseStatusException.class,
             () -> controller.login(new Credentials("user", "password")));
-    assertEquals(HttpStatus.NOT_FOUND, thrown.getStatus());
+    assertEquals(HttpStatus.BAD_REQUEST, thrown.getStatus());
   }
 }
