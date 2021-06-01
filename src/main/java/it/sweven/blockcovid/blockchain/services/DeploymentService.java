@@ -25,14 +25,20 @@ public class DeploymentService {
 
   public DocumentContract loadContract(DeploymentInformation deploymentInformation)
       throws Exception {
-    return DocumentContract.load(
-        deploymentInformation.getContract(),
-        connection,
-        deploymentInformation.getAccount(),
-        gasProvider);
+    logger.info("loading contract from information: " + deploymentInformation);
+    DocumentContract loaded =
+        DocumentContract.load(
+            deploymentInformation.getContract(),
+            connection,
+            deploymentInformation.getAccount(),
+            gasProvider);
+    logger.info("Loaded contract " + loaded.getContractAddress());
+    return loaded;
   }
 
   public DocumentContract deployContract(Credentials account) throws Exception {
-    return DocumentContract.deploy(connection, account, gasProvider).send();
+    DocumentContract deployed = DocumentContract.deploy(connection, account, gasProvider).send();
+    logger.info("Deployed new contract at address " + deployed.getContractAddress());
+    return deployed;
   }
 }
