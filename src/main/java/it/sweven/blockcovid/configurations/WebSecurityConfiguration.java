@@ -82,7 +82,13 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         .httpBasic()
         .disable()
         .logout()
-        .disable();
+        .disable()
+        .headers()
+        .cacheControl()
+        .and()
+        .frameOptions()
+        .and()
+        .contentTypeOptions();
 
     http.cors();
 
