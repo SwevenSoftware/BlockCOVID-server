@@ -16,11 +16,11 @@ services:
     networks:
       - db-net
 
-   ganache:
-     image: trufflesuite/ganache-cli:latest
-     command: --account "${BLOCKCHAIN_ACCOUNT},1000000000000000000"
-     networks:
-       - blockchain-net
+  ganache:
+    image: trufflesuite/ganache-cli:latest
+    command: --account "${BLOCKCHAIN_ACCOUNT},1000000000000000000"
+    networks:
+      - blockchain-net
 
   blockcovid:
     build:
@@ -31,7 +31,7 @@ services:
       - .env
     depends_on:
       - mongo
-       - ganache
+      - ganache
     networks:
       - db-net
       - blockchain-net
