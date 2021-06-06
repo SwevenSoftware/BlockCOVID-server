@@ -43,8 +43,15 @@ public class DocumentService {
     report
         .setTitle("Cleaner Report")
         .setTimestamp(timestamp)
-        .setHeaderTable(List.of("Room name", "Status"));
-    rooms.forEach(r -> report.addRowTable(List.of(r.getName(), r.getRoomStatus().toString())));
+        .setHeaderTable(List.of("Room name", "Status", "Last cleaned"));
+    rooms.forEach(
+        r -> {
+          String lastCleaned =
+              r.getLastCleaned() != null
+                  ? r.getLastCleaned().format(DateTimeFormatter.ISO_DATE_TIME)
+                  : "never";
+          report.addRowTable(List.of(r.getName(), r.getRoomStatus().toString(), lastCleaned));
+        });
     try {
       report.create(destination);
     } catch (BadAttributeValueExpException e) {
