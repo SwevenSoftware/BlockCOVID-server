@@ -27,6 +27,7 @@ public class Room {
   private @EqualsAndHashCode.Include int width, height;
   private Status roomStatus;
   private LocalDateTime lastCleaned;
+  private String lastCleaner;
 
   @PersistenceConstructor
   public Room(
@@ -39,7 +40,8 @@ public class Room {
       int width,
       int height,
       Status roomStatus,
-      LocalDateTime lastCleaned) {
+      LocalDateTime lastCleaned,
+      String lastCleaner) {
     this.id = id;
     this.name = name;
     this.closed = closed;
@@ -50,6 +52,7 @@ public class Room {
     setHeight(height);
     this.roomStatus = roomStatus;
     this.lastCleaned = lastCleaned;
+    this.lastCleaner = lastCleaner;
   }
 
   public Room(
@@ -61,7 +64,8 @@ public class Room {
       int width,
       int height,
       Status roomStatus,
-      LocalDateTime lastCleaned) {
+      LocalDateTime lastCleaned,
+      String lastCleaner) {
     this.name = name;
     this.closed = closed;
     setOpeningTime(openingTime);
@@ -71,6 +75,7 @@ public class Room {
     setHeight(height);
     this.roomStatus = roomStatus;
     this.lastCleaned = lastCleaned;
+    this.lastCleaner = lastCleaner;
   }
 
   public void setOpeningTime(LocalTime openingTime) {

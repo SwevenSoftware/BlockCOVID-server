@@ -23,7 +23,8 @@ class RoomBuilderTest {
             10,
             10,
             Status.CLEAN,
-            LocalDateTime.MIN);
+            LocalDateTime.MIN,
+            "cleaner");
     Room generated =
         builder
             .name("name")
@@ -33,6 +34,7 @@ class RoomBuilderTest {
             .closingTime(LocalTime.MIDNIGHT)
             .roomStatus(Status.CLEAN)
             .lastCleaned(LocalDateTime.MIN)
+            .lastCleaner("cleaner")
             .width(10)
             .height(10)
             .build();

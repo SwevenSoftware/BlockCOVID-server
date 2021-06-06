@@ -13,8 +13,9 @@ public class RoomBuilder {
   private Set<DayOfWeek> openingDays;
   private Integer width;
   private Integer height;
-  private Status status = Status.CLEAN;
-  private LocalDateTime lastCleaned = LocalDateTime.now();
+  private Status status = Status.DIRTY;
+  private LocalDateTime lastCleaned;
+  private String lastCleaner;
   private boolean closed;
 
   public RoomBuilder name(String name) throws BadAttributeValueExpException {
@@ -69,6 +70,11 @@ public class RoomBuilder {
     return this;
   }
 
+  public RoomBuilder lastCleaner(String username) {
+    this.lastCleaner = username;
+    return this;
+  }
+
   public Room build() throws BadAttributeValueExpException {
     if (name == null
         || openingTime == null
@@ -78,6 +84,15 @@ public class RoomBuilder {
         || height == null) throw new BadAttributeValueExpException(null);
 
     return new Room(
-        name, closed, openingTime, closingTime, openingDays, width, height, status, lastCleaned);
+        name,
+        closed,
+        openingTime,
+        closingTime,
+        openingDays,
+        width,
+        height,
+        status,
+        lastCleaned,
+        lastCleaner);
   }
 }

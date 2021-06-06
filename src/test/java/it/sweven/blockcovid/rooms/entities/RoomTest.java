@@ -33,7 +33,8 @@ class RoomTest {
             10,
             10,
             Status.CLEAN,
-            LocalDateTime.MIN);
+            LocalDateTime.MIN,
+            "cleaner");
   }
 
   @Test
@@ -169,7 +170,8 @@ class RoomTest {
             100,
             100,
             null,
-            LocalDateTime.MIN);
+            LocalDateTime.MIN,
+            "cleaner");
     assertEquals(Status.DIRTY, room.getRoomStatus());
   }
 
@@ -186,7 +188,8 @@ class RoomTest {
             100,
             100,
             Status.CLEAN,
-            LocalDateTime.MIN);
+            LocalDateTime.MIN,
+            "cleaner");
     assertEquals(Status.CLEAN, room.getRoomStatus());
   }
 
@@ -203,7 +206,8 @@ class RoomTest {
             100,
             100,
             Status.CLEAN,
-            LocalDateTime.MIN);
+            LocalDateTime.MIN,
+            "cleaner");
     assertFalse(room.isRoomOpen(LocalDateTime.now()));
   }
 
@@ -220,7 +224,8 @@ class RoomTest {
             100,
             100,
             Status.CLEAN,
-            LocalDateTime.MIN);
+            LocalDateTime.MIN,
+            "cleaner");
     /* 2021-04-20T15.30 has valid time but it's tuesday */
     assertFalse(room.isRoomOpen(LocalDateTime.of(2021, 4, 20, 15, 30)));
   }
@@ -238,7 +243,8 @@ class RoomTest {
             100,
             100,
             Status.CLEAN,
-            LocalDateTime.MIN);
+            LocalDateTime.MIN,
+            "cleaner");
     assertFalse(room.isRoomOpen(LocalDateTime.of(2021, 4, 19, 12, 30)));
   }
 
@@ -255,7 +261,8 @@ class RoomTest {
             100,
             100,
             Status.CLEAN,
-            LocalDateTime.MIN);
+            LocalDateTime.MIN,
+            "cleaner");
     assertFalse(room.isRoomOpen(LocalDateTime.of(2021, 4, 19, 19, 30)));
   }
 
@@ -272,7 +279,8 @@ class RoomTest {
             100,
             100,
             Status.CLEAN,
-            LocalDateTime.MIN);
+            LocalDateTime.MIN,
+            "cleaner");
     assertTrue(room.isRoomOpen(LocalDateTime.of(2021, 4, 19, 15, 30)));
   }
 }

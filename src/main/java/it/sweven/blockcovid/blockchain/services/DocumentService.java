@@ -43,14 +43,16 @@ public class DocumentService {
     report
         .setTitle("Cleaner Report")
         .setTimestamp(timestamp)
-        .setHeaderTable(List.of("Room name", "Status", "Last cleaned"));
+        .setHeaderTable(List.of("Room name", "Status", "Last cleaned", "Cleaner"));
     rooms.forEach(
         r -> {
           String lastCleaned =
               r.getLastCleaned() != null
                   ? r.getLastCleaned().format(DateTimeFormatter.ISO_DATE_TIME)
                   : "never";
-          report.addRowTable(List.of(r.getName(), r.getRoomStatus().toString(), lastCleaned));
+          String lastCleaner = r.getLastCleaner() != null ? r.getLastCleaner() : "";
+          report.addRowTable(
+              List.of(r.getName(), r.getRoomStatus().toString(), lastCleaned, lastCleaner));
         });
     try {
       report.create(destination);
