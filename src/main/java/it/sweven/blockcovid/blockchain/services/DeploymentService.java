@@ -28,7 +28,7 @@ public class DeploymentService {
     return DocumentContract.load(
         deploymentInformation.getContract(),
         connection,
-        deploymentInformation.getAccount(),
+        Credentials.create(deploymentInformation.getAccount()),
         gasProvider);
   }
 

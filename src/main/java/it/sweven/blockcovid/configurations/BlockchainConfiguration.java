@@ -54,9 +54,11 @@ public class BlockchainConfiguration {
       } catch (ContractNotDeployed contractNotDeployed) {
         return deploymentInformationService.save(
             new DeploymentInformation(
-                account, network, deploymentService.deployContract(account).getContractAddress()));
+                account.getAddress(),
+                network,
+                deploymentService.deployContract(account).getContractAddress()));
       }
-    } else return new DeploymentInformation(account, contract, network);
+    } else return new DeploymentInformation(account.getAddress(), contract, network);
   }
 
   @Bean
@@ -65,7 +67,9 @@ public class BlockchainConfiguration {
       throws InvalidNetworkException, BlockchainAccountNotFound, Exception {
     if (network == null || network.equals("")) throw new InvalidNetworkException();
     return new DeploymentInformation(
-        account(), deploymentService.deployContract(account()).getContractAddress(), network);
+        account().getAddress(),
+        deploymentService.deployContract(account()).getContractAddress(),
+        network);
   }
 
   @Bean
