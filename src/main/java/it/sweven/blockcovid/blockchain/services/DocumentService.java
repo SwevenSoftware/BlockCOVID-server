@@ -21,19 +21,28 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.management.BadAttributeValueExpException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
+import org.web3j.crypto.Credentials;
 
 @Service
 public class DocumentService {
   private final String DESTINATION_DIR;
+  private final String account;
+  private final String contract;
 
-  public DocumentService(@Value("#{environment.REPORT_DIR}") String destination_dir) {
+  public DocumentService(
+      @Value("#{environment.REPORT_DIR}") String destination_dir,
+      @Value("${it.sweven.blockcovid.blockchain.contract}") String contract,
+      Credentials account) {
     DESTINATION_DIR = destination_dir;
+    this.contract = contract;
+    this.account = account.getAddress();
   }
 
   public String generateCleanerReport(List<Room> rooms) throws IOException {
@@ -43,6 +52,8 @@ public class DocumentService {
     report
         .setTitle("Cleaner Report")
         .setTimestamp(timestamp)
+        .setHeaderInfo(
+            Map.of("Blockchain Account", this.account, "Blockchain Contract", this.contract))
         .setHeaderTable(List.of("Room name", "Status"));
     rooms.forEach(r -> report.addRowTable(List.of(r.getName(), r.getRoomStatus().toString())));
     try {
@@ -61,6 +72,8 @@ public class DocumentService {
         .landscape()
         .setTitle("Usage Report")
         .setTimestamp(timestamp)
+        .setHeaderInfo(
+            Map.of("Blockchain Account", this.account, "Blockchain Contract", this.contract))
         .setHeaderTable(
             List.of(
                 "Reservation ID",

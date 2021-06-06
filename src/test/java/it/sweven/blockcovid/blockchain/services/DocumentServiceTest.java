@@ -23,6 +23,7 @@ import javax.management.BadAttributeValueExpException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.web3j.crypto.Credentials;
 
 class DocumentServiceTest {
 
@@ -33,7 +34,9 @@ class DocumentServiceTest {
   void setUp() throws IOException {
     destination_dir = "report_tests" + LocalDateTime.now();
     Files.createDirectory(Path.of(destination_dir));
-    service = spy(new DocumentService(destination_dir));
+    Credentials mockAccount = mock(Credentials.class);
+    when(mockAccount.getAddress()).thenReturn("account");
+    service = spy(new DocumentService(destination_dir, "contract", mockAccount));
   }
 
   @AfterEach
@@ -54,6 +57,7 @@ class DocumentServiceTest {
     doReturn(mockReport).when(service).createNewReport();
     when(mockReport.setTitle(any())).thenReturn(mockReport);
     when(mockReport.setTimestamp(any())).thenReturn(mockReport);
+    when(mockReport.setHeaderInfo(any())).thenReturn(mockReport);
     when(mockReport.setHeaderTable(any())).thenReturn(mockReport);
     when(mockReport.addRowTable(any())).thenReturn(mockReport);
     assertEquals("pathFile", service.generateCleanerReport(List.of(mockRoom1, mockRoom2)));
@@ -73,6 +77,7 @@ class DocumentServiceTest {
     doReturn(mockReport).when(service).createNewReport();
     when(mockReport.setTitle(any())).thenReturn(mockReport);
     when(mockReport.setTimestamp(any())).thenReturn(mockReport);
+    when(mockReport.setHeaderInfo(any())).thenReturn(mockReport);
     when(mockReport.setHeaderTable(any())).thenReturn(mockReport);
     when(mockReport.addRowTable(any())).thenReturn(mockReport);
     doThrow(new BadAttributeValueExpException(null)).when(mockReport).create(any());
@@ -134,6 +139,7 @@ class DocumentServiceTest {
     when(mockReport.landscape()).thenReturn(mockReport);
     when(mockReport.setTitle(any())).thenReturn(mockReport);
     when(mockReport.setTimestamp(any())).thenReturn(mockReport);
+    when(mockReport.setHeaderInfo(any())).thenReturn(mockReport);
     when(mockReport.setHeaderTable(any())).thenReturn(mockReport);
     when(mockReport.addRowTable(any())).thenReturn(mockReport);
     assertEquals(
@@ -173,6 +179,7 @@ class DocumentServiceTest {
     when(mockReport.landscape()).thenReturn(mockReport);
     when(mockReport.setTitle(any())).thenReturn(mockReport);
     when(mockReport.setTimestamp(any())).thenReturn(mockReport);
+    when(mockReport.setHeaderInfo(any())).thenReturn(mockReport);
     when(mockReport.setHeaderTable(any())).thenReturn(mockReport);
     when(mockReport.addRowTable(any())).thenReturn(mockReport);
     doThrow(new BadAttributeValueExpException(null)).when(mockReport).create(any());
