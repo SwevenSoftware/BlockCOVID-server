@@ -7,6 +7,8 @@ import static org.mockito.Mockito.*;
 import it.sweven.blockcovid.blockchain.documents.PdfReport;
 import it.sweven.blockcovid.blockchain.documents.ReportType;
 import it.sweven.blockcovid.blockchain.dto.ReportInformation;
+import it.sweven.blockcovid.blockchain.entities.DeploymentInformation;
+import it.sweven.blockcovid.blockchain.exceptions.ContractNotDeployed;
 import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.rooms.entities.Room;
 import it.sweven.blockcovid.rooms.entities.Status;
@@ -30,10 +32,13 @@ class DocumentServiceTest {
   private String destination_dir;
 
   @BeforeEach
-  void setUp() throws IOException {
+  void setUp() throws IOException, ContractNotDeployed {
     destination_dir = "report_tests" + LocalDateTime.now();
     Files.createDirectory(Path.of(destination_dir));
-    service = spy(new DocumentService(destination_dir));
+    DeploymentInformation mockInfo = mock(DeploymentInformation.class);
+    when(mockInfo.getContract()).thenReturn("contract");
+    when(mockInfo.getAccount()).thenReturn("account");
+    service = spy(new DocumentService(destination_dir, mockInfo));
   }
 
   @AfterEach
@@ -58,6 +63,7 @@ class DocumentServiceTest {
     doReturn(mockReport).when(service).createNewReport();
     when(mockReport.setTitle(any())).thenReturn(mockReport);
     when(mockReport.setTimestamp(any())).thenReturn(mockReport);
+    when(mockReport.setHeaderInfo(any())).thenReturn(mockReport);
     when(mockReport.setHeaderTable(any())).thenReturn(mockReport);
     when(mockReport.addRowTable(any())).thenReturn(mockReport);
     assertEquals("pathFile", service.generateCleanerReport(List.of(mockRoom1, mockRoom2)));
@@ -77,6 +83,7 @@ class DocumentServiceTest {
     doReturn(mockReport).when(service).createNewReport();
     when(mockReport.setTitle(any())).thenReturn(mockReport);
     when(mockReport.setTimestamp(any())).thenReturn(mockReport);
+    when(mockReport.setHeaderInfo(any())).thenReturn(mockReport);
     when(mockReport.setHeaderTable(any())).thenReturn(mockReport);
     when(mockReport.addRowTable(any())).thenReturn(mockReport);
     doThrow(new BadAttributeValueExpException(null)).when(mockReport).create(any());
@@ -138,6 +145,7 @@ class DocumentServiceTest {
     when(mockReport.landscape()).thenReturn(mockReport);
     when(mockReport.setTitle(any())).thenReturn(mockReport);
     when(mockReport.setTimestamp(any())).thenReturn(mockReport);
+    when(mockReport.setHeaderInfo(any())).thenReturn(mockReport);
     when(mockReport.setHeaderTable(any())).thenReturn(mockReport);
     when(mockReport.addRowTable(any())).thenReturn(mockReport);
     assertEquals(
@@ -177,6 +185,7 @@ class DocumentServiceTest {
     when(mockReport.landscape()).thenReturn(mockReport);
     when(mockReport.setTitle(any())).thenReturn(mockReport);
     when(mockReport.setTimestamp(any())).thenReturn(mockReport);
+    when(mockReport.setHeaderInfo(any())).thenReturn(mockReport);
     when(mockReport.setHeaderTable(any())).thenReturn(mockReport);
     when(mockReport.addRowTable(any())).thenReturn(mockReport);
     doThrow(new BadAttributeValueExpException(null)).when(mockReport).create(any());

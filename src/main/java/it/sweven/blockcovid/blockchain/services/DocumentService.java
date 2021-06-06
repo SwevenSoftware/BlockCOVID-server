@@ -5,6 +5,8 @@ import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import it.sweven.blockcovid.blockchain.documents.PdfReport;
 import it.sweven.blockcovid.blockchain.documents.ReportType;
 import it.sweven.blockcovid.blockchain.dto.ReportInformation;
+import it.sweven.blockcovid.blockchain.entities.DeploymentInformation;
+import it.sweven.blockcovid.blockchain.exceptions.ContractNotDeployed;
 import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.rooms.entities.Room;
 import java.io.FileInputStream;
@@ -21,6 +23,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.management.BadAttributeValueExpException;
@@ -31,9 +34,16 @@ import org.springframework.util.DigestUtils;
 @Service
 public class DocumentService {
   private final String DESTINATION_DIR;
+  private final String account;
+  private final String contract;
 
-  public DocumentService(@Value("#{environment.REPORT_DIR}") String destination_dir) {
+  public DocumentService(
+      @Value("#{environment.REPORT_DIR}") String destination_dir,
+      DeploymentInformation deploymentInformation)
+      throws ContractNotDeployed {
     DESTINATION_DIR = destination_dir;
+    this.account = deploymentInformation.getAccount();
+    this.contract = deploymentInformation.getContract();
   }
 
   public String generateCleanerReport(List<Room> rooms) throws IOException {
@@ -43,6 +53,7 @@ public class DocumentService {
     report
         .setTitle("Cleaner Report")
         .setTimestamp(timestamp)
+        .setHeaderInfo(Map.of("Blockchain Account", account, "Blockchain Contract", contract))
         .setHeaderTable(List.of("Room name", "Status", "Last cleaned", "Cleaner"));
     rooms.forEach(
         r -> {
@@ -70,6 +81,7 @@ public class DocumentService {
         .landscape()
         .setTitle("Usage Report")
         .setTimestamp(timestamp)
+        .setHeaderInfo(Map.of("Blockchain Account", account, "Blockchain Contract", contract))
         .setHeaderTable(
             List.of(
                 "Reservation ID",
