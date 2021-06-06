@@ -1,6 +1,7 @@
 package it.sweven.blockcovid.rooms.entities;
 
 import java.time.DayOfWeek;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Set;
 import javax.management.BadAttributeValueExpException;
@@ -12,7 +13,9 @@ public class RoomBuilder {
   private Set<DayOfWeek> openingDays;
   private Integer width;
   private Integer height;
-  private Status status = Status.CLEAN;
+  private Status status = Status.DIRTY;
+  private LocalDateTime lastCleaned;
+  private String lastCleaner;
   private boolean closed;
 
   public RoomBuilder name(String name) throws BadAttributeValueExpException {
@@ -62,6 +65,16 @@ public class RoomBuilder {
     return this;
   }
 
+  public RoomBuilder lastCleaned(LocalDateTime lastCleaned) {
+    this.lastCleaned = lastCleaned;
+    return this;
+  }
+
+  public RoomBuilder lastCleaner(String username) {
+    this.lastCleaner = username;
+    return this;
+  }
+
   public Room build() throws BadAttributeValueExpException {
     if (name == null
         || openingTime == null
@@ -70,6 +83,16 @@ public class RoomBuilder {
         || width == null
         || height == null) throw new BadAttributeValueExpException(null);
 
-    return new Room(name, closed, openingTime, closingTime, openingDays, width, height, status);
+    return new Room(
+        name,
+        closed,
+        openingTime,
+        closingTime,
+        openingDays,
+        width,
+        height,
+        status,
+        lastCleaned,
+        lastCleaner);
   }
 }

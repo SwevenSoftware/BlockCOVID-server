@@ -54,8 +54,17 @@ public class DocumentService {
         .setTitle("Cleaner Report")
         .setTimestamp(timestamp)
         .setHeaderInfo(Map.of("Blockchain Account", account, "Blockchain Contract", contract))
-        .setHeaderTable(List.of("Room name", "Status"));
-    rooms.forEach(r -> report.addRowTable(List.of(r.getName(), r.getRoomStatus().toString())));
+        .setHeaderTable(List.of("Room name", "Status", "Last cleaned", "Cleaner"));
+    rooms.forEach(
+        r -> {
+          String lastCleaned =
+              r.getLastCleaned() != null
+                  ? r.getLastCleaned().format(DateTimeFormatter.ISO_DATE_TIME)
+                  : "never";
+          String lastCleaner = r.getLastCleaner() != null ? r.getLastCleaner() : "";
+          report.addRowTable(
+              List.of(r.getName(), r.getRoomStatus().toString(), lastCleaned, lastCleaner));
+        });
     try {
       report.create(destination);
     } catch (BadAttributeValueExpException e) {

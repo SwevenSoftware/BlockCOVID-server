@@ -53,8 +53,12 @@ class DocumentServiceTest {
     Room mockRoom1 = mock(Room.class), mockRoom2 = mock(Room.class);
     when(mockRoom1.getName()).thenReturn("room1");
     when(mockRoom1.getRoomStatus()).thenReturn(Status.CLEAN);
+    when(mockRoom1.getLastCleaned()).thenReturn(LocalDateTime.MIN);
+    when(mockRoom1.getLastCleaner()).thenReturn("cleaner");
     when(mockRoom2.getName()).thenReturn("room2");
     when(mockRoom2.getRoomStatus()).thenReturn(Status.DIRTY);
+    when(mockRoom2.getLastCleaned()).thenReturn(null);
+    when(mockRoom2.getLastCleaner()).thenReturn(null);
     PdfReport mockReport = mock(PdfReport.class);
     doReturn(mockReport).when(service).createNewReport();
     when(mockReport.setTitle(any())).thenReturn(mockReport);

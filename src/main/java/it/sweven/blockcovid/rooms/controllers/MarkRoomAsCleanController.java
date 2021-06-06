@@ -56,7 +56,7 @@ public class MarkRoomAsCleanController implements RoomsController {
           "Cleaner " + submitter.getUsername() + " setted the room " + roomName + " as clean");
       return assembler
           .setAuthorities(submitter.getAuthorities())
-          .toModel(roomService.setStatus(roomName, Status.CLEAN));
+          .toModel(roomService.setStatus(roomName, Status.CLEAN, submitter.getUsername()));
     } catch (RoomNotFoundException exception) {
       logger.warn(
           "Cleaner "

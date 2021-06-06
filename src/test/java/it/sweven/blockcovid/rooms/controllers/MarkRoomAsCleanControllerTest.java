@@ -33,18 +33,21 @@ class MarkRoomAsCleanControllerTest {
   @Test
   void validMark() {
     User cleaner = mock(User.class);
+    when(cleaner.getUsername()).thenReturn("cleaner");
     Room room = mock(Room.class);
-    when(roomService.setStatus("room", Status.CLEAN)).thenReturn(room);
+    when(roomService.setStatus("room", Status.CLEAN, "cleaner")).thenReturn(room);
     when(roomAssembler.toModel(room)).thenReturn(EntityModel.of(room));
     assertEquals(room, controller.markAsClean(cleaner, "room").getContent());
   }
 
   @Test
   void invalidRoomName_throwsResponseStatusException() {
-    when(roomService.setStatus("room", Status.CLEAN)).thenThrow(new RoomNotFoundException());
+    User cleaner = mock(User.class);
+    when(cleaner.getUsername()).thenReturn("cleaner");
+    when(roomService.setStatus("room", Status.CLEAN, "cleaner"))
+        .thenThrow(new RoomNotFoundException());
     ResponseStatusException thrown =
-        assertThrows(
-            ResponseStatusException.class, () -> controller.markAsClean(mock(User.class), "room"));
+        assertThrows(ResponseStatusException.class, () -> controller.markAsClean(cleaner, "room"));
     assertEquals(HttpStatus.NOT_FOUND, thrown.getStatus());
   }
 }

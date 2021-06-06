@@ -26,6 +26,8 @@ public class Room {
   private Set<DayOfWeek> openingDays;
   private @EqualsAndHashCode.Include int width, height;
   private Status roomStatus;
+  private LocalDateTime lastCleaned;
+  private String lastCleaner;
 
   @PersistenceConstructor
   public Room(
@@ -37,7 +39,9 @@ public class Room {
       Set<DayOfWeek> openingDays,
       int width,
       int height,
-      Status roomStatus) {
+      Status roomStatus,
+      LocalDateTime lastCleaned,
+      String lastCleaner) {
     this.id = id;
     this.name = name;
     this.closed = closed;
@@ -46,7 +50,9 @@ public class Room {
     setOpeningDays(openingDays);
     setWidth(width);
     setHeight(height);
-    setRoomStatus(roomStatus);
+    this.roomStatus = roomStatus;
+    this.lastCleaned = lastCleaned;
+    this.lastCleaner = lastCleaner;
   }
 
   public Room(
@@ -57,7 +63,9 @@ public class Room {
       Set<DayOfWeek> openingDays,
       int width,
       int height,
-      Status roomStatus) {
+      Status roomStatus,
+      LocalDateTime lastCleaned,
+      String lastCleaner) {
     this.name = name;
     this.closed = closed;
     setOpeningTime(openingTime);
@@ -65,7 +73,9 @@ public class Room {
     setOpeningDays(openingDays);
     setWidth(width);
     setHeight(height);
-    setRoomStatus(roomStatus);
+    this.roomStatus = roomStatus;
+    this.lastCleaned = lastCleaned;
+    this.lastCleaner = lastCleaner;
   }
 
   public void setOpeningTime(LocalTime openingTime) {
@@ -98,6 +108,11 @@ public class Room {
   public Status getRoomStatus() {
     if (roomStatus == null) return Status.DIRTY;
     return roomStatus;
+  }
+
+  public void setRoomStatus(Status status) {
+    this.roomStatus = status;
+    if (status == Status.CLEAN) this.lastCleaned = LocalDateTime.now();
   }
 
   @JsonIgnore
