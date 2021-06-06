@@ -32,7 +32,8 @@ class RoomTest {
             Set.of(DayOfWeek.MONDAY),
             10,
             10,
-            Status.CLEAN);
+            Status.CLEAN,
+            LocalDateTime.MIN);
   }
 
   @Test
@@ -142,6 +143,20 @@ class RoomTest {
   }
 
   @Test
+  void setRoomStatus_cleaned() {
+    LocalDateTime prevClean = room.getLastCleaned();
+    room.setRoomStatus(Status.CLEAN);
+    assertNotEquals(prevClean, room.getLastCleaned());
+  }
+
+  @Test
+  void setRoomStatus_dirty() {
+    LocalDateTime prevClean = room.getLastCleaned();
+    room.setRoomStatus(Status.DIRTY);
+    assertEquals(prevClean, room.getLastCleaned());
+  }
+
+  @Test
   void getRoomStatus_nullStatus() {
     room =
         new Room(
@@ -153,7 +168,8 @@ class RoomTest {
             Set.of(DayOfWeek.MONDAY),
             100,
             100,
-            null);
+            null,
+            LocalDateTime.MIN);
     assertEquals(Status.DIRTY, room.getRoomStatus());
   }
 
@@ -169,7 +185,8 @@ class RoomTest {
             Set.of(DayOfWeek.MONDAY),
             100,
             100,
-            Status.CLEAN);
+            Status.CLEAN,
+            LocalDateTime.MIN);
     assertEquals(Status.CLEAN, room.getRoomStatus());
   }
 
@@ -185,7 +202,8 @@ class RoomTest {
             Set.of(DayOfWeek.MONDAY),
             100,
             100,
-            Status.CLEAN);
+            Status.CLEAN,
+            LocalDateTime.MIN);
     assertFalse(room.isRoomOpen(LocalDateTime.now()));
   }
 
@@ -201,7 +219,8 @@ class RoomTest {
             Set.of(DayOfWeek.MONDAY),
             100,
             100,
-            Status.CLEAN);
+            Status.CLEAN,
+            LocalDateTime.MIN);
     /* 2021-04-20T15.30 has valid time but it's tuesday */
     assertFalse(room.isRoomOpen(LocalDateTime.of(2021, 4, 20, 15, 30)));
   }
@@ -218,7 +237,8 @@ class RoomTest {
             Set.of(DayOfWeek.MONDAY),
             100,
             100,
-            Status.CLEAN);
+            Status.CLEAN,
+            LocalDateTime.MIN);
     assertFalse(room.isRoomOpen(LocalDateTime.of(2021, 4, 19, 12, 30)));
   }
 
@@ -234,7 +254,8 @@ class RoomTest {
             Set.of(DayOfWeek.MONDAY),
             100,
             100,
-            Status.CLEAN);
+            Status.CLEAN,
+            LocalDateTime.MIN);
     assertFalse(room.isRoomOpen(LocalDateTime.of(2021, 4, 19, 19, 30)));
   }
 
@@ -250,7 +271,8 @@ class RoomTest {
             Set.of(DayOfWeek.MONDAY),
             100,
             100,
-            Status.CLEAN);
+            Status.CLEAN,
+            LocalDateTime.MIN);
     assertTrue(room.isRoomOpen(LocalDateTime.of(2021, 4, 19, 15, 30)));
   }
 }
