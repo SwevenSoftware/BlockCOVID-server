@@ -10,6 +10,7 @@ import com.itextpdf.layout.element.IBlockElement;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import java.io.FileNotFoundException;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -114,13 +115,13 @@ public class PdfReportTest {
   @Test
   void create() throws FileNotFoundException, BadAttributeValueExpException {
     Document mockDocument = mock(Document.class);
-    doReturn(mockDocument).when(report).createNewDocument("path");
+    doReturn(mockDocument).when(report).createNewDocument(any());
     PdfDocument mockPdfDocument = mock(PdfDocument.class);
     when(mockDocument.getPdfDocument()).thenReturn(mockPdfDocument);
     doNothing().when(report).addTitle(any());
     doNothing().when(report).addTimestamp(any());
     doNothing().when(report).addTable(any());
-    report.landscape().create("path");
+    report.landscape().create(Path.of("file.pdf"));
     verify(mockDocument).close();
     verify(mockPdfDocument).setDefaultPageSize(any());
   }

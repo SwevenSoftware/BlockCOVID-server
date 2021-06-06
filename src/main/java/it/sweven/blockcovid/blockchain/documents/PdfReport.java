@@ -8,6 +8,7 @@ import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import java.io.FileNotFoundException;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -95,8 +96,8 @@ public class PdfReport {
     document.add(table);
   }
 
-  public void create(String path) throws BadAttributeValueExpException, FileNotFoundException {
-    Document document = createNewDocument(path);
+  public void create(Path path) throws BadAttributeValueExpException, FileNotFoundException {
+    Document document = createNewDocument(path.toString());
     if (landscape) document.getPdfDocument().setDefaultPageSize(PageSize.A4.rotate());
     addTitle(document);
     addTimestamp(document);

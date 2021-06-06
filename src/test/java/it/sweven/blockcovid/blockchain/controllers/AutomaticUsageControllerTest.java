@@ -5,7 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import it.sweven.blockcovid.blockchain.services.DocumentService;
+import it.sweven.blockcovid.blockchain.entities.ReportInformation;
+import it.sweven.blockcovid.blockchain.services.ReportService;
 import it.sweven.blockcovid.blockchain.services.SignRegistrationService;
 import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.reservations.servicies.ReservationService;
@@ -19,16 +20,16 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt;
 class AutomaticUsageControllerTest {
   private SignRegistrationService signRegistrationService;
   private ReservationService reservationService;
-  private DocumentService documentService;
+  private ReportService reportService;
   private AutomaticUsageController controller;
 
   @BeforeEach
   void setUp() {
-    documentService = mock(DocumentService.class);
+    reportService = mock(ReportService.class);
     reservationService = mock(ReservationService.class);
     signRegistrationService = mock(SignRegistrationService.class);
     controller =
-        new AutomaticUsageController(documentService, signRegistrationService, reservationService);
+        new AutomaticUsageController(reportService, signRegistrationService, reservationService);
   }
 
   @Test
@@ -36,7 +37,8 @@ class AutomaticUsageControllerTest {
     List<ReservationWithRoom> listReservations =
         List.of(mock(ReservationWithRoom.class), mock(ReservationWithRoom.class));
     when(reservationService.findByTimeInterval(any(), any())).thenReturn(listReservations);
-    when(documentService.generateUsageReport(listReservations)).thenReturn("path");
+    when(reportService.generateUsageReport(listReservations))
+        .thenReturn(mock(ReportInformation.class));
     TransactionReceipt receipt = mock(TransactionReceipt.class);
     when(receipt.getBlockNumber()).thenReturn(BigInteger.ONE);
     when(signRegistrationService.registerString(any())).thenReturn(receipt);
@@ -45,20 +47,20 @@ class AutomaticUsageControllerTest {
 
   @Test
   void generationOfCleanerReportThrowsException_throwsIoException() throws IOException {
-    when(documentService.generateUsageReport(any())).thenThrow(new IOException());
+    when(reportService.generateUsageReport(any())).thenThrow(new IOException());
     assertThrows(IOException.class, controller::run);
   }
 
   @Test
   void invalidSavedPath_doesNotThrow() throws Exception {
-    when(documentService.generateUsageReport(any())).thenReturn("InvalidPath");
-    when(documentService.hashOf(any())).thenThrow(new IOException());
+    when(reportService.generateUsageReport(any())).thenReturn(mock(ReportInformation.class));
+    when(reportService.hashOf(any())).thenThrow(new IOException());
     assertDoesNotThrow(controller::run);
   }
 
   @Test
   void registerReportFails_doesNotThrow() throws Exception {
-    when(documentService.generateUsageReport(any())).thenReturn("path");
+    when(reportService.generateUsageReport(any())).thenReturn(mock(ReportInformation.class));
     TransactionReceipt receipt = mock(TransactionReceipt.class);
     when(receipt.getBlockNumber()).thenReturn(BigInteger.ONE);
     when(signRegistrationService.registerString(any())).thenReturn(receipt);

@@ -6,8 +6,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import it.sweven.blockcovid.blockchain.assemblers.ReportInformationAssembler;
-import it.sweven.blockcovid.blockchain.dto.ReportInformation;
-import it.sweven.blockcovid.blockchain.services.DocumentService;
+import it.sweven.blockcovid.blockchain.entities.ReportInformation;
+import it.sweven.blockcovid.blockchain.services.ReportService;
 import it.sweven.blockcovid.users.entities.User;
 import java.io.IOException;
 import org.slf4j.Logger;
@@ -25,14 +25,13 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class ListReportsController implements ReportsController {
-  private final DocumentService documentService;
+  private final ReportService reportService;
   private final ReportInformationAssembler assembler;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Autowired
-  public ListReportsController(
-      DocumentService documentService, ReportInformationAssembler assembler) {
-    this.documentService = documentService;
+  public ListReportsController(ReportService reportService, ReportInformationAssembler assembler) {
+    this.reportService = reportService;
     this.assembler = assembler;
   }
 
@@ -51,7 +50,7 @@ public class ListReportsController implements ReportsController {
   public CollectionModel<EntityModel<ReportInformation>> listReports(
       @Parameter(hidden = true) @AuthenticationPrincipal User submitter) {
     try {
-      return assembler.toCollectionModel(documentService.getAllReports());
+      return assembler.toCollectionModel(reportService.getAllReports());
     } catch (IOException e) {
       logger.error("IOException thrown when trying to read all reports: " + e.getMessage());
       throw new ResponseStatusException(

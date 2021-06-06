@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import it.sweven.blockcovid.blockchain.services.DocumentService;
+import it.sweven.blockcovid.blockchain.services.ReportService;
 import it.sweven.blockcovid.users.entities.User;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
@@ -24,11 +24,11 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class GetReportController implements ReportsController {
-  private final DocumentService service;
+  private final ReportService service;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Autowired
-  public GetReportController(DocumentService service) {
+  public GetReportController(ReportService service) {
     this.service = service;
   }
 

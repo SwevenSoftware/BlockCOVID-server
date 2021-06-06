@@ -2,6 +2,7 @@ package it.sweven.blockcovid.blockchain.dto;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import it.sweven.blockcovid.blockchain.entities.ReportInformation;
 import org.junit.jupiter.api.Test;
 
 class ReportInformationTest {

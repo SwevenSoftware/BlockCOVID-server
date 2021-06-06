@@ -6,7 +6,9 @@ import static org.mockito.Mockito.*;
 
 import it.sweven.blockcovid.blockchain.documents.PdfReport;
 import it.sweven.blockcovid.blockchain.documents.ReportType;
-import it.sweven.blockcovid.blockchain.dto.ReportInformation;
+import it.sweven.blockcovid.blockchain.entities.ReportInformation;
+import it.sweven.blockcovid.blockchain.exceptions.ReportNotFoundException;
+import it.sweven.blockcovid.blockchain.repositories.ReportInformationRepository;
 import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.rooms.entities.Room;
 import it.sweven.blockcovid.rooms.entities.Status;
@@ -24,16 +26,18 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class DocumentServiceTest {
+class ReportServiceTest {
 
-  private DocumentService service;
+  private ReportService service;
+  private ReportInformationRepository repository;
   private String destination_dir;
 
   @BeforeEach
   void setUp() throws IOException {
     destination_dir = "report_tests" + LocalDateTime.now();
+    repository = mock(ReportInformationRepository.class);
     Files.createDirectory(Path.of(destination_dir));
-    service = spy(new DocumentService(destination_dir));
+    service = spy(new ReportService(destination_dir, repository));
   }
 
   @AfterEach
@@ -57,7 +61,7 @@ class DocumentServiceTest {
     when(mockReport.setHeaderTable(any())).thenReturn(mockReport);
     when(mockReport.addRowTable(any())).thenReturn(mockReport);
     assertEquals("pathFile", service.generateCleanerReport(List.of(mockRoom1, mockRoom2)));
-    verify(mockReport).create("pathFile");
+    verify(mockReport).create(Path.of("pathFile"));
   }
 
   @Test
@@ -138,7 +142,7 @@ class DocumentServiceTest {
     when(mockReport.addRowTable(any())).thenReturn(mockReport);
     assertEquals(
         "pathFile", service.generateUsageReport(List.of(reservation1, reservation2, reservation3)));
-    verify(mockReport).create("pathFile");
+    verify(mockReport).create(Path.of("pathFile"));
   }
 
   @Test
@@ -203,7 +207,7 @@ class DocumentServiceTest {
     doReturn(true).when(service).validFilename("reportFilename.pdf");
     doReturn(true).when(service).fileExists(contains("reportFilename.pdf"));
     byte[] expectedBytes = "correct report".getBytes();
-    doReturn(expectedBytes).when(service).readReport(contains("reportFilename.pdf"));
+    doReturn(expectedBytes).when(service).readReport(any());
     assertEquals(expectedBytes, service.findReport("reportFilename.pdf"));
   }
 
@@ -265,9 +269,9 @@ class DocumentServiceTest {
   }
 
   @Test
-  void SetRegisteredPrependsInformation() throws IOException {
+  void SetRegisteredPrependsInformation() throws IOException, ReportNotFoundException {
     Path newFile = Files.createFile(Path.of(destination_dir + "/report.pdf"));
-    service.setAsVerified(newFile.toString());
+    service.setAsVerified(newFile.toString(), "");
     Path movedFile = Path.of(destination_dir + "/Registered_" + newFile.getFileName());
     assertFalse(Files.exists(newFile));
     assertTrue(Files.exists(movedFile));

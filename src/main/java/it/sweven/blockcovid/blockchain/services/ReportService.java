@@ -1,22 +1,19 @@
 package it.sweven.blockcovid.blockchain.services;
 
-import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
-
 import it.sweven.blockcovid.blockchain.documents.PdfReport;
 import it.sweven.blockcovid.blockchain.documents.ReportType;
-import it.sweven.blockcovid.blockchain.dto.ReportInformation;
+import it.sweven.blockcovid.blockchain.entities.ReportInformation;
+import it.sweven.blockcovid.blockchain.exceptions.ReportNotFoundException;
+import it.sweven.blockcovid.blockchain.repositories.ReportInformationRepository;
 import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.rooms.entities.Room;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
@@ -24,21 +21,27 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.management.BadAttributeValueExpException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 @Service
-public class DocumentService {
+public class ReportService {
   private final String DESTINATION_DIR;
+  private final ReportInformationRepository repository;
 
-  public DocumentService(@Value("#{environment.REPORT_DIR}") String destination_dir) {
+  @Autowired
+  public ReportService(
+      @Value("#{environment.REPORT_DIR}") String destination_dir,
+      ReportInformationRepository repository) {
     DESTINATION_DIR = destination_dir;
+    this.repository = repository;
   }
 
-  public String generateCleanerReport(List<Room> rooms) throws IOException {
+  public ReportInformation generateCleanerReport(List<Room> rooms) throws IOException {
     LocalDateTime timestamp = LocalDateTime.now();
-    String destination = initializeReport(timestamp, ReportType.CLEANER);
+    Path destination = initializeReport(timestamp, ReportType.CLEANER);
     PdfReport report = createNewReport();
     report
         .setTitle("Cleaner Report")
@@ -47,15 +50,24 @@ public class DocumentService {
     rooms.forEach(r -> report.addRowTable(List.of(r.getName(), r.getRoomStatus().toString())));
     try {
       report.create(destination);
+      return repository.save(
+          new ReportInformation(
+              destination.getFileName().toString(),
+              destination.toString(),
+              LocalDateTime.now(),
+              null,
+              hashOf(destination),
+              null,
+              false));
     } catch (BadAttributeValueExpException e) {
       throw new IOException();
     }
-    return destination;
   }
 
-  public String generateUsageReport(List<ReservationWithRoom> reservations) throws IOException {
+  public ReportInformation generateUsageReport(List<ReservationWithRoom> reservations)
+      throws IOException {
     LocalDateTime timestamp = LocalDateTime.now();
-    String destination = initializeReport(timestamp, ReportType.USAGE);
+    Path destination = initializeReport(timestamp, ReportType.USAGE);
     PdfReport report = createNewReport();
     report
         .landscape()
@@ -87,18 +99,26 @@ public class DocumentService {
                         r.getDeskCleaned().toString())));
     try {
       report.create(destination);
+      return repository.save(
+          new ReportInformation(
+              destination.getFileName().toString(),
+              destination.toString(),
+              LocalDateTime.now(),
+              null,
+              hashOf(destination),
+              null,
+              false));
     } catch (BadAttributeValueExpException e) {
       throw new IOException();
     }
-    return destination;
   }
 
   protected PdfReport createNewReport() {
     return new PdfReport();
   }
 
-  public byte[] readReport(String path) throws IOException {
-    InputStream inputStream = new FileInputStream(path);
+  public byte[] readReport(Path path) throws IOException {
+    InputStream inputStream = new FileInputStream(path.toFile());
     return inputStream.readAllBytes();
   }
 
@@ -106,7 +126,7 @@ public class DocumentService {
     if (validFilename(filename)) {
       String filePath = DESTINATION_DIR + "/" + filename;
       if (!fileExists(filePath)) throw new NoSuchFileException("file " + filePath + " not found");
-      return readReport(filePath);
+      return readReport(Path.of(filePath));
     } else throw new IllegalArgumentException();
   }
 
@@ -132,12 +152,12 @@ public class DocumentService {
     Files.createFile(Path.of(path));
   }
 
-  protected String initializeReport(LocalDateTime timestamp, ReportType type) throws IOException {
+  protected Path initializeReport(LocalDateTime timestamp, ReportType type) throws IOException {
     String destination =
         pathReport(timestamp.format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")), type);
     if (!fileExists(DESTINATION_DIR + "/")) createDirectory(DESTINATION_DIR);
     createFile(destination);
-    return destination;
+    return Path.of(destination);
   }
 
   protected String pathReport(String id, ReportType type) {
@@ -149,36 +169,22 @@ public class DocumentService {
         + ".pdf";
   }
 
-  public String setAsVerified(String path) throws IOException {
-    Path src = Path.of(path);
-    Path dest = Path.of(DESTINATION_DIR + "/Registered_" + src.getFileName());
-    Files.move(src, dest, ATOMIC_MOVE);
-    return dest.toString();
+  public ReportInformation setAsVerified(String path, String transactionHash)
+      throws ReportNotFoundException {
+    Path doc = Path.of(path);
+    String name = doc.getFileName().toString();
+    ReportInformation reportInformation =
+        repository.findByName(name).orElseThrow(ReportNotFoundException::new);
+    reportInformation.setTransactionHash(transactionHash);
+    reportInformation.setRegistrationDate(LocalDateTime.now());
+    return repository.save(reportInformation);
   }
 
-  public String hashOf(String path) throws IOException {
+  public String hashOf(Path path) throws IOException {
     return DigestUtils.md5DigestAsHex(readReport(path));
   }
 
   public List<ReportInformation> getAllReports() throws IOException {
-    return Files.list(Path.of(DESTINATION_DIR))
-        .map(
-            path -> {
-              try {
-                BasicFileAttributes attrs =
-                    Files.readAttributes(
-                        path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
-                return new ReportInformation(
-                    path.getFileName().toString(),
-                    LocalDateTime.ofInstant(
-                        attrs.creationTime().toInstant(), ZoneId.systemDefault()),
-                    LocalDateTime.ofInstant(
-                        attrs.lastModifiedTime().toInstant(), ZoneId.systemDefault()),
-                    hashOf(path.toString()));
-              } catch (IOException e) {
-                return new ReportInformation(path.getFileName().toString());
-              }
-            })
-        .collect(Collectors.toList());
+    return repository.findAll();
   }
 }

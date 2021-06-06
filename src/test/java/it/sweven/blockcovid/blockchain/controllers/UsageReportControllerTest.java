@@ -3,7 +3,8 @@ package it.sweven.blockcovid.blockchain.controllers;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import it.sweven.blockcovid.blockchain.services.DocumentService;
+import it.sweven.blockcovid.blockchain.entities.ReportInformation;
+import it.sweven.blockcovid.blockchain.services.ReportService;
 import it.sweven.blockcovid.blockchain.services.SignRegistrationService;
 import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.reservations.servicies.ReservationService;
@@ -23,7 +24,7 @@ import org.web3j.documentcontract.DocumentContract;
 class UsageReportControllerTest {
 
   private ReservationService reservationService;
-  private DocumentService documentService;
+  private ReportService reportService;
   private UsageReportController controller;
 
   private final DocumentContract documentContract = mock(DocumentContract.class);
@@ -31,11 +32,11 @@ class UsageReportControllerTest {
   @BeforeEach
   void setUp() {
     reservationService = mock(ReservationService.class);
-    documentService = mock(DocumentService.class);
+    reportService = mock(ReportService.class);
     SignRegistrationService signRegistrationService = mock((SignRegistrationService.class));
     when(reservationService.findByTimeInterval(any(), any())).thenReturn(Collections.emptyList());
     controller =
-        new UsageReportController(reservationService, documentService, signRegistrationService);
+        new UsageReportController(reservationService, reportService, signRegistrationService);
   }
 
   @Test
@@ -44,18 +45,19 @@ class UsageReportControllerTest {
     List<ReservationWithRoom> listReservations =
         List.of(mock(ReservationWithRoom.class), mock(ReservationWithRoom.class));
     when(reservationService.findByTimeInterval(from, to)).thenReturn(listReservations);
-    when(documentService.generateUsageReport(listReservations)).thenReturn("pathReport");
+    when(reportService.generateUsageReport(listReservations))
+        .thenReturn(mock(ReportInformation.class));
     Files.deleteIfExists(Path.of("pathReport"));
     Files.createFile(Path.of("pathReport"));
     byte[] expectedBytes = "correct report".getBytes();
-    when(documentService.readReport("pathReport")).thenReturn(expectedBytes);
+    when(reportService.readReport(any())).thenReturn(expectedBytes);
     assertEquals(expectedBytes, controller.report(mock(User.class), from, to));
     Files.deleteIfExists(Path.of("pathReport"));
   }
 
   @Test
   void report_reportGenerationFails_throwsResponseStatusException() throws IOException {
-    when(documentService.generateUsageReport(any())).thenThrow(new IOException());
+    when(reportService.generateUsageReport(any())).thenThrow(new IOException());
     ResponseStatusException thrown =
         assertThrows(
             ResponseStatusException.class,
@@ -65,7 +67,7 @@ class UsageReportControllerTest {
 
   @Test
   void report_contractCreationFails_throwsResponseStatusException() throws Exception {
-    when(documentService.generateUsageReport(any())).thenThrow(new IOException());
+    when(reportService.generateUsageReport(any())).thenThrow(new IOException());
     ResponseStatusException thrown =
         assertThrows(
             ResponseStatusException.class,
@@ -75,16 +77,16 @@ class UsageReportControllerTest {
 
   @Test
   void report_reportRegistrationFails_doesNotThrow() throws Exception {
-    when(documentService.generateUsageReport(any())).thenReturn("pathReport");
-    when(documentService.hashOf(any())).thenThrow(new IOException());
+    when(reportService.generateUsageReport(any())).thenReturn(mock(ReportInformation.class));
+    when(reportService.hashOf(any())).thenThrow(new IOException());
     assertDoesNotThrow(
         () -> controller.report(mock(User.class), LocalDateTime.now(), LocalDateTime.now()));
   }
 
   @Test
   void report_reportReadFails_throwsResponseStatusException() throws IOException {
-    when(documentService.generateUsageReport(any())).thenReturn("pathReport");
-    when(documentService.readReport(any())).thenThrow(new IOException());
+    when(reportService.generateUsageReport(any())).thenReturn(mock(ReportInformation.class));
+    when(reportService.readReport(any())).thenThrow(new IOException());
     ResponseStatusException thrown =
         assertThrows(
             ResponseStatusException.class,
