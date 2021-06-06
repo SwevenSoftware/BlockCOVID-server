@@ -173,7 +173,8 @@ public class DocumentService {
                     LocalDateTime.ofInstant(
                         attrs.creationTime().toInstant(), ZoneId.systemDefault()),
                     LocalDateTime.ofInstant(
-                        attrs.lastModifiedTime().toInstant(), ZoneId.systemDefault()));
+                        attrs.lastModifiedTime().toInstant(), ZoneId.systemDefault()),
+                    hashOf(path.toString()));
               } catch (IOException e) {
                 return new ReportInformation(path.getFileName().toString());
               }

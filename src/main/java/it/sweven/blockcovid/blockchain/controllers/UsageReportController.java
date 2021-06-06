@@ -70,7 +70,11 @@ public class UsageReportController implements ReportsController {
                   logger.info(
                       "successfully registered the file " + path + " on the provided blockchain");
                 } catch (Exception exception) {
-                  logger.error("Unable to open file stream for file at path: " + path);
+                  logger.error(
+                      "Unable to open file stream for file at path: "
+                          + path
+                          + ", inner exception message is "
+                          + exception.getMessage());
                 }
               });
       registrationThread.start();
