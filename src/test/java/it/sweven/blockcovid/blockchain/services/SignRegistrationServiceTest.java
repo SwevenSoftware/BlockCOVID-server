@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import it.sweven.blockcovid.blockchain.exceptions.HashNotRegistered;
+import it.sweven.blockcovid.blockchain.exceptions.InvalidHash;
 import java.math.BigInteger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,7 @@ class SignRegistrationServiceTest {
     receipt = mock(TransactionReceipt.class);
     RemoteFunctionCall<TransactionReceipt> fakeCall = mock(RemoteFunctionCall.class);
     verify = mock(RemoteFunctionCall.class);
+    when(verify.send()).thenReturn(BigInteger.ONE);
     contract = mock(DocumentContract.class);
     when(contract.add(any())).thenReturn(fakeCall);
     when(contract.verify(any())).thenReturn(verify);
@@ -42,5 +44,16 @@ class SignRegistrationServiceTest {
   void zeroMeansNotRegistered() throws Exception {
     when(verify.send()).thenReturn(BigInteger.ZERO);
     assertThrows(HashNotRegistered.class, () -> service.registerString("hash"));
+  }
+
+  @Test
+  void happyVerificationPath() throws InvalidHash, Exception {
+    assertEquals(BigInteger.ONE, service.verifyHash("hash"));
+  }
+
+  @Test
+  void ZeroMeansNotFound() throws Exception {
+    when(verify.send()).thenReturn(BigInteger.ZERO);
+    assertThrows(InvalidHash.class, () -> service.verifyHash("hash"));
   }
 }
