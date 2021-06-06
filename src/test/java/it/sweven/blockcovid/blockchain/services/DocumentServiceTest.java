@@ -7,6 +7,8 @@ import static org.mockito.Mockito.*;
 import it.sweven.blockcovid.blockchain.documents.PdfReport;
 import it.sweven.blockcovid.blockchain.documents.ReportType;
 import it.sweven.blockcovid.blockchain.dto.ReportInformation;
+import it.sweven.blockcovid.blockchain.entities.DeploymentInformation;
+import it.sweven.blockcovid.blockchain.exceptions.ContractNotDeployed;
 import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.rooms.entities.Room;
 import it.sweven.blockcovid.rooms.entities.Status;
@@ -23,7 +25,6 @@ import javax.management.BadAttributeValueExpException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.web3j.crypto.Credentials;
 
 class DocumentServiceTest {
 
@@ -31,12 +32,13 @@ class DocumentServiceTest {
   private String destination_dir;
 
   @BeforeEach
-  void setUp() throws IOException {
+  void setUp() throws IOException, ContractNotDeployed {
     destination_dir = "report_tests" + LocalDateTime.now();
     Files.createDirectory(Path.of(destination_dir));
-    Credentials mockAccount = mock(Credentials.class);
-    when(mockAccount.getAddress()).thenReturn("account");
-    service = spy(new DocumentService(destination_dir, "contract", mockAccount));
+    DeploymentInformation mockInfo = mock(DeploymentInformation.class);
+    when(mockInfo.getContract()).thenReturn("contract");
+    when(mockInfo.getAccount()).thenReturn("account");
+    service = spy(new DocumentService(destination_dir, mockInfo));
   }
 
   @AfterEach

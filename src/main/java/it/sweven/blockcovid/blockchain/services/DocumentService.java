@@ -5,6 +5,8 @@ import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import it.sweven.blockcovid.blockchain.documents.PdfReport;
 import it.sweven.blockcovid.blockchain.documents.ReportType;
 import it.sweven.blockcovid.blockchain.dto.ReportInformation;
+import it.sweven.blockcovid.blockchain.entities.DeploymentInformation;
+import it.sweven.blockcovid.blockchain.exceptions.ContractNotDeployed;
 import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.rooms.entities.Room;
 import java.io.FileInputStream;
@@ -28,7 +30,6 @@ import javax.management.BadAttributeValueExpException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
-import org.web3j.crypto.Credentials;
 
 @Service
 public class DocumentService {
@@ -38,11 +39,11 @@ public class DocumentService {
 
   public DocumentService(
       @Value("#{environment.REPORT_DIR}") String destination_dir,
-      @Value("${it.sweven.blockcovid.blockchain.contract}") String contract,
-      Credentials account) {
+      DeploymentInformation deploymentInformation)
+      throws ContractNotDeployed {
     DESTINATION_DIR = destination_dir;
-    this.contract = contract;
-    this.account = account.getAddress();
+    this.account = deploymentInformation.getAccount();
+    this.contract = deploymentInformation.getContract();
   }
 
   public String generateCleanerReport(List<Room> rooms) throws IOException {
@@ -52,8 +53,7 @@ public class DocumentService {
     report
         .setTitle("Cleaner Report")
         .setTimestamp(timestamp)
-        .setHeaderInfo(
-            Map.of("Blockchain Account", this.account, "Blockchain Contract", this.contract))
+        .setHeaderInfo(Map.of("Blockchain Account", account, "Blockchain Contract", contract))
         .setHeaderTable(List.of("Room name", "Status"));
     rooms.forEach(r -> report.addRowTable(List.of(r.getName(), r.getRoomStatus().toString())));
     try {
@@ -72,8 +72,7 @@ public class DocumentService {
         .landscape()
         .setTitle("Usage Report")
         .setTimestamp(timestamp)
-        .setHeaderInfo(
-            Map.of("Blockchain Account", this.account, "Blockchain Contract", this.contract))
+        .setHeaderInfo(Map.of("Blockchain Account", account, "Blockchain Contract", contract))
         .setHeaderTable(
             List.of(
                 "Reservation ID",
