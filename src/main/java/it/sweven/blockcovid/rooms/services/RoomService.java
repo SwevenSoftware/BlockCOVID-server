@@ -63,6 +63,7 @@ public class RoomService {
             .openingDays(roomInfo.getOpeningDays())
             .width(roomInfo.getWidth())
             .height(roomInfo.getHeight())
+            .roomStatus(Status.DIRTY)
             .build();
 
     return roomRepository.save(toCreate);
@@ -72,7 +73,8 @@ public class RoomService {
     return roomRepository.findAll();
   }
 
-  public Room setStatus(String roomName, Status status) throws RoomNotFoundException {
+  public Room setStatus(String roomName, Status status, String username)
+      throws RoomNotFoundException {
     Room toChange = roomRepository.findRoomByName(roomName).orElseThrow(RoomNotFoundException::new);
     deskRepository
         .findAllByRoomId(toChange.getId())
@@ -82,6 +84,7 @@ public class RoomService {
               deskRepository.save(desk);
             });
     toChange.setRoomStatus(status);
+    if (status == Status.CLEAN) toChange.setLastCleaner(username);
     return roomRepository.save(toChange);
   }
 

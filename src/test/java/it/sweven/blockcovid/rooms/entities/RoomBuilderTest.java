@@ -3,6 +3,7 @@ package it.sweven.blockcovid.rooms.entities;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.DayOfWeek;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Set;
 import javax.management.BadAttributeValueExpException;
@@ -21,7 +22,9 @@ class RoomBuilderTest {
             Set.of(DayOfWeek.MONDAY),
             10,
             10,
-            Status.CLEAN);
+            Status.CLEAN,
+            LocalDateTime.MIN,
+            "cleaner");
     Room generated =
         builder
             .name("name")
@@ -30,6 +33,8 @@ class RoomBuilderTest {
             .openingTime(LocalTime.MIDNIGHT)
             .closingTime(LocalTime.MIDNIGHT)
             .roomStatus(Status.CLEAN)
+            .lastCleaned(LocalDateTime.MIN)
+            .lastCleaner("cleaner")
             .width(10)
             .height(10)
             .build();

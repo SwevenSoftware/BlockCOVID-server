@@ -217,20 +217,34 @@ class RoomServiceTest {
   }
 
   @Test
-  void setRoomStatus_validChange() {
+  void setRoomStatus_validChangeClean() {
     Room fakeRoom = mock(Room.class);
     Desk fakeDesk = mock(Desk.class);
     List<Desk> fakeDeskList = List.of(fakeDesk, fakeDesk);
     when(deskRepository.findAllByRoomId(any())).thenReturn(fakeDeskList);
     when(repository.findRoomByName(any())).thenReturn(Optional.of(fakeRoom));
     when(repository.save(any())).thenReturn(fakeRoom);
-    assertEquals(fakeRoom, service.setStatus("room", Status.CLEAN));
+    assertEquals(fakeRoom, service.setStatus("room", Status.CLEAN, "cleaner"));
+    verify(fakeRoom).setLastCleaner("cleaner");
+  }
+
+  @Test
+  void setRoomStatus_validChangeDirty() {
+    Room fakeRoom = mock(Room.class);
+    Desk fakeDesk = mock(Desk.class);
+    List<Desk> fakeDeskList = List.of(fakeDesk, fakeDesk);
+    when(deskRepository.findAllByRoomId(any())).thenReturn(fakeDeskList);
+    when(repository.findRoomByName(any())).thenReturn(Optional.of(fakeRoom));
+    when(repository.save(any())).thenReturn(fakeRoom);
+    assertEquals(fakeRoom, service.setStatus("room", Status.DIRTY, "cleaner"));
+    verify(fakeRoom, times(0)).setLastCleaner("cleaner");
   }
 
   @Test
   void setRoomStatus_invalidChange() {
     when(repository.findRoomByName(any())).thenReturn(Optional.ofNullable(null));
-    assertThrows(RoomNotFoundException.class, () -> service.setStatus("room", Status.DIRTY));
+    assertThrows(
+        RoomNotFoundException.class, () -> service.setStatus("room", Status.DIRTY, "cleaner"));
   }
 
   @Test
