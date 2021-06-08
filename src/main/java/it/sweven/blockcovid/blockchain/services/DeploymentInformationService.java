@@ -20,7 +20,7 @@ public class DeploymentInformationService {
   public DeploymentInformation getByAccountAndNetwork(Credentials account, String network)
       throws ContractNotDeployed {
     return deploymentInformationRepository
-        .findByAccountAndNetwork(account, network)
+        .findByAccountAndNetwork(account.getAddress(), network)
         .orElseThrow(ContractNotDeployed::new);
   }
 

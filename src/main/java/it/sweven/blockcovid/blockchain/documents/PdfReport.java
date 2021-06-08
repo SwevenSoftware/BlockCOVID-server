@@ -12,7 +12,9 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.management.BadAttributeValueExpException;
 import lombok.AccessLevel;
@@ -21,6 +23,7 @@ import lombok.Getter;
 public class PdfReport {
   private String title;
   private LocalDateTime timestamp;
+  private Map<String, String> headerInfo = new HashMap<>();
   private @Getter(AccessLevel.PROTECTED) List<Cell> tableHeader;
   private @Getter(AccessLevel.PROTECTED) final ArrayList<List<Cell>> rowsTable;
   private Boolean landscape = false;
@@ -59,6 +62,11 @@ public class PdfReport {
     return this;
   }
 
+  public PdfReport setHeaderInfo(Map<String, String> info) {
+    this.headerInfo = info;
+    return this;
+  }
+
   public PdfReport addRowTable(List<String> row) {
     rowsTable.add(
         row.stream()
@@ -87,6 +95,10 @@ public class PdfReport {
           createNewParagraph(timestamp.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
   }
 
+  protected void addHeaderInfo(Document document) {
+    this.headerInfo.forEach((k, v) -> document.add(createNewParagraph(k + ": " + v)));
+  }
+
   protected void addTable(Document document) throws BadAttributeValueExpException {
     if (tableHeader == null || tableHeader.isEmpty()) throw new BadAttributeValueExpException(null);
     Table table = createNewTable(tableHeader.size());
@@ -101,6 +113,7 @@ public class PdfReport {
     if (landscape) document.getPdfDocument().setDefaultPageSize(PageSize.A4.rotate());
     addTitle(document);
     addTimestamp(document);
+    addHeaderInfo(document);
     addTable(document);
     document.close();
   }

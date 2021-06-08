@@ -2,6 +2,7 @@ package it.sweven.blockcovid.blockchain.services;
 
 import it.sweven.blockcovid.blockchain.documents.PdfReport;
 import it.sweven.blockcovid.blockchain.documents.ReportType;
+import it.sweven.blockcovid.blockchain.entities.DeploymentInformation;
 import it.sweven.blockcovid.blockchain.entities.ReportInformation;
 import it.sweven.blockcovid.blockchain.exceptions.ReportNotFoundException;
 import it.sweven.blockcovid.blockchain.repositories.ReportInformationRepository;
@@ -18,6 +19,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.management.BadAttributeValueExpException;
@@ -30,13 +32,18 @@ import org.springframework.util.DigestUtils;
 public class ReportService {
   private final String DESTINATION_DIR;
   private final ReportInformationRepository repository;
+  private final String account;
+  private final String contract;
 
   @Autowired
   public ReportService(
       @Value("#{environment.REPORT_DIR}") String destination_dir,
-      ReportInformationRepository repository) {
+      ReportInformationRepository repository,
+      DeploymentInformation deploymentInformation) {
     DESTINATION_DIR = destination_dir;
     this.repository = repository;
+    this.account = deploymentInformation.getAccount();
+    this.contract = deploymentInformation.getContract();
   }
 
   public ReportInformation generateCleanerReport(List<Room> rooms) throws IOException {
@@ -46,8 +53,18 @@ public class ReportService {
     report
         .setTitle("Cleaner Report")
         .setTimestamp(timestamp)
-        .setHeaderTable(List.of("Room name", "Status"));
-    rooms.forEach(r -> report.addRowTable(List.of(r.getName(), r.getRoomStatus().toString())));
+        .setHeaderInfo(Map.of("Blockchain Account", account, "Blockchain Contract", contract))
+        .setHeaderTable(List.of("Room name", "Status", "Last cleaned", "Cleaner"));
+    rooms.forEach(
+        r -> {
+          String lastCleaned =
+              r.getLastCleaned() != null
+                  ? r.getLastCleaned().format(DateTimeFormatter.ISO_DATE_TIME)
+                  : "never";
+          String lastCleaner = r.getLastCleaner() != null ? r.getLastCleaner() : "";
+          report.addRowTable(
+              List.of(r.getName(), r.getRoomStatus().toString(), lastCleaned, lastCleaner));
+        });
     try {
       report.create(destination);
       return repository.save(
@@ -73,6 +90,7 @@ public class ReportService {
         .landscape()
         .setTitle("Usage Report")
         .setTimestamp(timestamp)
+        .setHeaderInfo(Map.of("Blockchain Account", account, "Blockchain Contract", contract))
         .setHeaderTable(
             List.of(
                 "Reservation ID",
@@ -177,6 +195,7 @@ public class ReportService {
         repository.findByName(name).orElseThrow(ReportNotFoundException::new);
     reportInformation.setTransactionHash(transactionHash);
     reportInformation.setRegistrationDate(LocalDateTime.now());
+    reportInformation.setRegistered(true);
     return repository.save(reportInformation);
   }
 

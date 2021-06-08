@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.management.BadAttributeValueExpException;
 import org.junit.jupiter.api.BeforeEach;
@@ -78,6 +79,16 @@ public class PdfReportTest {
         .when(report)
         .createNewParagraph(any());
     report.addTimestamp(mock(Document.class));
+  }
+
+  @Test
+  void addHeaderInfo() {
+    Document mockDocument = mock(Document.class);
+    report.setHeaderInfo(Map.of("Key1", "Value1", "Key2", "Value2"));
+    report.addHeaderInfo(mockDocument);
+    verify(report).createNewParagraph("Key1: Value1");
+    verify(report).createNewParagraph("Key2: Value2");
+    verify(mockDocument, times(2)).add(any(IBlockElement.class));
   }
 
   @Test

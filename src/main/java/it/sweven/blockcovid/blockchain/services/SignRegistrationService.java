@@ -1,6 +1,7 @@
 package it.sweven.blockcovid.blockchain.services;
 
 import it.sweven.blockcovid.blockchain.exceptions.HashNotRegistered;
+import it.sweven.blockcovid.blockchain.exceptions.InvalidHash;
 import java.math.BigInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,5 +28,20 @@ public class SignRegistrationService {
     }
     logger.info("Successfully added hash [" + hash + "] to the provided blockchain network");
     return receipt;
+  }
+
+  public BigInteger verifyHash(String hash) throws Exception, InvalidHash {
+    BigInteger additionTimeBigInteger = contract.verify(hash).send();
+    if (additionTimeBigInteger.equals(BigInteger.ZERO)) {
+      logger.info("hash " + hash + " is not on the blockchain");
+      throw new InvalidHash();
+    } else {
+      logger.info(
+          "hash "
+              + hash
+              + " is on the blockchain, and it was registered on "
+              + additionTimeBigInteger);
+      return additionTimeBigInteger;
+    }
   }
 }

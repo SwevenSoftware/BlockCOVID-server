@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import it.sweven.blockcovid.blockchain.documents.PdfReport;
 import it.sweven.blockcovid.blockchain.documents.ReportType;
+import it.sweven.blockcovid.blockchain.entities.DeploymentInformation;
 import it.sweven.blockcovid.blockchain.entities.ReportInformation;
 import it.sweven.blockcovid.blockchain.exceptions.ReportNotFoundException;
 import it.sweven.blockcovid.blockchain.repositories.ReportInformationRepository;
@@ -40,7 +41,10 @@ class ReportServiceTest {
     repository = mock(ReportInformationRepository.class);
     doAnswer(invocationOnMock -> invocationOnMock.getArgument(0)).when(repository).save(any());
     Files.createDirectory(Path.of(destination_dir));
-    service = spy(new ReportService(destination_dir, repository));
+    DeploymentInformation mockInfo = mock(DeploymentInformation.class);
+    when(mockInfo.getContract()).thenReturn("contract");
+    when(mockInfo.getAccount()).thenReturn("account");
+    service = spy(new ReportService(destination_dir, repository, mockInfo));
   }
 
   @AfterEach
@@ -59,12 +63,17 @@ class ReportServiceTest {
     Room mockRoom1 = mock(Room.class), mockRoom2 = mock(Room.class);
     when(mockRoom1.getName()).thenReturn("room1");
     when(mockRoom1.getRoomStatus()).thenReturn(Status.CLEAN);
+    when(mockRoom1.getLastCleaned()).thenReturn(LocalDateTime.MIN);
+    when(mockRoom1.getLastCleaner()).thenReturn("cleaner");
     when(mockRoom2.getName()).thenReturn("room2");
     when(mockRoom2.getRoomStatus()).thenReturn(Status.DIRTY);
+    when(mockRoom2.getLastCleaned()).thenReturn(null);
+    when(mockRoom2.getLastCleaner()).thenReturn(null);
     PdfReport mockReport = mock(PdfReport.class);
     doReturn(mockReport).when(service).createNewReport();
     when(mockReport.setTitle(any())).thenReturn(mockReport);
     when(mockReport.setTimestamp(any())).thenReturn(mockReport);
+    when(mockReport.setHeaderInfo(any())).thenReturn(mockReport);
     when(mockReport.setHeaderTable(any())).thenReturn(mockReport);
     when(mockReport.addRowTable(any())).thenReturn(mockReport);
     ReportInformation information = service.generateCleanerReport(List.of(mockRoom1, mockRoom2));
@@ -87,6 +96,7 @@ class ReportServiceTest {
     doReturn(mockReport).when(service).createNewReport();
     when(mockReport.setTitle(any())).thenReturn(mockReport);
     when(mockReport.setTimestamp(any())).thenReturn(mockReport);
+    when(mockReport.setHeaderInfo(any())).thenReturn(mockReport);
     when(mockReport.setHeaderTable(any())).thenReturn(mockReport);
     when(mockReport.addRowTable(any())).thenReturn(mockReport);
     doThrow(new BadAttributeValueExpException(null)).when(mockReport).create(any());
@@ -148,6 +158,7 @@ class ReportServiceTest {
     when(mockReport.landscape()).thenReturn(mockReport);
     when(mockReport.setTitle(any())).thenReturn(mockReport);
     when(mockReport.setTimestamp(any())).thenReturn(mockReport);
+    when(mockReport.setHeaderInfo(any())).thenReturn(mockReport);
     when(mockReport.setHeaderTable(any())).thenReturn(mockReport);
     when(mockReport.addRowTable(any())).thenReturn(mockReport);
     ReportInformation information =
@@ -190,6 +201,7 @@ class ReportServiceTest {
     when(mockReport.landscape()).thenReturn(mockReport);
     when(mockReport.setTitle(any())).thenReturn(mockReport);
     when(mockReport.setTimestamp(any())).thenReturn(mockReport);
+    when(mockReport.setHeaderInfo(any())).thenReturn(mockReport);
     when(mockReport.setHeaderTable(any())).thenReturn(mockReport);
     when(mockReport.addRowTable(any())).thenReturn(mockReport);
     doThrow(new BadAttributeValueExpException(null)).when(mockReport).create(any());
@@ -269,10 +281,12 @@ class ReportServiceTest {
   void setAsVerifiedWorks() throws ReportNotFoundException {
     String txHash = "txHash";
     String path = "pathFile";
-    when(repository.findByName(any())).thenReturn(Optional.of(new ReportInformation("pathFile")));
+    when(repository.findByName(any()))
+        .thenReturn(Optional.of(new ReportInformation("name", null, null, null, null, null, null)));
     ReportInformation information = service.setAsVerified(path, txHash);
     assertEquals(txHash, information.getTransactionHash());
     assertNotNull(information.getRegistrationDate());
+    assertTrue(information.getRegistered());
   }
 
   @Test

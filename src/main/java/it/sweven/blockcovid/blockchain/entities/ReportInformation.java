@@ -20,14 +20,4 @@ public class ReportInformation {
   private String hash;
   private String transactionHash;
   private Boolean registered;
-
-  public ReportInformation(String name) {
-    this.name = name;
-    this.path = null;
-    this.creationDate = null;
-    this.registrationDate = null;
-    this.hash = null;
-    this.transactionHash = null;
-    this.registered = false;
-  }
 }
