@@ -5,7 +5,6 @@ import it.sweven.blockcovid.blockchain.exceptions.ReportNotFoundException;
 import it.sweven.blockcovid.blockchain.services.ReportService;
 import it.sweven.blockcovid.blockchain.services.SignRegistrationService;
 import it.sweven.blockcovid.rooms.services.RoomService;
-import java.io.IOException;
 import java.nio.file.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +44,7 @@ public class AutomaticCleanerController {
               + newInformation
               + " on the blockchain on block "
               + receipt.getBlockNumber());
-    } catch (IOException | ReportNotFoundException exception) {
+    } catch (ReportNotFoundException exception) {
       logger.error(
           "Unable to open file stream for file with information: "
               + information
