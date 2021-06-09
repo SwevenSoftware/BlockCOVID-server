@@ -40,7 +40,6 @@ class AutomaticCleanerControllerTest {
 
   @Test
   void happyPath() throws Exception, ReportNotFoundException {
-    String path = "Report.pdf";
     TransactionReceipt receipt = mock(TransactionReceipt.class);
     when(signRegistrationService.registerString(any())).thenReturn(receipt);
     when(receipt.getBlockNumber()).thenReturn(BigInteger.ZERO);
@@ -50,14 +49,4 @@ class AutomaticCleanerControllerTest {
     when(reportService.setAsVerified(any(), any())).thenReturn(fakeInfo);
     assertDoesNotThrow(() -> controller.run());
   }
-
-  /*@Test
-  void unableToReadFile() throws Exception, ReportNotFoundException {
-    String path = "Report.pdf";
-    TransactionReceipt receipt = mock(TransactionReceipt.class);
-    when(signRegistrationService.registerString(any())).thenReturn(receipt);
-    when(reportService.generateCleanerReport(any())).thenReturn(mock(ReportInformation.class));
-    when(reportService.setAsVerified(any(), any())).thenThrow(new IOException());
-    assertDoesNotThrow(() -> controller.run());
-  }*/
 }
