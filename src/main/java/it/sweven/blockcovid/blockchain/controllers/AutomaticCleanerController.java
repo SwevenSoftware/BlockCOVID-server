@@ -1,9 +1,11 @@
 package it.sweven.blockcovid.blockchain.controllers;
 
-import it.sweven.blockcovid.blockchain.services.DocumentService;
+import it.sweven.blockcovid.blockchain.entities.ReportInformation;
+import it.sweven.blockcovid.blockchain.exceptions.ReportNotFoundException;
+import it.sweven.blockcovid.blockchain.services.ReportService;
 import it.sweven.blockcovid.blockchain.services.SignRegistrationService;
 import it.sweven.blockcovid.rooms.services.RoomService;
-import java.io.IOException;
+import java.nio.file.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,38 +16,38 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt;
 @Controller
 public class AutomaticCleanerController {
   private final SignRegistrationService signRegistrationService;
-  private final DocumentService documentService;
+  private final ReportService reportService;
   private final RoomService roomService;
   private final Logger logger = LoggerFactory.getLogger(AutomaticCleanerController.class);
 
   @Autowired
   public AutomaticCleanerController(
       SignRegistrationService signRegistrationService,
-      DocumentService documentService,
+      ReportService reportService,
       RoomService roomService) {
     this.signRegistrationService = signRegistrationService;
-    this.documentService = documentService;
+    this.reportService = reportService;
     this.roomService = roomService;
   }
 
   @Scheduled(cron = "0 0 0 * * *")
   public void run() throws Exception {
-    String savedPath = documentService.generateCleanerReport(roomService.getAllRooms());
+    ReportInformation information = reportService.generateCleanerReport(roomService.getAllRooms());
     try {
       TransactionReceipt receipt =
-          signRegistrationService.registerString(documentService.hashOf(savedPath));
-      String newPath = documentService.setAsVerified(savedPath);
+          signRegistrationService.registerString(
+              reportService.hashOf(Path.of(information.getPath())));
+      ReportInformation newInformation =
+          reportService.setAsVerified(information.getPath(), receipt.getTransactionHash());
       logger.info(
-          "registered file "
-              + savedPath
-              + " (now "
-              + newPath
-              + ") on the blockchain on block "
-              + receipt.getBlockNumber().toString());
-    } catch (IOException exception) {
+          "registered report "
+              + newInformation
+              + " on the blockchain on block "
+              + receipt.getBlockNumber());
+    } catch (ReportNotFoundException exception) {
       logger.error(
-          "Unable to open file stream for file at path: "
-              + savedPath
+          "Unable to open file stream for file with information: "
+              + information
               + ", nested exception message is: "
               + exception.getMessage());
     }

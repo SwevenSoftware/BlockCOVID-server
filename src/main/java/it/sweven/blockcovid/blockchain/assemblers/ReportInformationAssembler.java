@@ -4,7 +4,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import it.sweven.blockcovid.blockchain.controllers.ListReportsController;
-import it.sweven.blockcovid.blockchain.dto.ReportInformation;
+import it.sweven.blockcovid.blockchain.entities.ReportInformation;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.springframework.hateoas.CollectionModel;

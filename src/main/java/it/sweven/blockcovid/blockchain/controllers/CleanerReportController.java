@@ -5,11 +5,14 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import it.sweven.blockcovid.blockchain.services.DocumentService;
+import it.sweven.blockcovid.blockchain.entities.ReportInformation;
+import it.sweven.blockcovid.blockchain.exceptions.ReportNotFoundException;
+import it.sweven.blockcovid.blockchain.services.ReportService;
 import it.sweven.blockcovid.blockchain.services.SignRegistrationService;
 import it.sweven.blockcovid.rooms.services.RoomService;
 import it.sweven.blockcovid.users.entities.User;
 import java.io.IOException;
+import java.nio.file.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,21 +24,22 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 @RestController
 public class CleanerReportController implements ReportsController {
   private final RoomService roomService;
-  private final DocumentService documentService;
+  private final ReportService reportService;
   private final SignRegistrationService signRegistrationService;
   private final Logger logger = LoggerFactory.getLogger(CleanerReportController.class);
 
   @Autowired
   public CleanerReportController(
       RoomService roomService,
-      DocumentService documentService,
+      ReportService reportService,
       SignRegistrationService signRegistrationService) {
     this.roomService = roomService;
-    this.documentService = documentService;
+    this.reportService = reportService;
     this.signRegistrationService = signRegistrationService;
   }
 
@@ -55,22 +59,30 @@ public class CleanerReportController implements ReportsController {
   @PreAuthorize("#submitter.isAdmin()")
   public byte[] report(@Parameter(hidden = true) @AuthenticationPrincipal User submitter) {
     try {
-      String path = documentService.generateCleanerReport(roomService.getAllRooms());
-      logger.info("file saved at path " + path);
+      ReportInformation information =
+          reportService.generateCleanerReport(roomService.getAllRooms());
+      logger.info("file saved at path " + information.getPath());
       Thread registrationThread =
           new Thread(
               () -> {
                 try {
-                  signRegistrationService.registerString(documentService.hashOf(path));
-                  documentService.setAsVerified(path);
+                  TransactionReceipt receipt =
+                      signRegistrationService.registerString(
+                          reportService.hashOf(Path.of(information.getPath())));
+                  reportService.setAsVerified(information.getPath(), receipt.getTransactionHash());
                   logger.info(
-                      "successfully registered file " + path + " on the provided blockchain");
+                      "successfully registered file "
+                          + information.getName()
+                          + " on the provided blockchain");
                 } catch (Exception exception) {
-                  logger.error("Unable to open file stream for file at path: " + path);
+                  logger.error(
+                      "Unable to open file stream for file at path: " + information.getName());
+                } catch (ReportNotFoundException e) {
+                  logger.error("Unable to find report " + information.getName() + " in repository");
                 }
               });
       registrationThread.start();
-      return documentService.readReport(path);
+      return reportService.readReport(Path.of(information.getPath()));
     } catch (IOException e) {
       logger.error(
           "An error occurred while trying to create a new cleaner report: " + e.getMessage());

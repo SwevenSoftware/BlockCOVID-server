@@ -3,7 +3,7 @@ package it.sweven.blockcovid.blockchain.assemblers;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
-import it.sweven.blockcovid.blockchain.dto.ReportInformation;
+import it.sweven.blockcovid.blockchain.entities.ReportInformation;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

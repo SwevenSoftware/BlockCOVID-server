@@ -5,7 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import it.sweven.blockcovid.blockchain.services.DocumentService;
+import it.sweven.blockcovid.blockchain.services.ReportService;
 import it.sweven.blockcovid.users.entities.User;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
@@ -16,12 +16,12 @@ import org.springframework.web.server.ResponseStatusException;
 
 class GetReportControllerTest {
 
-  private DocumentService service;
+  private ReportService service;
   private GetReportController controller;
 
   @BeforeEach
   void setUp() {
-    service = mock(DocumentService.class);
+    service = mock(ReportService.class);
     controller = new GetReportController(service);
   }
 

@@ -6,50 +6,60 @@ import static org.mockito.Mockito.*;
 
 import it.sweven.blockcovid.blockchain.documents.PdfReport;
 import it.sweven.blockcovid.blockchain.documents.ReportType;
-import it.sweven.blockcovid.blockchain.dto.ReportInformation;
 import it.sweven.blockcovid.blockchain.entities.DeploymentInformation;
-import it.sweven.blockcovid.blockchain.exceptions.ContractNotDeployed;
+import it.sweven.blockcovid.blockchain.entities.ReportInformation;
+import it.sweven.blockcovid.blockchain.exceptions.ReportNotFoundException;
+import it.sweven.blockcovid.blockchain.repositories.ReportInformationRepository;
 import it.sweven.blockcovid.reservations.dto.ReservationWithRoom;
 import it.sweven.blockcovid.rooms.entities.Room;
 import it.sweven.blockcovid.rooms.entities.Status;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import javax.management.BadAttributeValueExpException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class DocumentServiceTest {
+class ReportServiceTest {
 
-  private DocumentService service;
+  private ReportService service;
+  private ReportInformationRepository repository;
   private String destination_dir;
 
   @BeforeEach
-  void setUp() throws IOException, ContractNotDeployed {
+  void setUp() throws IOException {
+    Files.createFile(Path.of("pathFile"));
     destination_dir = "report_tests" + LocalDateTime.now();
+    repository = mock(ReportInformationRepository.class);
+    doAnswer(invocationOnMock -> invocationOnMock.getArgument(0)).when(repository).save(any());
     Files.createDirectory(Path.of(destination_dir));
     DeploymentInformation mockInfo = mock(DeploymentInformation.class);
     when(mockInfo.getContract()).thenReturn("contract");
     when(mockInfo.getAccount()).thenReturn("account");
-    service = spy(new DocumentService(destination_dir, mockInfo));
+    service = spy(new ReportService(destination_dir, repository, mockInfo));
   }
 
   @AfterEach
   void tearDown() throws IOException {
-    Files.deleteIfExists(Path.of(destination_dir));
+    Files.deleteIfExists(Path.of("pathFile"));
+    Files.walk(Path.of(destination_dir))
+        .sorted(Comparator.reverseOrder())
+        .map(Path::toFile)
+        .forEach(File::delete);
   }
 
   @Test
   void generateCleanerReport_reportCorrectlyCreated()
       throws IOException, BadAttributeValueExpException {
-    doReturn("pathFile").when(service).initializeReport(any(), eq(ReportType.CLEANER));
+    doReturn(Path.of("pathFile")).when(service).initializeReport(any(), eq(ReportType.CLEANER));
     Room mockRoom1 = mock(Room.class), mockRoom2 = mock(Room.class);
     when(mockRoom1.getName()).thenReturn("room1");
     when(mockRoom1.getRoomStatus()).thenReturn(Status.CLEAN);
@@ -66,14 +76,17 @@ class DocumentServiceTest {
     when(mockReport.setHeaderInfo(any())).thenReturn(mockReport);
     when(mockReport.setHeaderTable(any())).thenReturn(mockReport);
     when(mockReport.addRowTable(any())).thenReturn(mockReport);
-    assertEquals("pathFile", service.generateCleanerReport(List.of(mockRoom1, mockRoom2)));
-    verify(mockReport).create("pathFile");
+    ReportInformation information = service.generateCleanerReport(List.of(mockRoom1, mockRoom2));
+    assertNull(information.getRegistrationDate());
+    assertNull(information.getTransactionHash());
+    assertFalse(information.getRegistered());
+    verify(mockReport).create(Path.of("pathFile"));
   }
 
   @Test
   void generateCleanerReport_errorWhileCreatingReport_throwsIOException()
       throws IOException, BadAttributeValueExpException {
-    doReturn("pathFile").when(service).initializeReport(any(), eq(ReportType.CLEANER));
+    doReturn(Path.of("pathFile")).when(service).initializeReport(any(), eq(ReportType.CLEANER));
     Room mockRoom1 = mock(Room.class), mockRoom2 = mock(Room.class);
     when(mockRoom1.getName()).thenReturn("room1");
     when(mockRoom1.getRoomStatus()).thenReturn(Status.CLEAN);
@@ -94,7 +107,7 @@ class DocumentServiceTest {
   @Test
   void generateUsageReport_reportCorrectlyCreated()
       throws BadAttributeValueExpException, IOException {
-    doReturn("pathFile").when(service).initializeReport(any(), eq(ReportType.USAGE));
+    doReturn(Path.of("pathFile")).when(service).initializeReport(any(), eq(ReportType.USAGE));
     ReservationWithRoom
         reservation1 =
             new ReservationWithRoom(
@@ -148,15 +161,18 @@ class DocumentServiceTest {
     when(mockReport.setHeaderInfo(any())).thenReturn(mockReport);
     when(mockReport.setHeaderTable(any())).thenReturn(mockReport);
     when(mockReport.addRowTable(any())).thenReturn(mockReport);
-    assertEquals(
-        "pathFile", service.generateUsageReport(List.of(reservation1, reservation2, reservation3)));
-    verify(mockReport).create("pathFile");
+    ReportInformation information =
+        service.generateUsageReport(List.of(reservation1, reservation2, reservation3));
+    assertFalse(information.getRegistered());
+    assertNull(information.getTransactionHash());
+    assertNull(information.getRegistrationDate());
+    verify(mockReport).create(Path.of("pathFile"));
   }
 
   @Test
   void generateUsageReport_errorWhileCreatingReport_throwsIOException()
       throws IOException, BadAttributeValueExpException {
-    doReturn("pathFile").when(service).initializeReport(any(), eq(ReportType.USAGE));
+    doReturn(Path.of("pathFile")).when(service).initializeReport(any(), eq(ReportType.USAGE));
     ReservationWithRoom
         reservation1 =
             new ReservationWithRoom(
@@ -199,9 +215,8 @@ class DocumentServiceTest {
     doReturn(false).when(service).fileExists(any());
     doNothing().when(service).createDirectory(any());
     doNothing().when(service).createFile(any());
-    assertEquals(
-        "pathFile",
-        service.initializeReport(LocalDateTime.of(2021, 1, 1, 20, 0), ReportType.CLEANER));
+    Path file = service.initializeReport(LocalDateTime.of(2021, 1, 1, 20, 0), ReportType.CLEANER);
+    assertEquals("pathFile", file.getFileName().toString());
   }
 
   @Test
@@ -216,7 +231,7 @@ class DocumentServiceTest {
     doReturn(true).when(service).validFilename("reportFilename.pdf");
     doReturn(true).when(service).fileExists(contains("reportFilename.pdf"));
     byte[] expectedBytes = "correct report".getBytes();
-    doReturn(expectedBytes).when(service).readReport(contains("reportFilename.pdf"));
+    doReturn(expectedBytes).when(service).readReport(any());
     assertEquals(expectedBytes, service.findReport("reportFilename.pdf"));
   }
 
@@ -263,27 +278,22 @@ class DocumentServiceTest {
   }
 
   @Test
-  void validFileMeansValidInformation() throws IOException {
-    Path newFile = Files.createFile(Path.of(destination_dir + "/report.pdf"));
-    ReportInformation info =
-        service.getAllReports().stream().findFirst().orElseThrow(IOException::new);
-    BasicFileAttributes attributes = Files.readAttributes(newFile, BasicFileAttributes.class);
-    assertEquals(
-        info.getCreationDate(),
-        LocalDateTime.ofInstant(attributes.creationTime().toInstant(), ZoneId.systemDefault()));
-    assertEquals(
-        info.getRegistrationDate(),
-        LocalDateTime.ofInstant(attributes.lastModifiedTime().toInstant(), ZoneId.systemDefault()));
-    Files.deleteIfExists(newFile);
+  void setAsVerifiedWorks() throws ReportNotFoundException {
+    String txHash = "txHash";
+    String path = "pathFile";
+    when(repository.findByName(any()))
+        .thenReturn(Optional.of(new ReportInformation("name", null, null, null, null, null, null)));
+    ReportInformation information = service.setAsVerified(path, txHash);
+    assertEquals(txHash, information.getTransactionHash());
+    assertNotNull(information.getRegistrationDate());
+    assertTrue(information.getRegistered());
   }
 
   @Test
-  void SetRegisteredPrependsInformation() throws IOException {
-    Path newFile = Files.createFile(Path.of(destination_dir + "/report.pdf"));
-    service.setAsVerified(newFile.toString());
-    Path movedFile = Path.of(destination_dir + "/Registered_" + newFile.getFileName());
-    assertFalse(Files.exists(newFile));
-    assertTrue(Files.exists(movedFile));
-    Files.deleteIfExists(movedFile);
+  void setAsVerifiedReportNotFound() {
+    String txHash = "txHash";
+    String path = "pathFile";
+    when(repository.findByName(any())).thenReturn(Optional.empty());
+    assertThrows(ReportNotFoundException.class, () -> service.setAsVerified(path, txHash));
   }
 }

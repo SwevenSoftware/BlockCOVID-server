@@ -6,8 +6,8 @@ import static org.mockito.ArgumentMatchers.anyIterable;
 import static org.mockito.Mockito.*;
 
 import it.sweven.blockcovid.blockchain.assemblers.ReportInformationAssembler;
-import it.sweven.blockcovid.blockchain.dto.ReportInformation;
-import it.sweven.blockcovid.blockchain.services.DocumentService;
+import it.sweven.blockcovid.blockchain.entities.ReportInformation;
+import it.sweven.blockcovid.blockchain.services.ReportService;
 import it.sweven.blockcovid.users.entities.User;
 import java.io.IOException;
 import java.util.List;
@@ -20,15 +20,15 @@ import org.springframework.web.server.ResponseStatusException;
 
 class ListReportsControllerTest {
 
-  private DocumentService documentService;
+  private ReportService reportService;
   private ListReportsController controller;
   private ReportInformation content;
 
   @BeforeEach
   void setUp() throws IOException {
-    documentService = mock(DocumentService.class);
+    reportService = mock(ReportService.class);
     content = mock(ReportInformation.class);
-    when(documentService.getAllReports()).thenReturn(List.of(content));
+    when(reportService.getAllReports()).thenReturn(List.of(content));
     ReportInformationAssembler reportInformationAssembler = mock(ReportInformationAssembler.class);
     doAnswer(invocationOnMock -> EntityModel.of(invocationOnMock.getArgument(0)))
         .when(reportInformationAssembler)
@@ -37,7 +37,7 @@ class ListReportsControllerTest {
         .when(reportInformationAssembler)
         .toCollectionModel(anyIterable());
 
-    controller = new ListReportsController(documentService, reportInformationAssembler);
+    controller = new ListReportsController(reportService, reportInformationAssembler);
   }
 
   @Test
@@ -47,7 +47,7 @@ class ListReportsControllerTest {
 
   @Test
   void documentServiceFails_throwsResponseStatusException() throws IOException {
-    when(documentService.getAllReports()).thenThrow(new IOException());
+    when(reportService.getAllReports()).thenThrow(new IOException());
     ResponseStatusException thrown =
         assertThrows(ResponseStatusException.class, () -> controller.listReports(mock(User.class)));
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, thrown.getStatus());

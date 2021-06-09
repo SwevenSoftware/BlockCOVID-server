@@ -5,7 +5,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import it.sweven.blockcovid.blockchain.services.DocumentService;
+import it.sweven.blockcovid.blockchain.entities.ReportInformation;
+import it.sweven.blockcovid.blockchain.exceptions.ReportNotFoundException;
+import it.sweven.blockcovid.blockchain.services.ReportService;
 import it.sweven.blockcovid.blockchain.services.SignRegistrationService;
 import it.sweven.blockcovid.rooms.services.RoomService;
 import java.io.IOException;
@@ -16,7 +18,7 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 class AutomaticCleanerControllerTest {
   SignRegistrationService signRegistrationService;
-  DocumentService documentService;
+  ReportService reportService;
   RoomService roomService;
 
   AutomaticCleanerController controller;
@@ -24,37 +26,27 @@ class AutomaticCleanerControllerTest {
   @BeforeEach
   void setUp() {
     signRegistrationService = mock(SignRegistrationService.class);
-    documentService = mock(DocumentService.class);
+    reportService = mock(ReportService.class);
     roomService = mock(RoomService.class);
     controller =
-        new AutomaticCleanerController(signRegistrationService, documentService, roomService);
+        new AutomaticCleanerController(signRegistrationService, reportService, roomService);
   }
 
   @Test
   void generationOfCleanerReportThrowsException_throwsIoException() throws IOException {
-    when(documentService.generateCleanerReport(any())).thenThrow(new IOException());
+    when(reportService.generateCleanerReport(any())).thenThrow(new IOException());
     assertThrows(IOException.class, controller::run);
   }
 
   @Test
-  void happyPath() throws Exception {
-    String path = "Report.pdf";
+  void happyPath() throws Exception, ReportNotFoundException {
     TransactionReceipt receipt = mock(TransactionReceipt.class);
     when(signRegistrationService.registerString(any())).thenReturn(receipt);
     when(receipt.getBlockNumber()).thenReturn(BigInteger.ZERO);
-    when(documentService.generateCleanerReport(any())).thenReturn(path);
-    when(documentService.setAsVerified(any())).thenReturn(path);
-    assertDoesNotThrow(() -> controller.run());
-  }
-
-  @Test
-  void unableToReadFile() throws Exception {
-    String path = "Report.pdf";
-    TransactionReceipt receipt = mock(TransactionReceipt.class);
-    when(signRegistrationService.registerString(any())).thenReturn(receipt);
-    when(receipt.getBlockNumber()).thenReturn(BigInteger.ZERO);
-    when(documentService.generateCleanerReport(any())).thenReturn(path);
-    when(documentService.setAsVerified(any())).thenThrow(new IOException());
+    ReportInformation fakeInfo = mock(ReportInformation.class);
+    when(fakeInfo.getPath()).thenReturn("Name");
+    when(reportService.generateCleanerReport(any())).thenReturn(fakeInfo);
+    when(reportService.setAsVerified(any(), any())).thenReturn(fakeInfo);
     assertDoesNotThrow(() -> controller.run());
   }
 }
