@@ -32,8 +32,8 @@ public class ContractAddressController {
         description = "returns the contract where the documents signs are saved on the blockchain")
   })
   @PreAuthorize("#submitter.isAdmin()")
-  public EntityModel<String> contractAddress(
+  public EntityModel<DeploymentInformation> contractAddress(
       @Parameter(hidden = true) @AuthenticationPrincipal User submitter) {
-    return EntityModel.of(deploymentInformation.getContract());
+    return EntityModel.of(deploymentInformation);
   }
 }
