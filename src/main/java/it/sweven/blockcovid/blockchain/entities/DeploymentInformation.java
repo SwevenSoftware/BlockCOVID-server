@@ -1,5 +1,6 @@
 package it.sweven.blockcovid.blockchain.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -10,6 +11,7 @@ import lombok.ToString;
 @Getter
 @ToString
 public class DeploymentInformation {
-  String account;
-  String contract, network;
+  @JsonIgnore String account;
+  String contract;
+  @JsonIgnore String network;
 }
