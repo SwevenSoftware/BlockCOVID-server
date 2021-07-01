@@ -25,6 +25,7 @@ services:
   blockcovid:
     build:
       context: .
+    image: swevensoftware/blockcovid-server:latest
     ports:
       - ${SERVER_PORT}:8091
     env_file:
